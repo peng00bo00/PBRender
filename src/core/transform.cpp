@@ -16,10 +16,10 @@ bool SolveLinearSystem2x2(const Float A[2][2], const Float B[2], Float *x0,
 
 Matrix4x4::Matrix4x4(Float mat[4][4]) { memcpy(m, mat, 16 * sizeof(Float)); }
 
-Matrix4x4::Matrix4x4(Float t00, Float t01, Float t02, Float t03, Float t10,
-                     Float t11, Float t12, Float t13, Float t20, Float t21,
-                     Float t22, Float t23, Float t30, Float t31, Float t32,
-                     Float t33) {
+Matrix4x4::Matrix4x4(Float t00, Float t01, Float t02, Float t03, 
+                     Float t10, Float t11, Float t12, Float t13,
+                     Float t20, Float t21, Float t22, Float t23,
+                     Float t30, Float t31, Float t32, Float t33) {
     m[0][0] = t00;
     m[0][1] = t01;
     m[0][2] = t02;
