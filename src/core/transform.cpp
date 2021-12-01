@@ -105,23 +105,35 @@ Matrix4x4 Inverse(const Matrix4x4 &m) {
 void Transform::Print(FILE *f) const { m.Print(f); }
 
 Transform Translate(const Vector3f &delta) {
-    Matrix4x4 m(1, 0, 0, delta.x, 0, 1, 0, delta.y, 0, 0, 1, delta.z, 0, 0, 0,
-                1);
-    Matrix4x4 minv(1, 0, 0, -delta.x, 0, 1, 0, -delta.y, 0, 0, 1, -delta.z, 0,
-                   0, 0, 1);
+    Matrix4x4 m(1, 0, 0, delta.x, 
+                0, 1, 0, delta.y, 
+                0, 0, 1, delta.z, 
+                0, 0, 0, 1);
+    Matrix4x4 minv(1, 0, 0, -delta.x, 
+                   0, 1, 0, -delta.y, 
+                   0, 0, 1, -delta.z, 
+                   0, 0, 0, 1);
     return Transform(m, minv);
 }
 
 Transform Scale(Float x, Float y, Float z) {
-    Matrix4x4 m(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
-    Matrix4x4 minv(1 / x, 0, 0, 0, 0, 1 / y, 0, 0, 0, 0, 1 / z, 0, 0, 0, 0, 1);
+    Matrix4x4 m(x, 0, 0, 0, 
+                0, y, 0, 0, 
+                0, 0, z, 0, 
+                0, 0, 0, 1);
+    Matrix4x4 minv(1 / x, 0, 0, 0, 
+                   0, 1 / y, 0, 0, 
+                   0, 0, 1 / z, 0, 
+                   0, 0, 0, 1);
     return Transform(m, minv);
 }
 
 Transform RotateX(Float theta) {
     Float sinTheta = std::sin(Radians(theta));
     Float cosTheta = std::cos(Radians(theta));
-    Matrix4x4 m(1, 0, 0, 0, 0, cosTheta, -sinTheta, 0, 0, sinTheta, cosTheta, 0,
+    Matrix4x4 m(1, 0, 0, 0, 
+                0, cosTheta, -sinTheta, 0, 
+                0, sinTheta, cosTheta, 0,
                 0, 0, 0, 1);
     return Transform(m, Transpose(m));
 }
@@ -129,7 +141,9 @@ Transform RotateX(Float theta) {
 Transform RotateY(Float theta) {
     Float sinTheta = std::sin(Radians(theta));
     Float cosTheta = std::cos(Radians(theta));
-    Matrix4x4 m(cosTheta, 0, sinTheta, 0, 0, 1, 0, 0, -sinTheta, 0, cosTheta, 0,
+    Matrix4x4 m(cosTheta, 0, sinTheta, 0, 
+                0, 1, 0, 0, 
+                -sinTheta, 0, cosTheta, 0,
                 0, 0, 0, 1);
     return Transform(m, Transpose(m));
 }
@@ -137,7 +151,9 @@ Transform RotateY(Float theta) {
 Transform RotateZ(Float theta) {
     Float sinTheta = std::sin(Radians(theta));
     Float cosTheta = std::cos(Radians(theta));
-    Matrix4x4 m(cosTheta, -sinTheta, 0, 0, sinTheta, cosTheta, 0, 0, 0, 0, 1, 0,
+    Matrix4x4 m(cosTheta, -sinTheta, 0, 0, 
+                sinTheta, cosTheta, 0, 0, 
+                0, 0, 1, 0,
                 0, 0, 0, 1);
     return Transform(m, Transpose(m));
 }

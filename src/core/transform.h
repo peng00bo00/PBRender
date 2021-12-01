@@ -94,10 +94,10 @@ class Transform {
         Transform() {}
 
         Transform(const Float mat[4][4]) {
-            m = Matrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3], mat[1][0],
-                        mat[1][1], mat[1][2], mat[1][3], mat[2][0], mat[2][1],
-                        mat[2][2], mat[2][3], mat[3][0], mat[3][1], mat[3][2],
-                        mat[3][3]);
+            m = Matrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3], 
+                          mat[1][0], mat[1][1], mat[1][2], mat[1][3], 
+                          mat[2][0], mat[2][1], mat[2][2], mat[2][3], 
+                          mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
             mInv = Inverse(m);
         }
 
@@ -149,9 +149,9 @@ class Transform {
             Float la2 = (*this)(Vector3f(1, 0, 0)).LengthSquared();
             Float lb2 = (*this)(Vector3f(0, 1, 0)).LengthSquared();
             Float lc2 = (*this)(Vector3f(0, 0, 1)).LengthSquared();
-    #define NOT_ONE(x) ((x) < .999f || (x) > 1.001f)
+        #define NOT_ONE(x) ((x) < .999f || (x) > 1.001f)
             return (NOT_ONE(la2) || NOT_ONE(lb2) || NOT_ONE(lc2));
-    #undef NOT_ONE
+        #undef NOT_ONE
         }
 
         template <typename T>
