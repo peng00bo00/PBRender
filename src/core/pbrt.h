@@ -64,22 +64,32 @@ namespace pbrt {
 class Scene;
 class Integrator;
 class SamplerIntegrator;
+
+// geometry
 template <typename T>
 class Vector2;
+
 template <typename T>
 class Vector3;
+
 template <typename T>
 class Point3;
+
 template <typename T>
 class Point2;
+
 template <typename T>
 class Normal3;
+
 class Ray;
 class RayDifferential;
+
 template <typename T>
 class Bounds2;
+
 template <typename T>
 class Bounds3;
+
 class Transform;
 struct Interaction;
 class SurfaceInteraction;
@@ -122,11 +132,13 @@ class VisibilityTester;
 class AreaLight;
 struct Distribution1D;
 class Distribution2D;
+
 #ifdef PBRT_FLOAT_AS_DOUBLE
   typedef double Float;
 #else
   typedef float Float;
 #endif  // PBRT_FLOAT_AS_DOUBLE
+
 class RNG;
 class ProgressReporter;
 class MemoryArena;
