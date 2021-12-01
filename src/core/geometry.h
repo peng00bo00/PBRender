@@ -453,6 +453,7 @@ class Point3 {
             : x((T)p.x), y((T)p.y), z((T)p.z) {
             DCHECK(!HasNaNs());
         }
+
         template <typename U>
         explicit operator Vector3<U>() const {
             return Vector3<U>(x, y, z);
@@ -602,6 +603,7 @@ class Normal3 {
         Normal3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) { DCHECK(!HasNaNs()); }
 
         Normal3<T> operator-() const { return Normal3(-x, -y, -z); }
+
         Normal3<T> operator+(const Normal3<T> &n) const {
             DCHECK(!n.HasNaNs());
             return Normal3<T>(x + n.x, y + n.y, z + n.z);
@@ -614,6 +616,7 @@ class Normal3 {
             z += n.z;
             return *this;
         }
+
         Normal3<T> operator-(const Normal3<T> &n) const {
             DCHECK(!n.HasNaNs());
             return Normal3<T>(x - n.x, y - n.y, z - n.z);
@@ -626,6 +629,7 @@ class Normal3 {
             z -= n.z;
             return *this;
         }
+
         bool HasNaNs() const { return isNaN(x) || isNaN(y) || isNaN(z); }
 
         template <typename U>
@@ -1026,6 +1030,7 @@ template <typename T, typename U>
 inline Vector3<T> operator*(U s, const Vector3<T> &v) {
     return v * s;
 }
+
 template <typename T>
 Vector3<T> Abs(const Vector3<T> &v) {
     return Vector3<T>(std::abs(v.x), std::abs(v.y), std::abs(v.z));
@@ -1108,8 +1113,7 @@ Vector3<T> Permute(const Vector3<T> &v, int x, int y, int z) {
 }
 
 template <typename T>
-inline void CoordinateSystem(const Vector3<T> &v1, Vector3<T> *v2,
-                             Vector3<T> *v3) {
+inline void CoordinateSystem(const Vector3<T> &v1, Vector3<T> *v2, Vector3<T> *v3) {
     if (std::abs(v1.x) > std::abs(v1.y))
         *v2 = Vector3<T>(-v1.z, 0, v1.x) / std::sqrt(v1.x * v1.x + v1.z * v1.z);
     else
@@ -1261,8 +1265,7 @@ inline Normal3<T> Normalize(const Normal3<T> &n) {
 }
 
 template <typename T>
-inline Vector3<T>::Vector3(const Normal3<T> &n)
-    : x(n.x), y(n.y), z(n.z) {
+inline Vector3<T>::Vector3(const Normal3<T> &n) : x(n.x), y(n.y), z(n.z) {
     DCHECK(!n.HasNaNs());
 }
 
