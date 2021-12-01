@@ -893,7 +893,7 @@ class Bounds3 {
 
         inline bool IntersectP(const Ray &ray, const Vector3f &invDir,
                             const int dirIsNeg[3]) const;
-                            
+
         friend std::ostream &operator<<(std::ostream &os, const Bounds3<T> &b) {
             os << "[ " << b.pMin << " - " << b.pMax << " ]";
             return os;
@@ -912,18 +912,22 @@ class Bounds2iIterator : public std::forward_iterator_tag {
     public:
         Bounds2iIterator(const Bounds2i &b, const Point2i &pt)
             : p(pt), bounds(&b) {}
+
         Bounds2iIterator operator++() {
             advance();
             return *this;
         }
+
         Bounds2iIterator operator++(int) {
             Bounds2iIterator old = *this;
             advance();
             return old;
         }
+
         bool operator==(const Bounds2iIterator &bi) const {
             return p == bi.p && bounds == bi.bounds;
         }
+
         bool operator!=(const Bounds2iIterator &bi) const {
             return p != bi.p || bounds != bi.bounds;
         }
@@ -947,11 +951,15 @@ class Ray {
     public:
         // Ray Public Methods
         Ray() : tMax(Infinity), time(0.f), medium(nullptr) {}
+
         Ray(const Point3f &o, const Vector3f &d, Float tMax = Infinity,
             Float time = 0.f, const Medium *medium = nullptr)
             : o(o), d(d), tMax(tMax), time(time), medium(medium) {}
+
         Point3f operator()(Float t) const { return o + d * t; }
+
         bool HasNaNs() const { return (o.HasNaNs() || d.HasNaNs() || isNaN(tMax)); }
+
         friend std::ostream &operator<<(std::ostream &os, const Ray &r) {
             os << "[o=" << r.o << ", d=" << r.d << ", tMax=" << r.tMax
             << ", time=" << r.time << "]";
@@ -970,24 +978,29 @@ class RayDifferential : public Ray {
     public:
         // RayDifferential Public Methods
         RayDifferential() { hasDifferentials = false; }
+
         RayDifferential(const Point3f &o, const Vector3f &d, Float tMax = Infinity,
                         Float time = 0.f, const Medium *medium = nullptr)
             : Ray(o, d, tMax, time, medium) {
             hasDifferentials = false;
         }
+
         RayDifferential(const Ray &ray) : Ray(ray) { hasDifferentials = false; }
+
         bool HasNaNs() const {
             return Ray::HasNaNs() ||
                 (hasDifferentials &&
                     (rxOrigin.HasNaNs() || ryOrigin.HasNaNs() ||
                     rxDirection.HasNaNs() || ryDirection.HasNaNs()));
         }
+
         void ScaleDifferentials(Float s) {
             rxOrigin = o + (rxOrigin - o) * s;
             ryOrigin = o + (ryOrigin - o) * s;
             rxDirection = d + (rxDirection - d) * s;
             ryDirection = d + (ryDirection - d) * s;
         }
+
         friend std::ostream &operator<<(std::ostream &os, const RayDifferential &r) {
             os << "[ " << (Ray &)r << " has differentials: " <<
                 (r.hasDifferentials ? "true" : "false") << ", xo = " << r.rxOrigin <<
@@ -1061,6 +1074,7 @@ template <typename T>
 inline Vector3<T> Normalize(const Vector3<T> &v) {
     return v / v.Length();
 }
+
 template <typename T>
 T MinComponent(const Vector3<T> &v) {
     return std::min(v.x, std::min(v.y, v.z));
@@ -1119,6 +1133,7 @@ template <typename T, typename U>
 inline Vector2<T> operator*(U f, const Vector2<T> &v) {
     return v * f;
 }
+
 template <typename T>
 inline Float Dot(const Vector2<T> &v1, const Vector2<T> &v2) {
     DCHECK(!v1.HasNaNs() && !v2.HasNaNs());
@@ -1135,6 +1150,7 @@ template <typename T>
 inline Vector2<T> Normalize(const Vector2<T> &v) {
     return v / v.Length();
 }
+
 template <typename T>
 Vector2<T> Abs(const Vector2<T> &v) {
     return Vector2<T>(std::abs(v.x), std::abs(v.y));
