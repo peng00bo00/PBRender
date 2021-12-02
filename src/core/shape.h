@@ -20,17 +20,21 @@ class Shape {
     public:
         // Shape Interface
         Shape(const Transform *ObjectToWorld, const Transform *WorldToObject,
-            bool reverseOrientation);
+              bool reverseOrientation);
         virtual ~Shape();
+
         virtual Bounds3f ObjectBound() const = 0;
         virtual Bounds3f WorldBound() const;
+
         virtual bool Intersect(const Ray &ray, Float *tHit,
-                            SurfaceInteraction *isect,
-                            bool testAlphaTexture = true) const = 0;
+                               SurfaceInteraction *isect,
+                               bool testAlphaTexture = true) const = 0;
+        
         virtual bool IntersectP(const Ray &ray,
                                 bool testAlphaTexture = true) const {
             return Intersect(ray, nullptr, nullptr, testAlphaTexture);
         }
+
         virtual Float Area() const = 0;
         // Sample a point on the surface of the shape and return the PDF with
         // respect to area on the surface.
@@ -40,7 +44,7 @@ class Shape {
         // Sample a point on the shape given a reference point |ref| and
         // return the PDF with respect to solid angle from |ref|.
         virtual Interaction Sample(const Interaction &ref, const Point2f &u,
-                                Float *pdf) const;
+                                   Float *pdf) const;
         virtual Float Pdf(const Interaction &ref, const Vector3f &wi) const;
 
         // Returns the solid angle subtended by the shape w.r.t. the reference
