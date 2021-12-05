@@ -94,48 +94,48 @@ class MediumInteraction : public Interaction {
 
 // SurfaceInteraction Declarations
 class SurfaceInteraction : public Interaction {
-  public:
-    // SurfaceInteraction Public Methods
-    SurfaceInteraction() {}
-    SurfaceInteraction(const Point3f &p, const Vector3f &pError,
-                       const Point2f &uv, const Vector3f &wo,
-                       const Vector3f &dpdu, const Vector3f &dpdv,
-                       const Normal3f &dndu, const Normal3f &dndv, Float time,
-                       const Shape *sh,
-                       int faceIndex = 0);
-    
-    void SetShadingGeometry(const Vector3f &dpdu, const Vector3f &dpdv,
-                            const Normal3f &dndu, const Normal3f &dndv,
-                            bool orientationIsAuthoritative);
-    
-    void ComputeScatteringFunctions(
-        const RayDifferential &ray, MemoryArena &arena,
-        bool allowMultipleLobes = false,
-        TransportMode mode = TransportMode::Radiance);
-    
-    void ComputeDifferentials(const RayDifferential &r) const;
-    Spectrum Le(const Vector3f &w) const;
+    public:
+        // SurfaceInteraction Public Methods
+        SurfaceInteraction() {}
+        SurfaceInteraction(const Point3f &p, const Vector3f &pError,
+                           const Point2f &uv, const Vector3f &wo,
+                           const Vector3f &dpdu, const Vector3f &dpdv,
+                           const Normal3f &dndu, const Normal3f &dndv, Float time,
+                           const Shape *sh,
+                           int faceIndex = 0);
+        
+        void SetShadingGeometry(const Vector3f &dpdu, const Vector3f &dpdv,
+                                const Normal3f &dndu, const Normal3f &dndv,
+                                bool orientationIsAuthoritative);
+        
+        void ComputeScatteringFunctions(
+            const RayDifferential &ray, MemoryArena &arena,
+            bool allowMultipleLobes = false,
+            TransportMode mode = TransportMode::Radiance);
+        
+        void ComputeDifferentials(const RayDifferential &r) const;
+        Spectrum Le(const Vector3f &w) const;
 
-    // SurfaceInteraction Public Data
-    Point2f uv;
-    Vector3f dpdu, dpdv;
-    Normal3f dndu, dndv;
-    const Shape *shape = nullptr;
-    struct {
-        Normal3f n;
+        // SurfaceInteraction Public Data
+        Point2f uv;
         Vector3f dpdu, dpdv;
         Normal3f dndu, dndv;
-    } shading;
-    const Primitive *primitive = nullptr;
-    BSDF *bsdf = nullptr;
-    BSSRDF *bssrdf = nullptr;
-    mutable Vector3f dpdx, dpdy;
-    mutable Float dudx = 0, dvdx = 0, dudy = 0, dvdy = 0;
+        const Shape *shape = nullptr;
+        struct {
+            Normal3f n;
+            Vector3f dpdu, dpdv;
+            Normal3f dndu, dndv;
+        } shading;
+        const Primitive *primitive = nullptr;
+        BSDF *bsdf = nullptr;
+        BSSRDF *bssrdf = nullptr;
+        mutable Vector3f dpdx, dpdy;
+        mutable Float dudx = 0, dvdx = 0, dudy = 0, dvdy = 0;
 
-    // Added after book publication. Shapes can optionally provide a face
-    // index with an intersection point for use in Ptex texture lookups.
-    // If Ptex isn't being used, then this value is ignored.
-    int faceIndex = 0;
+        // Added after book publication. Shapes can optionally provide a face
+        // index with an intersection point for use in Ptex texture lookups.
+        // If Ptex isn't being used, then this value is ignored.
+        int faceIndex = 0;
 };
 
 }  // namespace pbrt
