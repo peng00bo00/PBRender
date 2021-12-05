@@ -133,6 +133,7 @@ class AreaLight;
 struct Distribution1D;
 class Distribution2D;
 
+// Float declarations
 #ifdef PBRT_FLOAT_AS_DOUBLE
   typedef double Float;
 #else
@@ -181,6 +182,8 @@ static PBRT_CONSTEXPR Float Infinity = std::numeric_limits<Float>::infinity();
 static PBRT_CONSTEXPR Float MachineEpsilon =
     std::numeric_limits<Float>::epsilon() * 0.5;
 #endif
+
+// Global Constants
 static PBRT_CONSTEXPR Float ShadowEpsilon = 0.0001f;
 static PBRT_CONSTEXPR Float Pi = 3.14159265358979323846;
 static PBRT_CONSTEXPR Float InvPi = 0.31830988618379067154;
@@ -280,6 +283,7 @@ inline Float InverseGammaCorrect(Float value) {
     return std::pow((value + 0.055f) * 1.f / 1.055f, (Float)2.4f);
 }
 
+// utility functions
 template <typename T, typename U, typename V>
 inline T Clamp(T val, U low, V high) {
     if (val < low)
@@ -301,10 +305,12 @@ inline Float Mod(Float a, Float b) {
     return std::fmod(a, b);
 }
 
+// converting between angle measures
 inline Float Radians(Float deg) { return (Pi / 180) * deg; }
 
 inline Float Degrees(Float rad) { return (180 / Pi) * rad; }
 
+// log-2
 inline Float Log2(Float x) {
     const Float invLog2 = 1.442695040888963387004650940071;
     return std::log(x) * invLog2;
