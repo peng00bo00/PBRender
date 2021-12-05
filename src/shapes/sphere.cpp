@@ -43,7 +43,7 @@ bool Sphere::Intersect(const Ray &r, Float *tHit, SurfaceInteraction *isect,
         if (tShapeHit.UpperBound() > ray.tMax) return false;
     }
 
-    // Compute sphere hit position and ϕ
+    // Compute sphere hit position and $\phi$
     pHit = ray((Float)tShapeHit);
 
     // Refine sphere intersection point
@@ -58,7 +58,7 @@ bool Sphere::Intersect(const Ray &r, Float *tHit, SurfaceInteraction *isect,
         if (tShapeHit == t1) return false;
         if (t1.UpperBound() > ray.tMax) return false;
         tShapeHit = t1;
-        // Compute sphere hit position and ϕ
+        // Compute sphere hit position and $\phi$
         pHit = ray((Float)tShapeHit);
 
         // Refine sphere intersection point
@@ -76,7 +76,7 @@ bool Sphere::Intersect(const Ray &r, Float *tHit, SurfaceInteraction *isect,
     Float theta = std::acos(Clamp(pHit.z / radius, -1, 1));
     Float v = (theta - thetaMin) / (thetaMax - thetaMin);
 
-    // Compute sphere Undefined control sequence \dpdu and Undefined control sequence \dpdv
+    // Compute sphere $\dpdu$ and $\dpdv$
     Float zRadius = std::sqrt(pHit.x * pHit.x + pHit.y * pHit.y);
     Float invZRadius = 1 / zRadius;
     Float cosPhi = pHit.x * invZRadius;
@@ -86,7 +86,7 @@ bool Sphere::Intersect(const Ray &r, Float *tHit, SurfaceInteraction *isect,
         (thetaMax - thetaMin) *
         Vector3f(pHit.z * cosPhi, pHit.z * sinPhi, -radius * std::sin(theta));
 
-    // Compute sphere Undefined control sequence \dndu and Undefined control sequence \dndv
+    // Compute sphere $\dndu$ and $\dndv$
     Vector3f d2Pduu = -phiMax * phiMax * Vector3f(pHit.x, pHit.y, 0);
     Vector3f d2Pduv =
         (thetaMax - thetaMin) * pHit.z * phiMax * Vector3f(-sinPhi, cosPhi, 0.);
@@ -102,7 +102,7 @@ bool Sphere::Intersect(const Ray &r, Float *tHit, SurfaceInteraction *isect,
     Float f = Dot(N, d2Pduv);
     Float g = Dot(N, d2Pdvv);
 
-    // Compute Undefined control sequence \dndu and Undefined control sequence \dndv from fundamental form coefficients
+    // Compute $\dndu$ and $\dndv$ from fundamental form coefficients
     Float invEGF2 = 1 / (E * G - F * F);
     Normal3f dndu = Normal3f((f * F - e * G) * invEGF2 * dpdu +
                              (e * F - f * E) * invEGF2 * dpdv);
@@ -151,7 +151,7 @@ bool Sphere::IntersectP(const Ray &r, bool testAlphaTexture) const {
         if (tShapeHit.UpperBound() > ray.tMax) return false;
     }
 
-    // Compute sphere hit position and ϕ
+    // Compute sphere hit position and $\phi$
     pHit = ray((Float)tShapeHit);
 
     // Refine sphere intersection point
@@ -166,7 +166,7 @@ bool Sphere::IntersectP(const Ray &r, bool testAlphaTexture) const {
         if (tShapeHit == t1) return false;
         if (t1.UpperBound() > ray.tMax) return false;
         tShapeHit = t1;
-        // Compute sphere hit position and ϕ
+        // Compute sphere hit position and $\phi$
         pHit = ray((Float)tShapeHit);
 
         // Refine sphere intersection point
@@ -200,7 +200,7 @@ Interaction Sphere::Sample(const Interaction &ref, const Point2f &u,
                            Float *pdf) const {
     Point3f pCenter = (*ObjectToWorld)(Point3f(0, 0, 0));
 
-    // Sample uniformly on sphere if Undefined control sequence \pt is inside it
+    // Sample uniformly on sphere if $\pt{}$ is inside it
     Point3f pOrigin =
         OffsetRayOrigin(ref.p, ref.pError, ref.n, pCenter - ref.p);
     if (DistanceSquared(pOrigin, pCenter) <= radius * radius) {
@@ -227,7 +227,7 @@ Interaction Sphere::Sample(const Interaction &ref, const Point2f &u,
     Vector3f wcX, wcY;
     CoordinateSystem(wc, &wcX, &wcY);
 
-    // Compute θ and ϕ values for sample in cone
+    // Compute $\theta$ and $\phi$ values for sample in cone
     Float sinThetaMax = radius * invDc;
     Float sinThetaMax2 = sinThetaMax * sinThetaMax;
     Float invSinThetaMax = 1 / sinThetaMax;
@@ -243,7 +243,7 @@ Interaction Sphere::Sample(const Interaction &ref, const Point2f &u,
         cosTheta = std::sqrt(1 - sinTheta2);
     }
 
-    // Compute angle α from center of sphere to sampled point on surface
+    // Compute angle $\alpha$ from center of sphere to sampled point on surface
     Float cosAlpha = sinTheta2 * invSinThetaMax +
         cosTheta * std::sqrt(std::max((Float)0.f, 1.f - sinTheta2 * invSinThetaMax * invSinThetaMax));
     Float sinAlpha = std::sqrt(std::max((Float)0.f, 1.f - cosAlpha*cosAlpha));
