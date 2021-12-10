@@ -34,6 +34,7 @@ class ParallelForLoop {
           maxIndex(maxIndex),
           chunkSize(chunkSize),
           profilerState(profilerState) {}
+    
     ParallelForLoop(const std::function<void(Point2i)> &f, const Point2i &count,
                     uint64_t profilerState)
         : func2D(f),
