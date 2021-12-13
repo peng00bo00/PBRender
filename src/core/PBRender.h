@@ -46,6 +46,9 @@ template <typename T>
 class Bounds3;
 
 class Ray;
+class Transform;
+struct Interaction;
+class SurfaceInteraction;
 
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {

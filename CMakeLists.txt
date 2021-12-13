@@ -7,10 +7,12 @@ INCLUDE_DIRECTORIES ( src/core )
 
 SET ( CORE_HEADERS
     src/core/geometry.h
+    src/core/transform.h
 )
 
 SET ( CORE_SOURCE 
     src/core/geometry.cpp
+    src/core/transform.cpp
 )
 
 ADD_LIBRARY ( PBRender_LIB STATIC
