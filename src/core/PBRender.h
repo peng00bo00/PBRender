@@ -49,6 +49,7 @@ class Ray;
 class Transform;
 struct Interaction;
 class SurfaceInteraction;
+class MediumInteraction;
 class Shape;
 class Primitive;
 

@@ -26,4 +26,8 @@ class SurfaceInteraction : public Interaction {
 
 };
 
+class MediumInteraction : public Interaction {
+    
+}
+
 }
