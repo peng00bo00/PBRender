@@ -1,7 +1,9 @@
 #include "PBRender.h"
+#include "geometry.h"
 
 using namespace PBRender;
 
 int main(int argc, char *argv[]) {
-    std::cout << "Finished!" << std::endl;
+    auto x = Vector2f();
+    std::cout << x << std::endl;
 }

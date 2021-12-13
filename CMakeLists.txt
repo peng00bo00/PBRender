@@ -5,4 +5,18 @@ PROJECT ( PBRender )
 INCLUDE_DIRECTORIES ( src )
 INCLUDE_DIRECTORIES ( src/core )
 
+SET ( CORE_HEADERS
+    src/core/geometry.h
+)
+
+SET ( CORE_SOURCE 
+    src/core/geometry.cpp
+)
+
+ADD_LIBRARY ( PBRender STATIC
+    ${CORE_HEADERS}
+    ${CORE_SOURCE}
+)
+
 ADD_EXECUTABLE ( render src/main.cpp )
+TARGET_LINK_LIBRARIES ( render PBRender )
