@@ -8,12 +8,14 @@ INCLUDE_DIRECTORIES ( src/core )
 SET ( CORE_HEADERS
     src/core/interaction.h
     src/core/geometry.h
+    src/core/shape.h
     src/core/transform.h
 )
 
 SET ( CORE_SOURCE 
     src/core/interaction.cpp
     src/core/geometry.cpp
+    src/core/shape.cpp
     src/core/transform.cpp
 )
 
