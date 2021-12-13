@@ -6,5 +6,9 @@
 #include "transform.h"
 
 namespace PBRender {
-    
+
+class Shape {
+
+};
+
 }
