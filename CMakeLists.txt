@@ -19,9 +19,14 @@ SET ( CORE_SOURCE
     src/core/transform.cpp
 )
 
+FILE ( GLOB PBRender_SOURCE
+  src/shapes/*
+)
+
 ADD_LIBRARY ( PBRender_LIB STATIC
     ${CORE_HEADERS}
     ${CORE_SOURCE}
+    ${PBRender_SOURCE}
 )
 
 ADD_EXECUTABLE ( render src/main.cpp )

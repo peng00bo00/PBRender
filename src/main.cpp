@@ -1,6 +1,7 @@
 #include "PBRender.h"
 #include "geometry.h"
 #include "transform.h"
+#include "shapes/sphere.h"
 
 using namespace PBRender;
 
@@ -17,4 +18,7 @@ int main(int argc, char *argv[]) {
     Transform t1 = Translate(Vector3f(3.3, 2.0, 0));
     Point3f c1 = t1(Point3f());
     std::cout << c1 << std::endl;
+
+    Transform sphereT_Object2World, sphereT_World2Object;
+    Sphere(&sphereT_Object2World , &sphereT_World2Object , false , 1.0) ;
 }
