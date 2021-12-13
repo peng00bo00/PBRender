@@ -13,4 +13,8 @@ int main(int argc, char *argv[]) {
 
     auto m = Matrix4x4();
     std::cout << m << std::endl;
+
+    Transform t1 = Translate(Vector3f(3.3, 2.0, 0));
+    Point3f c1 = t1(Point3f());
+    std::cout << c1 << std::endl;
 }

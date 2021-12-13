@@ -49,6 +49,8 @@ class Ray;
 class Transform;
 struct Interaction;
 class SurfaceInteraction;
+class Shape;
+class Primitive;
 
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {
