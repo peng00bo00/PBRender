@@ -1186,4 +1186,54 @@ Bounds3<T> Union(const Bounds3<T> &b1, const Bounds3<T> &b2) {
     return ret;
 }
 
+template <typename T>
+Bounds3<T> Intersect(const Bounds3<T> &b1, const Bounds3<T> &b2) {
+    Bounds3<T> ret;
+    ret.pMin = Max(b1.pMin, b2.pMin);
+    ret.pMax = Min(b1.pMax, b2.pMax);
+    return ret;
+}
+
+template <typename T>
+bool Overlaps(const Bounds3<T> &b1, const Bounds3<T> &b2) {
+    bool x = (b1.pMax.x >= b2.pMin.x) && (b1.pMin.x <= b2.pMax.x);
+    bool y = (b1.pMax.y >= b2.pMin.y) && (b1.pMin.y <= b2.pMax.y);
+    bool z = (b1.pMax.z >= b2.pMin.z) && (b1.pMin.z <= b2.pMax.z);
+    return (x && y && z);
+}
+
+template <typename T>
+bool Inside(const Point3<T> &p, const Bounds3<T> &b) {
+    return (p.x >= b.pMin.x && p.x <= b.pMax.x && p.y >= b.pMin.y &&
+            p.y <= b.pMax.y && p.z >= b.pMin.z && p.z <= b.pMax.z);
+}
+
+template <typename T>
+bool InsideExclusive(const Point3<T> &p, const Bounds3<T> &b) {
+    return (p.x >= b.pMin.x && p.x < b.pMax.x && p.y >= b.pMin.y &&
+            p.y < b.pMax.y && p.z >= b.pMin.z && p.z < b.pMax.z);
+}
+
+template <typename T, typename U>
+inline Bounds3<T> Expand(const Bounds3<T> &b, U delta) {
+    return Bounds3<T>(b.pMin - Vector3<T>(delta, delta, delta),
+                      b.pMax + Vector3<T>(delta, delta, delta));
+}
+
+// Minimum squared distance from point to box; returns zero if point is
+// inside.
+template <typename T, typename U>
+inline float DistanceSquared(const Point3<T> &p, const Bounds3<U> &b) {
+    float dx = std::max({float(0), b.pMin.x - p.x, p.x - b.pMax.x});
+    float dy = std::max({float(0), b.pMin.y - p.y, p.y - b.pMax.y});
+    float dz = std::max({float(0), b.pMin.z - p.z, p.z - b.pMax.z});
+    return dx * dx + dy * dy + dz * dz;
+}
+
+template <typename T, typename U>
+inline Float Distance(const Point3<T> &p, const Bounds3<U> &b) {
+    return std::sqrt(DistanceSquared(p, b));
+}
+
+
 }
