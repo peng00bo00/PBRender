@@ -1,14 +1,16 @@
+#pragma once
+
+#include "PBRender.h"
 #include "shape.h"
 
 namespace PBRender {
 
 class Sphere : public Shape {
     public:
-        Sphere (const Transform *ObjectToWorld, const Transform *WorldToObject,
-                bool reverseOrientation, float radius)
-                : Shape(ObjectToWorld, WorldToObject, reverseOrientation),
-                  radius(radius)
-                {}
+        Sphere(const Transform *ObjectToWorld, const Transform *WorldToObject,
+               bool reverseOrientation, float radius)
+              : Shape(ObjectToWorld, WorldToObject, reverseOrientation),
+                radius(radius) {}
 
         Bounds3f ObjectBound() const;
 
