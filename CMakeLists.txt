@@ -1,0 +1,8 @@
+CMAKE_MINIMUM_REQUIRED ( VERSION 3.1.0 )
+
+PROJECT ( PBRender )
+
+INCLUDE_DIRECTORIES ( src )
+INCLUDE_DIRECTORIES ( src/core )
+
+ADD_EXECUTABLE ( render src/main.cpp )
