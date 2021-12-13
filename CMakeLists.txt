@@ -13,10 +13,10 @@ SET ( CORE_SOURCE
     src/core/geometry.cpp
 )
 
-ADD_LIBRARY ( PBRender STATIC
+ADD_LIBRARY ( PBRender_LIB STATIC
     ${CORE_HEADERS}
     ${CORE_SOURCE}
 )
 
 ADD_EXECUTABLE ( render src/main.cpp )
-TARGET_LINK_LIBRARIES ( render PBRender )
+TARGET_LINK_LIBRARIES ( render PUBLIC PBRender_LIB )
