@@ -23,7 +23,13 @@ struct Interaction {
 };
 
 class SurfaceInteraction : public Interaction {
-
+	public:
+		SurfaceInteraction() {}
+		void ComputeScatteringFunctions();
+	
+	public:
+		const Shape *shape = nullptr;
+		const Primitive *primitive = nullptr;
 };
 
 class MediumInteraction : public Interaction {

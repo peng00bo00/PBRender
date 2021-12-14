@@ -29,4 +29,9 @@ class GeometricPrimitive : public Primitive {
         std::shared_ptr<Shape> shape;
 };
 
+class Aggregate : public Primitive {
+    public:
+        void ComputeScatteringFunctions() const;
+};
+
 }
