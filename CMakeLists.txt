@@ -25,6 +25,7 @@ SET ( CORE_SOURCE
 
 FILE ( GLOB PBRender_SOURCE
     src/shapes/*
+    src/accelerators/*
 )
 
 ADD_LIBRARY ( PBRender_LIB STATIC
