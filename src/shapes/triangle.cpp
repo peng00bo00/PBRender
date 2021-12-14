@@ -460,4 +460,24 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const {
     return true;
 }
 
+std::vector<std::shared_ptr<Shape>> CreateTriangleMesh(
+    const Transform *ObjectToWorld, const Transform *WorldToObject,
+    bool reverseOrientation, int nTriangles, const int *vertexIndices,
+    int nVertices, const Point3f *p, const Vector3f *s, const Normal3f *n,
+    const Point2f *uv, 
+    // const std::shared_ptr<Texture<Float>> &alphaMask,
+    // const std::shared_ptr<Texture<Float>> &shadowAlphaMask,
+    const int *faceIndices) {
+    std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>(
+        *ObjectToWorld, nTriangles, vertexIndices, nVertices, p, s, n, uv,
+        // alphaMask, shadowAlphaMask, 
+        faceIndices);
+    std::vector<std::shared_ptr<Shape>> tris;
+    tris.reserve(nTriangles);
+    for (int i = 0; i < nTriangles; ++i)
+        tris.push_back(std::make_shared<Triangle>(ObjectToWorld, WorldToObject,
+                                                  reverseOrientation, mesh, i));
+    return tris;
+}
+
 }
