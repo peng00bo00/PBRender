@@ -2,6 +2,8 @@ CMAKE_MINIMUM_REQUIRED ( VERSION 3.1.0 )
 
 PROJECT ( PBRender )
 
+ADD_SUBDIRECTORY ( src/ext/stbiw )
+
 INCLUDE_DIRECTORIES ( src )
 INCLUDE_DIRECTORIES ( src/core )
 
@@ -20,7 +22,7 @@ SET ( CORE_SOURCE
 )
 
 FILE ( GLOB PBRender_SOURCE
-  src/shapes/*
+    src/shapes/*
 )
 
 ADD_LIBRARY ( PBRender_LIB STATIC
@@ -30,4 +32,4 @@ ADD_LIBRARY ( PBRender_LIB STATIC
 )
 
 ADD_EXECUTABLE ( render src/main.cpp )
-TARGET_LINK_LIBRARIES ( render PUBLIC PBRender_LIB )
+TARGET_LINK_LIBRARIES ( render PUBLIC PBRender_LIB stbiw )
