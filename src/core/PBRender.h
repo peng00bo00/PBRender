@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <string>
 #include <string.h>
 #include <vector>
@@ -46,12 +47,17 @@ template <typename T>
 class Bounds3;
 
 class Ray;
+
 class Transform;
+
 struct Interaction;
 class SurfaceInteraction;
 class MediumInteraction;
+
 class Shape;
+
 class Primitive;
+class GeometricPrimitive;
 
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {
