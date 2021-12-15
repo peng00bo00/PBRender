@@ -24,7 +24,7 @@ struct BVHPrimitiveInfo {
 };
 
 struct BVHBuildNode {
-    // BVHBuildNode Public Methods
+    // initialize leaf node
     void InitLeaf(int first, int n, const Bounds3f &b) {
         firstPrimOffset = first;
         nPrimitives = n;
@@ -35,6 +35,7 @@ struct BVHBuildNode {
         totalPrimitives += n;
     }
 
+    // initialize interior node
     void InitInterior(int axis, BVHBuildNode *c0, BVHBuildNode *c1) {
         children[0] = c0;
         children[1] = c1;
