@@ -149,12 +149,12 @@ bool Triangle::Intersect(const Ray &ray, float *tHit, SurfaceInteraction *isect,
     else if (det > 0 && (tScaled <= 0 || tScaled > ray.tMax * det))
         return false;
 
-    // // Compute barycentric coordinates and $t$ value for triangle intersection
-    // float invDet = 1 / det;
-    // float b0 = e0 * invDet;
-    // float b1 = e1 * invDet;
-    // float b2 = e2 * invDet;
-    // float t = tScaled * invDet;
+    // Compute barycentric coordinates and $t$ value for triangle intersection
+    float invDet = 1 / det;
+    float b0 = e0 * invDet;
+    float b1 = e1 * invDet;
+    float b2 = e2 * invDet;
+    float t = tScaled * invDet;
 
     // // Ensure that computed triangle $t$ is conservatively greater than zero
 
@@ -386,14 +386,14 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const {
     else if (det > 0 && (tScaled <= 0 || tScaled > ray.tMax * det))
         return false;
 
-    // // Compute barycentric coordinates and $t$ value for triangle intersection
-    // float invDet = 1 / det;
-    // float b0 = e0 * invDet;
-    // float b1 = e1 * invDet;
-    // float b2 = e2 * invDet;
-    // float t = tScaled * invDet;
+    // Compute barycentric coordinates and $t$ value for triangle intersection
+    float invDet = 1 / det;
+    float b0 = e0 * invDet;
+    float b1 = e1 * invDet;
+    float b2 = e2 * invDet;
+    float t = tScaled * invDet;
 
-    // // Ensure that computed triangle $t$ is conservatively greater than zero
+    // Ensure that computed triangle $t$ is conservatively greater than zero
 
     // // Compute $\delta_z$ term for triangle $t$ error bounds
     // float maxZt = MaxComponent(Abs(Vector3f(p0t.z, p1t.z, p2t.z)));
