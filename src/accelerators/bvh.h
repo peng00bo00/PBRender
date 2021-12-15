@@ -11,16 +11,12 @@ struct BVHPrimitiveInfo;
 struct MortonPrimitive;
 struct LinearBVHNode;
 
-// save for future changes
-// class BVHAccel : public Aggregate {
-class BVHAccel {
+class BVHAccel : public Aggregate {
     public:
         BVHAccel(std::vector<std::shared_ptr<Primitive>> p,
                  int maxPrimsInNode = 1);
-        
-        ~BVHAccel();
-
         Bounds3f WorldBound() const;
+        ~BVHAccel();
         bool Intersect(const Ray &ray, SurfaceInteraction *isect) const;
         bool IntersectP(const Ray &ray) const;
     
@@ -31,7 +27,6 @@ class BVHAccel {
             std::vector<std::shared_ptr<Primitive>> &orderedPrims);
         int flattenBVHTree(BVHBuildNode *node, int *offset);
     
-    private:
         const int maxPrimsInNode;
         std::vector<std::shared_ptr<Primitive>> primitives;
         LinearBVHNode *nodes = nullptr;

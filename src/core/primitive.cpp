@@ -30,4 +30,8 @@ void GeometricPrimitive::ComputeScatteringFunctions() const {
 
 }
 
+void Aggregate::ComputeScatteringFunctions() const {
+
+}
+
 }
