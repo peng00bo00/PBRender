@@ -7,6 +7,10 @@ namespace PBRender {
 
 struct BVHBuildNode;
 
+struct BVHPrimitiveInfo;
+struct MortonPrimitive;
+struct LinearBVHNode;
+
 class BVHAccel : public Aggregate {
     public:
         BVHAccel(std::vector<std::shared_ptr<Primitive>> p,
@@ -19,12 +23,18 @@ class BVHAccel : public Aggregate {
         bool IntersectP(const Ray &ray) const;
     
     private:
+        BVHBuildNode *recursiveBuild(
+            std::vector<BVHPrimitiveInfo> &primitiveInfo,
+            int start, int end, int *totalNodes,
+            std::vector<std::shared_ptr<Primitive>> &orderedPrims);
         int flattenBVHTree(BVHBuildNode *node, int *offset);
     
     private:
         const int maxPrimsInNode;
         std::vector<std::shared_ptr<Primitive>> primitives;
-        // LinearBVHNode *nodes = nullptr;
+        LinearBVHNode *nodes = nullptr;
 };
+
+std::shared_ptr<BVHAccel> CreateBVHAccelerator(std::vector<std::shared_ptr<Primitive>> prims);
 
 }
