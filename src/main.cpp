@@ -1,10 +1,13 @@
 #include "PBRender.h"
+
 #include "geometry.h"
 #include "transform.h"
 #include "shapes/sphere.h"
 #include "shapes/triangle.h"
+#include "modelloader.h"
 
 #include <stb_image_write.h>
+
 
 using namespace PBRender;
 
@@ -117,6 +120,59 @@ void test_triangle() {
     
 }
 
+void test_bunny() {
+
+    Transform Object2WorldModel = Scale( 5.0, 5.0, 5.0 );
+    std::vector<std::shared_ptr<Primitive>> prims;
+
+    ModelLoader loader;
+    loader.loadModel("./bunny.obj", Object2WorldModel);
+    loader.buildNoTextureModel(Object2WorldModel, prims);
+
+    Vector3f lower_left_corner(-2.0, -2.0, -2.0);
+    Vector3f horizontal(4.0, 0.0, 0.0);
+    Vector3f vertical(0.0, 4.0, 0.0);
+
+    Point3f origin(0.0, 0.0, -3.0);
+
+    std::vector<char> buf(512 * 512 * 3);
+    std::cout << "Rendering begins!" << std::endl;
+
+    for (int j = 0; j < 512; j++) {
+        for (int i = 0; i < 512; i++) {
+            float u = float(i + 0.5) / float(512);
+            float v = float(j + 0.5) / float(512);
+
+            Vector3f dir(lower_left_corner + u*horizontal + v*vertical);
+            dir -= Vector3f(origin);
+            Ray r(origin, dir);
+            
+            buf[(j * 512 + i) * 3 + 0] = 255;
+            buf[(j * 512 + i) * 3 + 1] = 255;
+            buf[(j * 512 + i) * 3 + 2] = 0;
+
+            bool found = false;
+            SurfaceInteraction *isect = nullptr;
+            for (size_t k = 0; k < prims.size(); k++)
+            {
+                if (prims[k]->Intersect(r, isect)) {
+                    buf[(j * 512 + i) * 3 + 0] = 255;
+                    buf[(j * 512 + i) * 3 + 1] = 0;
+                    buf[(j * 512 + i) * 3 + 2] = 0;
+
+                    std::cout << "Inetersection found at (" << i << ", " << j << ")" << std::endl;
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) std::cout << "Inetersection not found at (" << i << ", " << j << ")" << std::endl;
+        }
+    }
+
+    std::cout << "Rendering is finished!" << std::endl;
+    stbi_write_png("bunny.png", 512, 512, 3, buf.data(), 0);
+}
 
 void renderFrame() {
 
@@ -130,5 +186,10 @@ void renderFrame() {
 }
 
 int main(int argc, char *argv[]) {
-    renderFrame();
+    // renderFrame();
+
+    test_bunny();
+    std::cout << "Finish!" << std::endl;
+
+    return 0;
 }
