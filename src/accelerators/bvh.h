@@ -11,7 +11,9 @@ struct BVHPrimitiveInfo;
 struct MortonPrimitive;
 struct LinearBVHNode;
 
-class BVHAccel : public Aggregate {
+// save for future changes
+// class BVHAccel : public Aggregate {
+class BVHAccel {
     public:
         BVHAccel(std::vector<std::shared_ptr<Primitive>> p,
                  int maxPrimsInNode = 1);

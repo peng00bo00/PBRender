@@ -6,7 +6,6 @@
 
 namespace PBRender {
 
-
 class Primitive {
     public:
         virtual ~Primitive();
