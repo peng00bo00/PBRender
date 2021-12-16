@@ -72,6 +72,11 @@ class SampledSpectrum;
 class RGBSpectrum;
 typedef RGBSpectrum Spectrum;
 
+// Camera
+class Camera;
+struct CameraSample;
+class ProjectiveCamera;
+
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {
     uint32_t ui;

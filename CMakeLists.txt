@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES ( src )
 INCLUDE_DIRECTORIES ( src/core )
 
 SET ( CORE_HEADERS
+    src/core/camera.h
     src/core/geometry.h
     src/core/interaction.h
     src/core//modelloader.h
@@ -26,6 +27,7 @@ SET ( CORE_HEADERS
 )
 
 SET ( CORE_SOURCE 
+    src/core/camera.cpp
     src/core/geometry.cpp
     src/core/interaction.cpp
     src/core//modelloader.cpp
@@ -36,6 +38,7 @@ SET ( CORE_SOURCE
 )
 
 FILE ( GLOB PBRender_SOURCE
+    src/cameras/*
     src/shapes/*
     src/accelerators/*
 )
