@@ -59,6 +59,12 @@ class Shape;
 class Primitive;
 class GeometricPrimitive;
 
+template <int nSpectrumSamples>
+class CoefficientSpectrum;
+
+class RGBSpectrum;
+typedef RGBSpectrum Spectrum;
+
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {
     uint32_t ui;
