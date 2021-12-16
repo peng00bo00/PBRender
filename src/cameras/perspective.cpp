@@ -3,30 +3,27 @@
 namespace PBRender {
 
 // PerspectiveCamera Method Definitions
-// PerspectiveCamera::PerspectiveCamera(const Transform &CameraToWorld,
-//                                      const Bounds2f &screenWindow,
-//                                      const Vector2f &fullResolution,
-//                                      float lensRadius, float focalDistance,
-//                                      float fov)
-//     : ProjectiveCamera(CameraToWorld, Perspective(fov, 1e-2f, 1000.f),
-//                        screenWindow, fullResolution,
-//                        lensRadius,
-//                        focalDistance) {
-//     // Compute differential changes in origin for perspective camera rays
-//     dxCamera =
-//         (RasterToCamera(Point3f(1, 0, 0)) - RasterToCamera(Point3f(0, 0, 0)));
-//     dyCamera =
-//         (RasterToCamera(Point3f(0, 1, 0)) - RasterToCamera(Point3f(0, 0, 0)));
+PerspectiveCamera::PerspectiveCamera(const Transform &CameraToWorld,
+                                     const Bounds2f &screenWindow,
+                                     const Vector2f &fullResolution,
+                                     float lensRadius, float focalDistance,
+                                     float fov)
+    : ProjectiveCamera(CameraToWorld, Perspective(fov, 1e-2f, 1000.f),
+                       screenWindow, fullResolution, lensRadius, focalDistance) {
+    // Compute differential changes in origin for perspective camera rays
+    dxCamera =
+        (RasterToCamera(Point3f(1, 0, 0)) - RasterToCamera(Point3f(0, 0, 0)));
+    dyCamera =
+        (RasterToCamera(Point3f(0, 1, 0)) - RasterToCamera(Point3f(0, 0, 0)));
 
-//     // Compute image plane bounds at $z=1$ for _PerspectiveCamera_
-//     Point2i res(fullResolution.x, fullResolution.y);
-//     Point3f pMin = RasterToCamera(Point3f(0, 0, 0));
-//     Point3f pMax = RasterToCamera(Point3f(res.x, res.y, 0));
-//     pMin /= pMin.z;
-//     pMax /= pMax.z;
-//     A = std::abs((pMax.x - pMin.x) * (pMax.y - pMin.y));
-// }
-
+    // Compute image plane bounds at $z=1$ for _PerspectiveCamera_
+    Point2i res = Point2i(fullResolution);
+    Point3f pMin = RasterToCamera(Point3f(0, 0, 0));
+    Point3f pMax = RasterToCamera(Point3f(res.x, res.y, 0));
+    pMin /= pMin.z;
+    pMax /= pMax.z;
+    A = std::abs((pMax.x - pMin.x) * (pMax.y - pMin.y));
+}
 
 float PerspectiveCamera::GenerateRay(const CameraSample &sample,
                                      Ray *ray) const {
@@ -70,14 +67,12 @@ PerspectiveCamera *CreatePerspectiveCamera(const Transform &cam2world, const Vec
         screen.pMax.y = 1.f / frame;
     }
 
-    float fov = 90;
-    float halffov = 45.0f;
-
     float lensradius = 0.0f;
     float focaldistance = 0.0f;
 
+    float fov = 90.0f;
+
     return new PerspectiveCamera(cam2world, screen, fullResolution, lensradius, focaldistance, fov);
 }
-
 
 }

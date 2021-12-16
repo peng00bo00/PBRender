@@ -7,6 +7,7 @@
 #include "accelerators/bvh.h"
 #include "cameras/orthographic.h"
 #include "cameras/perspective.h"
+
 #include "shapes/sphere.h"
 #include "shapes/triangle.h"
 #include "spectrum.h"
@@ -32,8 +33,8 @@ std::vector<char> color2Img(std::vector<Spectrum> col) {
 
 void test() {
 
-    Transform Object2WorldModel = Scale( 0.2, 0.2, 0.2 );
-    Object2WorldModel = Translate(Vector3f(0.0, 0.0, 0.0)) * Object2WorldModel;
+    Transform Object2WorldModel = Scale( 0.5, 0.5, 0.5 );
+    Object2WorldModel = Translate(Vector3f(0.0, -1.0, 0.0)) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
 
     ModelLoader loader;
