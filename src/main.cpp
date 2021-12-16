@@ -7,11 +7,26 @@
 #include "accelerators/bvh.h"
 #include "shapes/sphere.h"
 #include "shapes/triangle.h"
+#include "spectrum.h"
 
 #include <stb_image_write.h>
 
 
 using namespace PBRender;
+
+std::vector<char> color2Img(std::vector<Spectrum> col) {
+    int N = col.size();
+    std::vector<char> buf(N * 3);
+
+    for (size_t i = 0; i < N; ++i)
+    {
+        buf[3 * i + 0] = 255 * col[i][0];
+        buf[3 * i + 1] = 255 * col[i][1];
+        buf[3 * i + 2] = 255 * col[i][2];
+    }
+    
+    return buf;
+}
 
 void test_rainbow() {
     std::vector<char> buf(512 * 512 * 3);
@@ -124,8 +139,8 @@ void test_triangle() {
 
 void test_bunny() {
 
-    Transform Object2WorldModel = Scale( 2.0, 2.0, 2.0 );
-    Object2WorldModel = RotateZ(180) * Object2WorldModel;
+    Transform Object2WorldModel = Scale( 4.0, 4.0, -4.0 );
+    Object2WorldModel = Translate(Vector3f(-0.1, 0.5, 1)) * RotateZ(180) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
 
     ModelLoader loader;
@@ -140,33 +155,39 @@ void test_bunny() {
 
     Point3f origin(0.0, 0.0, -1.0);
 
-    std::vector<char> buf(512 * 512 * 3);
+    Vector3f Light(1.0, 1.0, 1.0);
+    Light = Normalize(Light);
+
+    // std::vector<char> buf(512 * 512 * 3);
+    std::vector<Spectrum> col(512 * 512);
     std::cout << "Rendering begins!" << std::endl;
 
-    for (int j = 0; j < 512; j++) {
-        for (int i = 0; i < 512; i++) {
+    for (int i = 0; i < 512; i++) {
+        for (int j = 0; j < 512; j++) {
             float u = float(i + 0.5) / float(512);
             float v = float(j + 0.5) / float(512);
 
             Vector3f dir(lower_left_corner + u*horizontal + v*vertical);
             dir -= Vector3f(origin);
             Ray r(origin, dir);
-            
-            buf[(j * 512 + i) * 3 + 0] = 255;
-            buf[(j * 512 + i) * 3 + 1] = 255;
-            buf[(j * 512 + i) * 3 + 2] = 0;
 
-            bool found = false;
-            SurfaceInteraction *isect = nullptr;
-            if (agg->Intersect(r, isect)) {
-                buf[(j * 512 + i) * 3 + 0] = 255;
-                buf[(j * 512 + i) * 3 + 1] = 0;
-                buf[(j * 512 + i) * 3 + 2] = 0;
+            SurfaceInteraction isect;
+
+            Spectrum colObj(0.0f);
+            // colObj[0] = 1.0f;
+            // colObj[1] = 1.0f;
+
+            if (agg->Intersect(r, &isect)) {
+                float Li = Dot(Light , isect.n );
+                colObj[1] = std::abs(Li);
             }
+
+            col[i + j * 512] = colObj;
             
         }
     }
 
+    auto buf = color2Img(col);
     std::cout << "Rendering is finished!" << std::endl;
     stbi_write_png("bunny.png", 512, 512, 3, buf.data(), 0);
 }

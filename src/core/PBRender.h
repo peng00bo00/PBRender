@@ -9,20 +9,23 @@
 #include <string.h>
 #include <vector>
 
+#include <iostream>
+#include <sstream>
+
 namespace PBRender {
 
 // Global Constants
-static float MachineEpsilon = std::numeric_limits<float>::epsilon() * 0.5;
+static constexpr float MachineEpsilon = std::numeric_limits<float>::epsilon() * 0.5;
 
-static float Infinity = std::numeric_limits<float>::infinity();
+static constexpr float Infinity = std::numeric_limits<float>::infinity();
 
-static float Pi = 3.14159265358979323846;
-static float InvPi = 0.31830988618379067154;
-static float Inv2Pi = 0.15915494309189533577;
-static float Inv4Pi = 0.07957747154594766788;
-static float PiOver2 = 1.57079632679489661923;
-static float PiOver4 = 0.78539816339744830961;
-static float Sqrt2 = 1.41421356237309504880;
+static constexpr float Pi      = 3.14159265358979323846;
+static constexpr float InvPi   = 0.31830988618379067154;
+static constexpr float Inv2Pi  = 0.15915494309189533577;
+static constexpr float Inv4Pi  = 0.07957747154594766788;
+static constexpr float PiOver2 = 1.57079632679489661923;
+static constexpr float PiOver4 = 0.78539816339744830961;
+static constexpr float Sqrt2   = 1.41421356237309504880;
 
 // Geometry
 template <typename T>
@@ -50,18 +53,22 @@ class Ray;
 
 class Transform;
 
+// Interaction
 struct Interaction;
 class SurfaceInteraction;
 class MediumInteraction;
 
+// Shape
 class Shape;
 
 class Primitive;
 class GeometricPrimitive;
 
+// Spectrum
 template <int nSpectrumSamples>
 class CoefficientSpectrum;
 
+class SampledSpectrum;
 class RGBSpectrum;
 typedef RGBSpectrum Spectrum;
 
@@ -172,5 +179,39 @@ inline float Log2(float x) {
     return std::log(x) * invLog2;
 }
 
+template <typename Predicate>
+int FindInterval(int size, const Predicate &pred) {
+    int first = 0, len = size;
+    while (len > 0) {
+        int half = len >> 1, middle = first + half;
+        // Bisect range based on value of _pred_ at _middle_
+        if (pred(middle)) {
+            first = middle + 1;
+            len -= half + 1;
+        } else
+            len = half;
+    }
+    return Clamp(first - 1, 0, size - 2);
+}
+
 inline float Lerp(float t, float v1, float v2) { return (1 - t) * v1 + t * v2; }
+
+inline bool Quadratic(float a, float b, float c, float *t0, float *t1) {
+    // Find quadratic discriminant
+    double discrim = (double)b * (double)b - 4 * (double)a * (double)c;
+    if (discrim < 0) return false;
+    double rootDiscrim = std::sqrt(discrim);
+
+    // Compute quadratic _t_ values
+    double q;
+    if (b < 0)
+        q = -.5 * (b - rootDiscrim);
+    else
+        q = -.5 * (b + rootDiscrim);
+    *t0 = q / a;
+    *t1 = c / q;
+    if (*t0 > *t1) std::swap(*t0, *t1);
+    return true;
+}
+
 }
