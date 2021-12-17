@@ -43,7 +43,7 @@ std::vector<char> color2Img(std::vector<Spectrum> col) {
 void test() {
 
     Transform Object2WorldModel = Scale( 1.0, 1.0, 1.0 );
-    Object2WorldModel = Translate(Vector3f(0.0, -1.0, 1.0)) * Object2WorldModel;
+    Object2WorldModel = Translate(Vector3f(0.0, -1.0, 3.0)) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
 
     ModelLoader loader;
