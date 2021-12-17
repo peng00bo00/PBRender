@@ -307,8 +307,8 @@ bool Triangle::Intersect(const Ray &ray, float *tHit, SurfaceInteraction *isect,
     //     isect->SetShadingGeometry(ss, ts, dndu, dndv, true);
     // }
 
-    // *tHit = t;
-    // ++nHits;
+    *tHit = t;
+    ++nHits;
     isect->n = Normal3f(Normalize ( Cross ( p1-p0 , p2-p0 ) ) ) ;
     return true;
 }
@@ -457,7 +457,7 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const {
     //         mesh->shadowAlphaMask->Evaluate(isectLocal) == 0)
     //         return false;
     // }
-    // ++nHits;
+    ++nHits;
     return true;
 }
 
