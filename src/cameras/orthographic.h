@@ -46,6 +46,7 @@ class OrthographicCamera : public ProjectiveCamera {
 //                                              const AnimatedTransform &cam2world,
 //                                              Film *film, const Medium *medium);
 
-OrthographicCamera *CreateOrthographicCamera(const Transform &cam2world, const Vector2f &fullResolution);
+OrthographicCamera *CreateOrthographicCamera(const Transform &cam2world, const Vector2f &fullResolution, const float lensradius=0.0f, const float focaldistance=0.0f);
+// OrthographicCamera *CreateOrthographicCamera(const Transform &cam2world, const Vector2f &fullResolution);
 
 }

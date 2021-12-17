@@ -1,4 +1,5 @@
 #include "cameras/orthographic.h"
+#include "sampling.h"
 
 namespace PBRender {
 
@@ -10,26 +11,28 @@ float OrthographicCamera::GenerateRay(const CameraSample &sample,
     Point3f pFilm = Point3f(sample.pFilm.x, sample.pFilm.y, 0);
     Point3f pCamera = RasterToCamera(pFilm);
     *ray = Ray(pCamera, Vector3f(0, 0, 1));
-    // // Modify ray for depth of field
-    // if (lensRadius > 0) {
-    //     // Sample point on lens
-    //     Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
 
-    //     // Compute point on plane of focus
-    //     float ft = focalDistance / ray->d.z;
-    //     Point3f pFocus = (*ray)(ft);
+    // Modify ray for depth of field
+    if (lensRadius > 0) {
+        // Sample point on lens
+        Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
 
-    //     // Update ray for effect of lens
-    //     ray->o = Point3f(pLens.x, pLens.y, 0);
-    //     ray->d = Normalize(pFocus - ray->o);
-    // }
+        // Compute point on plane of focus
+        float ft = focalDistance / ray->d.z;
+        Point3f pFocus = (*ray)(ft);
+
+        // Update ray for effect of lens
+        ray->o = Point3f(pLens.x, pLens.y, 0);
+        ray->d = Normalize(pFocus - ray->o);
+    }
+    
     // ray->time = Lerp(sample.time, shutterOpen, shutterClose);
     // ray->medium = medium;
     *ray = CameraToWorld(*ray);
     return 1;
 }
 
-OrthographicCamera *CreateOrthographicCamera(const Transform &cam2world, const Vector2f &fullResolution) {
+OrthographicCamera *CreateOrthographicCamera(const Transform &cam2world, const Vector2f &fullResolution, const float lensradius, const float focaldistance) {
     float frame = fullResolution.x / fullResolution.y;
     Bounds2f screen;
 
@@ -54,10 +57,11 @@ OrthographicCamera *CreateOrthographicCamera(const Transform &cam2world, const V
         screen.pMax.y *= ScreenScale;
     }
 
-    float lensradius = 0.0f;
-    float focaldistance = 0.0f;
-
     return new OrthographicCamera(cam2world, screen, fullResolution, lensradius, focaldistance);
 }
+
+// OrthographicCamera *CreateOrthographicCamera(const Transform &cam2world, const Vector2f &fullResolution) {
+//     return CreateOrthographicCamera(cam2world, fullResolution, 0.0f, 0.0f);
+// }
 
 }

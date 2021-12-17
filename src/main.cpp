@@ -14,8 +14,17 @@
 
 #include <stb_image_write.h>
 
+#include <random>
+
 
 using namespace PBRender;
+
+constexpr int FLOAT_MIN = 0;
+constexpr int FLOAT_MAX = 1;
+
+std::random_device rd;
+std::default_random_engine eng(rd());
+std::uniform_real_distribution<float> distr(FLOAT_MIN, FLOAT_MAX);
 
 std::vector<char> color2Img(std::vector<Spectrum> col) {
     int N = col.size();
@@ -33,8 +42,8 @@ std::vector<char> color2Img(std::vector<Spectrum> col) {
 
 void test() {
 
-    Transform Object2WorldModel = Scale( 0.5, 0.5, 0.5 );
-    Object2WorldModel = Translate(Vector3f(0.0, -1.0, 0.0)) * Object2WorldModel;
+    Transform Object2WorldModel = Scale( 1.0, 1.0, 1.0 );
+    Object2WorldModel = Translate(Vector3f(0.0, -1.0, 1.0)) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
 
     ModelLoader loader;
@@ -51,11 +60,11 @@ void test() {
     Transform lookat = LookAt ( eye, look, up ) ;
     Transform Camera2World = Inverse(lookat);
 
-    Vector2f fullResolution(500, 300);
+    Vector2f fullResolution(800, 600);
     // cam = CreateOrthographicCamera( Camera2World, fullResolution ) ;
-    cam = CreatePerspectiveCamera( Camera2World, fullResolution );
+    cam = CreatePerspectiveCamera( Camera2World, fullResolution, 90.0f, 0.07f, 1.0f );
 
-    Vector3f Light(1.0, 1.0, 1.0);
+    Vector3f Light(10.0, 10.0,-1.0);
     Light = Normalize(Light);
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
@@ -67,7 +76,8 @@ void test() {
         {
             CameraSample cs;
             cs.pFilm = Point2f(i+0.5f, j+0.5f);
-
+            float random = distr(eng);
+            cs.pLens = Point2f ( random, random );
             Ray r;
             cam->GenerateRay( cs, &r );
 
@@ -76,9 +86,13 @@ void test() {
             Spectrum colObj(0.0f);
             if (agg->Intersect(r, &isect)) {
                 float Li = Dot(Light , isect.n );
-                colObj[0] = 0;
-                colObj[1] = std::abs(Li);
-                colObj[2] = 0;
+                // Li = std::abs(Li);
+                Li = Clamp(Li, 0.01f, 1.0f);
+                Li = sqrt(Li);
+
+                colObj[0] = Li;
+                colObj[1] = Li;
+                colObj[2] = Li;
             }
 
             col[i + j * int(fullResolution.x)] = colObj;
@@ -88,7 +102,9 @@ void test() {
 
     auto buf = color2Img(col);
     std::cout << "Rendering is finished!" << std::endl;
-    stbi_write_png("test.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
+
+    // stbi_write_png("OrthographicCamera.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
+    stbi_write_png("PerspectiveCamera.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
 
     delete cam;
 }

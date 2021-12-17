@@ -39,6 +39,7 @@ class PerspectiveCamera : public ProjectiveCamera {
         float A;
 };
 
-PerspectiveCamera *CreatePerspectiveCamera(const Transform &cam2world, const Vector2f &fullResolution);
+PerspectiveCamera *CreatePerspectiveCamera(const Transform &cam2world, const Vector2f &fullResolution,
+                                           const float fov=90.0f, const float lensradius=0.0f, const float focaldistance=0.0f); 
 
 }

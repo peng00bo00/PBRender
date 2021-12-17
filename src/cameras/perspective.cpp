@@ -1,4 +1,5 @@
 #include "cameras/perspective.h"
+#include "sampling.h"
 
 namespace PBRender {
 
@@ -32,26 +33,29 @@ float PerspectiveCamera::GenerateRay(const CameraSample &sample,
     Point3f pFilm = Point3f(sample.pFilm.x, sample.pFilm.y, 0);
     Point3f pCamera = RasterToCamera(pFilm);
     *ray = Ray(Point3f(0, 0, 0), Normalize(Vector3f(pCamera)));
-    // // Modify ray for depth of field
-    // if (lensRadius > 0) {
-    //     // Sample point on lens
-    //     Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
 
-    //     // Compute point on plane of focus
-    //     float ft = focalDistance / ray->d.z;
-    //     Point3f pFocus = (*ray)(ft);
+    // Modify ray for depth of field
+    if (lensRadius > 0) {
+        // Sample point on lens
+        Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
 
-    //     // Update ray for effect of lens
-    //     ray->o = Point3f(pLens.x, pLens.y, 0);
-    //     ray->d = Normalize(pFocus - ray->o);
-    // }
+        // Compute point on plane of focus
+        float ft = focalDistance / ray->d.z;
+        Point3f pFocus = (*ray)(ft);
+
+        // Update ray for effect of lens
+        ray->o = Point3f(pLens.x, pLens.y, 0);
+        ray->d = Normalize(pFocus - ray->o);
+    }
+
     // ray->time = Lerp(sample.time, shutterOpen, shutterClose);
     // ray->medium = medium;
     *ray = CameraToWorld(*ray);
     return 1;
 }
 
-PerspectiveCamera *CreatePerspectiveCamera(const Transform &cam2world, const Vector2f &fullResolution) {
+PerspectiveCamera *CreatePerspectiveCamera(const Transform &cam2world, const Vector2f &fullResolution,
+                                           const float fov, const float lensradius, const float focaldistance) {
     float frame = fullResolution.x / fullResolution.y;
     Bounds2f screen;
 
@@ -66,11 +70,6 @@ PerspectiveCamera *CreatePerspectiveCamera(const Transform &cam2world, const Vec
         screen.pMin.y = -1.f / frame;
         screen.pMax.y = 1.f / frame;
     }
-
-    float lensradius = 0.0f;
-    float focaldistance = 0.0f;
-
-    float fov = 90.0f;
 
     return new PerspectiveCamera(cam2world, screen, fullResolution, lensradius, focaldistance, fov);
 }
