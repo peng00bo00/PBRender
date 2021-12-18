@@ -15,12 +15,15 @@
 #include <stb_image_write.h>
 
 #include <random>
+#include <omp.h>
 
 
 using namespace PBRender;
 
 constexpr int FLOAT_MIN = 0;
 constexpr int FLOAT_MAX = 1;
+
+int NUM_PROCS =  omp_get_num_procs();
 
 std::random_device rd;
 std::default_random_engine eng(rd());
@@ -69,8 +72,10 @@ void test() {
     Light = Normalize(Light);
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
-    std::cout << "Rendering begins!" << std::endl;
+    std::cout << "Rendering begins! " << "Using " << NUM_PROCS << " cores." << std::endl;
 
+    omp_set_num_threads(NUM_PROCS);
+    #pragma omp parallel for
     for (size_t i = 0; i < int(fullResolution.x); i++)
     {
         for (size_t j = 0; j < int(fullResolution.y); j++)

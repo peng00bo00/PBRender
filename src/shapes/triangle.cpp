@@ -156,67 +156,67 @@ bool Triangle::Intersect(const Ray &ray, float *tHit, SurfaceInteraction *isect,
     float b2 = e2 * invDet;
     float t = tScaled * invDet;
 
-    // // Ensure that computed triangle $t$ is conservatively greater than zero
+    // Ensure that computed triangle $t$ is conservatively greater than zero
 
-    // // Compute $\delta_z$ term for triangle $t$ error bounds
-    // float maxZt = MaxComponent(Abs(Vector3f(p0t.z, p1t.z, p2t.z)));
-    // float deltaZ = gamma(3) * maxZt;
+    // Compute $\delta_z$ term for triangle $t$ error bounds
+    float maxZt = MaxComponent(Abs(Vector3f(p0t.z, p1t.z, p2t.z)));
+    float deltaZ = gamma(3) * maxZt;
 
-    // // Compute $\delta_x$ and $\delta_y$ terms for triangle $t$ error bounds
-    // float maxXt = MaxComponent(Abs(Vector3f(p0t.x, p1t.x, p2t.x)));
-    // float maxYt = MaxComponent(Abs(Vector3f(p0t.y, p1t.y, p2t.y)));
-    // float deltaX = gamma(5) * (maxXt + maxZt);
-    // float deltaY = gamma(5) * (maxYt + maxZt);
+    // Compute $\delta_x$ and $\delta_y$ terms for triangle $t$ error bounds
+    float maxXt = MaxComponent(Abs(Vector3f(p0t.x, p1t.x, p2t.x)));
+    float maxYt = MaxComponent(Abs(Vector3f(p0t.y, p1t.y, p2t.y)));
+    float deltaX = gamma(5) * (maxXt + maxZt);
+    float deltaY = gamma(5) * (maxYt + maxZt);
 
-    // // Compute $\delta_e$ term for triangle $t$ error bounds
-    // float deltaE =
-    //     2 * (gamma(2) * maxXt * maxYt + deltaY * maxXt + deltaX * maxYt);
+    // Compute $\delta_e$ term for triangle $t$ error bounds
+    float deltaE =
+        2 * (gamma(2) * maxXt * maxYt + deltaY * maxXt + deltaX * maxYt);
 
-    // // Compute $\delta_t$ term for triangle $t$ error bounds and check _t_
-    // float maxE = MaxComponent(Abs(Vector3f(e0, e1, e2)));
-    // float deltaT = 3 *
-    //                (gamma(3) * maxE * maxZt + deltaE * maxZt + deltaZ * maxE) *
-    //                std::abs(invDet);
-    // if (t <= deltaT) return false;
+    // Compute $\delta_t$ term for triangle $t$ error bounds and check _t_
+    float maxE = MaxComponent(Abs(Vector3f(e0, e1, e2)));
+    float deltaT = 3 *
+                   (gamma(3) * maxE * maxZt + deltaE * maxZt + deltaZ * maxE) *
+                   std::abs(invDet);
+    if (t <= deltaT) return false;
 
-    // // Compute triangle partial derivatives
-    // Vector3f dpdu, dpdv;
-    // Point2f uv[3];
-    // GetUVs(uv);
+    // Compute triangle partial derivatives
+    Vector3f dpdu, dpdv;
+    Point2f uv[3];
+    GetUVs(uv);
 
-    // // Compute deltas for triangle partial derivatives
-    // Vector2f duv02 = uv[0] - uv[2], duv12 = uv[1] - uv[2];
-    // Vector3f dp02 = p0 - p2, dp12 = p1 - p2;
-    // float determinant = duv02[0] * duv12[1] - duv02[1] * duv12[0];
-    // bool degenerateUV = std::abs(determinant) < 1e-8;
-    // if (!degenerateUV) {
-    //     float invdet = 1 / determinant;
-    //     dpdu = (duv12[1] * dp02 - duv02[1] * dp12) * invdet;
-    //     dpdv = (-duv12[0] * dp02 + duv02[0] * dp12) * invdet;
-    // }
-    // if (degenerateUV || Cross(dpdu, dpdv).LengthSquared() == 0) {
-    //     // Handle zero determinant for triangle partial derivative matrix
-    //     Vector3f ng = Cross(p2 - p0, p1 - p0);
-    //     if (ng.LengthSquared() == 0)
-    //         // The triangle is actually degenerate; the intersection is
-    //         // bogus.
-    //         return false;
+    // Compute deltas for triangle partial derivatives
+    Vector2f duv02 = uv[0] - uv[2], duv12 = uv[1] - uv[2];
+    Vector3f dp02 = p0 - p2, dp12 = p1 - p2;
+    float determinant = duv02[0] * duv12[1] - duv02[1] * duv12[0];
+    bool degenerateUV = std::abs(determinant) < 1e-8;
+    if (!degenerateUV) {
+        float invdet = 1 / determinant;
+        dpdu = (duv12[1] * dp02 - duv02[1] * dp12) * invdet;
+        dpdv = (-duv12[0] * dp02 + duv02[0] * dp12) * invdet;
+    }
+    if (degenerateUV || Cross(dpdu, dpdv).LengthSquared() == 0) {
+        // Handle zero determinant for triangle partial derivative matrix
+        Vector3f ng = Cross(p2 - p0, p1 - p0);
+        if (ng.LengthSquared() == 0)
+            // The triangle is actually degenerate; the intersection is
+            // bogus.
+            return false;
 
-    //     CoordinateSystem(Normalize(ng), &dpdu, &dpdv);
-    // }
+        CoordinateSystem(Normalize(ng), &dpdu, &dpdv);
+    }
 
-    // // Compute error bounds for triangle intersection
-    // float xAbsSum =
-    //     (std::abs(b0 * p0.x) + std::abs(b1 * p1.x) + std::abs(b2 * p2.x));
-    // float yAbsSum =
-    //     (std::abs(b0 * p0.y) + std::abs(b1 * p1.y) + std::abs(b2 * p2.y));
-    // float zAbsSum =
-    //     (std::abs(b0 * p0.z) + std::abs(b1 * p1.z) + std::abs(b2 * p2.z));
-    // Vector3f pError = gamma(7) * Vector3f(xAbsSum, yAbsSum, zAbsSum);
+    // Compute error bounds for triangle intersection
+    float xAbsSum =
+        (std::abs(b0 * p0.x) + std::abs(b1 * p1.x) + std::abs(b2 * p2.x));
+    float yAbsSum =
+        (std::abs(b0 * p0.y) + std::abs(b1 * p1.y) + std::abs(b2 * p2.y));
+    float zAbsSum =
+        (std::abs(b0 * p0.z) + std::abs(b1 * p1.z) + std::abs(b2 * p2.z));
+    Vector3f pError = gamma(7) * Vector3f(xAbsSum, yAbsSum, zAbsSum);
 
-    // // Interpolate $(u,v)$ parametric coordinates and hit point
-    // Point3f pHit = b0 * p0 + b1 * p1 + b2 * p2;
-    // Point2f uvHit = b0 * uv[0] + b1 * uv[1] + b2 * uv[2];
+    // Interpolate $(u,v)$ parametric coordinates and hit point
+    Point3f pHit = b0 * p0 + b1 * p1 + b2 * p2;
+    Point2f uvHit = b0 * uv[0] + b1 * uv[1] + b2 * uv[2];
 
     // // Test intersection against alpha texture, if present
     // if (testAlphaTexture && mesh->alphaMask) {
@@ -396,26 +396,26 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const {
 
     // Ensure that computed triangle $t$ is conservatively greater than zero
 
-    // // Compute $\delta_z$ term for triangle $t$ error bounds
-    // float maxZt = MaxComponent(Abs(Vector3f(p0t.z, p1t.z, p2t.z)));
-    // float deltaZ = gamma(3) * maxZt;
+    // Compute $\delta_z$ term for triangle $t$ error bounds
+    float maxZt = MaxComponent(Abs(Vector3f(p0t.z, p1t.z, p2t.z)));
+    float deltaZ = gamma(3) * maxZt;
 
-    // // Compute $\delta_x$ and $\delta_y$ terms for triangle $t$ error bounds
-    // float maxXt = MaxComponent(Abs(Vector3f(p0t.x, p1t.x, p2t.x)));
-    // float maxYt = MaxComponent(Abs(Vector3f(p0t.y, p1t.y, p2t.y)));
-    // float deltaX = gamma(5) * (maxXt + maxZt);
-    // float deltaY = gamma(5) * (maxYt + maxZt);
+    // Compute $\delta_x$ and $\delta_y$ terms for triangle $t$ error bounds
+    float maxXt = MaxComponent(Abs(Vector3f(p0t.x, p1t.x, p2t.x)));
+    float maxYt = MaxComponent(Abs(Vector3f(p0t.y, p1t.y, p2t.y)));
+    float deltaX = gamma(5) * (maxXt + maxZt);
+    float deltaY = gamma(5) * (maxYt + maxZt);
 
-    // // Compute $\delta_e$ term for triangle $t$ error bounds
-    // float deltaE =
-    //     2 * (gamma(2) * maxXt * maxYt + deltaY * maxXt + deltaX * maxYt);
+    // Compute $\delta_e$ term for triangle $t$ error bounds
+    float deltaE =
+        2 * (gamma(2) * maxXt * maxYt + deltaY * maxXt + deltaX * maxYt);
 
-    // // Compute $\delta_t$ term for triangle $t$ error bounds and check _t_
-    // float maxE = MaxComponent(Abs(Vector3f(e0, e1, e2)));
-    // float deltaT = 3 *
-    //                (gamma(3) * maxE * maxZt + deltaE * maxZt + deltaZ * maxE) *
-    //                std::abs(invDet);
-    // if (t <= deltaT) return false;
+    // Compute $\delta_t$ term for triangle $t$ error bounds and check _t_
+    float maxE = MaxComponent(Abs(Vector3f(e0, e1, e2)));
+    float deltaT = 3 *
+                   (gamma(3) * maxE * maxZt + deltaE * maxZt + deltaZ * maxE) *
+                   std::abs(invDet);
+    if (t <= deltaT) return false;
 
     // // Test shadow ray intersection against alpha texture, if present
     // if (testAlphaTexture && (mesh->alphaMask || mesh->shadowAlphaMask)) {
