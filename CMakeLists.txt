@@ -22,12 +22,14 @@ SET ( CORE_HEADERS
     src/core/camera.h
     src/core/geometry.h
     src/core/interaction.h
+    src/core/lowdiscrepancy.h
     src/core//modelloader.h
     src/core/primitive.h
     src/core/rng.h
     src/core/sampler.h
     src/core/sampling.h
     src/core/shape.h
+    src/core/sobolmatrices.h
     src/core/spectrum.h
     src/core/transform.h
 )
@@ -36,11 +38,13 @@ SET ( CORE_SOURCE
     src/core/camera.cpp
     src/core/geometry.cpp
     src/core/interaction.cpp
+    src/core/lowdiscrepancy.cpp
     src/core//modelloader.cpp
     src/core/primitive.cpp
     src/core/sampler.cpp
     src/core/sampling.cpp
     src/core/shape.cpp
+    src/core/sobolmatrices.cpp
     src/core/spectrum.cpp
     src/core/transform.cpp
 )

@@ -66,9 +66,7 @@ void test() {
     Transform Camera2World = Inverse(lookat);
 
     Vector2f fullResolution(800, 600);
-    // cam = CreateOrthographicCamera( Camera2World, fullResolution ) ;
     cam = CreatePerspectiveCamera( Camera2World, fullResolution, 90.0f);
-    // cam = CreatePerspectiveCamera( Camera2World, fullResolution, 90.0f, 0.07f, 1.0f );
 
     Vector3f Light(10.0, 10.0,-1.0);
     Light = Normalize(Light);

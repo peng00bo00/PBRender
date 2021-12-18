@@ -187,6 +187,48 @@ inline float Log2(float x) {
     return std::log(x) * invLog2;
 }
 
+inline int Log2Int(uint32_t v) {
+    return 31 - __builtin_clz(v);
+}
+
+inline int Log2Int(int32_t v) { return Log2Int((uint32_t)v); }
+
+inline int Log2Int(uint64_t v) {
+    return 63 - __builtin_clzll(v);
+}
+
+inline int Log2Int(int64_t v) { return Log2Int((uint64_t)v); }
+
+template <typename T>
+inline constexpr bool IsPowerOf2(T v) {
+    return v && !(v & (v - 1));
+}
+
+inline int32_t RoundUpPow2(int32_t v) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    return v + 1;
+}
+
+inline int64_t RoundUpPow2(int64_t v) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v |= v >> 32;
+    return v + 1;
+}
+
+inline int CountTrailingZeros(uint32_t v) {
+    return __builtin_ctz(v);
+}
+
 template <typename Predicate>
 int FindInterval(int size, const Predicate &pred) {
     int first = 0, len = size;
