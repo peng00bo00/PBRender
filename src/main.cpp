@@ -8,6 +8,8 @@
 #include "cameras/orthographic.h"
 #include "cameras/perspective.h"
 
+#include "sampler.h"
+
 #include "shapes/sphere.h"
 #include "shapes/triangle.h"
 #include "spectrum.h"

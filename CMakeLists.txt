@@ -24,6 +24,8 @@ SET ( CORE_HEADERS
     src/core/interaction.h
     src/core//modelloader.h
     src/core/primitive.h
+    src/core/rng.h
+    src/core/sampler.h
     src/core/sampling.h
     src/core/shape.h
     src/core/spectrum.h
@@ -36,6 +38,7 @@ SET ( CORE_SOURCE
     src/core/interaction.cpp
     src/core//modelloader.cpp
     src/core/primitive.cpp
+    src/core/sampler.cpp
     src/core/sampling.cpp
     src/core/shape.cpp
     src/core/spectrum.cpp
@@ -44,6 +47,7 @@ SET ( CORE_SOURCE
 
 FILE ( GLOB PBRender_SOURCE
     src/cameras/*
+    src/samplers/*
     src/shapes/*
     src/accelerators/*
 )
