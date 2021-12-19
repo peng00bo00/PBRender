@@ -44,7 +44,7 @@ void test() {
 
     // initialize worldScene
     Transform Object2WorldModel = Scale( 1.0, 1.0, 1.0 );
-    Object2WorldModel = Translate(Vector3f(0.0, -1.0, 3.0)) * Object2WorldModel;
+    Object2WorldModel = Translate(Vector3f(0.0, 0.0, 1.0)) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
 
     ModelLoader loader;
@@ -58,7 +58,7 @@ void test() {
 
     // initialize camera
     Camera *cam;
-    Point3f eye( 0.0f, 0.0f , -3.0f), look( 0.0, 0.0, 0.0f );
+    Point3f eye( 0.0f, 5.0f , -3.0f), look( 0.0, 0.0, 1.0f );
     Vector3f up(0.0f, 1.0f, 0.0f);
 
     Transform lookat = LookAt ( eye, look, up ) ;
