@@ -21,8 +21,6 @@
 
 #include <stb_image_write.h>
 
-#include <omp.h>
-
 
 using namespace PBRender;
 
