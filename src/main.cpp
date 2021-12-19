@@ -9,6 +9,7 @@
 #include "cameras/perspective.h"
 
 #include "sampler.h"
+#include "samplers/halton.h"
 
 #include "shapes/sphere.h"
 #include "shapes/triangle.h"
@@ -16,20 +17,12 @@
 
 #include <stb_image_write.h>
 
-#include <random>
 #include <omp.h>
 
 
 using namespace PBRender;
 
-constexpr int FLOAT_MIN = 0;
-constexpr int FLOAT_MAX = 1;
-
 int NUM_PROCS =  omp_get_num_procs();
-
-std::random_device rd;
-std::default_random_engine eng(rd());
-std::uniform_real_distribution<float> distr(FLOAT_MIN, FLOAT_MAX);
 
 std::vector<char> color2Img(std::vector<Spectrum> col) {
     int N = col.size();
@@ -71,6 +64,10 @@ void test() {
     Vector3f Light(10.0, 10.0,-1.0);
     Light = Normalize(Light);
 
+    // sampler
+    Bounds2i imageBound(Point2i(0, 0), Point2i(fullResolution.x, fullResolution.y));
+    std::shared_ptr<HaltonSampler> hns= std::make_shared<HaltonSampler>(128 , imageBound , false ) ;
+
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
     std::cout << "Rendering begins! " << "Using " << NUM_PROCS << " cores." << std::endl;
 
@@ -80,28 +77,35 @@ void test() {
     {
         for (size_t j = 0; j < int(fullResolution.y); j++)
         {
-            CameraSample cs;
-            cs.pFilm = Point2f(i+0.5f, j+0.5f);
-            float random = distr(eng);
-            cs.pLens = Point2f ( random, random );
-            Ray r;
-            cam->GenerateRay( cs, &r );
+            int offset = (i + (int)fullResolution.x * j);
+            std::unique_ptr<Sampler> pixel_sampler = hns->Clone(offset);
 
-            SurfaceInteraction isect;
-
+            Point2i pixel(i, j);
+            pixel_sampler->StartPixel(pixel);
             Spectrum colObj(0.0f);
-            if (agg->Intersect(r, &isect)) {
-                float Li = Dot(Light , isect.n );
-                // Li = std::abs(Li);
-                Li = Clamp(Li, 0.01f, 1.0f);
-                Li = sqrt(Li);
 
-                colObj[0] = Li;
-                colObj[1] = Li;
-                colObj[2] = Li;
-            }
+            do {
+                CameraSample cs;
+                cs = pixel_sampler->GetCameraSample(pixel);
 
-            col[i + j * int(fullResolution.x)] = colObj;
+                Ray r;
+                cam->GenerateRay ( cs ,& r ) ;
+                float tHit;
+                SurfaceInteraction isect;
+
+                if (agg->Intersect(r, &isect)) {
+                    float Li = Dot(Light, isect.n);
+                    Li = Clamp(Li, 0.0, 1.0);
+                    Li = sqrt(Li);
+
+                    colObj[0] += Li;
+                    colObj[1] += Li;
+                    colObj[2] += Li;
+                }
+            } while (pixel_sampler->StartNextSample());
+
+            colObj /= (float)pixel_sampler->samplesPerPixel;
+            col[offset] = colObj;
         }
         
     }
