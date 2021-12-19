@@ -66,7 +66,7 @@ void test() {
 
     // sampler
     Bounds2i imageBound(Point2i(0, 0), Point2i(fullResolution.x, fullResolution.y));
-    std::shared_ptr<HaltonSampler> hns= std::make_shared<HaltonSampler>(128 , imageBound , false ) ;
+    std::shared_ptr<Sampler> hns = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(32, imageBound));
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
     std::cout << "Rendering begins! " << "Using " << NUM_PROCS << " cores." << std::endl;
