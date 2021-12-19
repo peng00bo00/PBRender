@@ -8,6 +8,8 @@
 #include "cameras/orthographic.h"
 #include "cameras/perspective.h"
 
+#include "scene.h"
+
 #include "sampler.h"
 #include "samplers/halton.h"
 
@@ -40,6 +42,7 @@ std::vector<char> color2Img(std::vector<Spectrum> col) {
 
 void test() {
 
+    // initialize worldScene
     Transform Object2WorldModel = Scale( 1.0, 1.0, 1.0 );
     Object2WorldModel = Translate(Vector3f(0.0, -1.0, 3.0)) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
@@ -49,6 +52,9 @@ void test() {
     loader.buildNoTextureModel(Object2WorldModel, prims);
 
     auto agg = CreateBVHAccelerator(prims);
+
+    std::unique_ptr<Scene> worldScene;
+    worldScene = std::make_unique<Scene>(agg);
 
     // initialize camera
     Camera *cam;
@@ -89,11 +95,11 @@ void test() {
                 cs = pixel_sampler->GetCameraSample(pixel);
 
                 Ray r;
-                cam->GenerateRay ( cs ,& r ) ;
+                cam->GenerateRay(cs, &r) ;
                 float tHit;
                 SurfaceInteraction isect;
 
-                if (agg->Intersect(r, &isect)) {
+                if (worldScene->Intersect(r, &isect)) {
                     float Li = Dot(Light, isect.n);
                     Li = Clamp(Li, 0.0, 1.0);
                     Li = sqrt(Li);
@@ -113,8 +119,7 @@ void test() {
     auto buf = color2Img(col);
     std::cout << "Rendering is finished!" << std::endl;
 
-    // stbi_write_png("OrthographicCamera.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
-    stbi_write_png("PerspectiveCamera.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
+    stbi_write_png("test.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
 
     delete cam;
 }

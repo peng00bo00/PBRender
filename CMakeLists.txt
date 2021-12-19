@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED ( VERSION 3.1.0 )
 
 PROJECT ( PBRender )
 
-SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ASSIMP
@@ -28,6 +28,7 @@ SET ( CORE_HEADERS
     src/core/rng.h
     src/core/sampler.h
     src/core/sampling.h
+    src/core/scene.h
     src/core/shape.h
     src/core/sobolmatrices.h
     src/core/spectrum.h
@@ -43,6 +44,7 @@ SET ( CORE_SOURCE
     src/core/primitive.cpp
     src/core/sampler.cpp
     src/core/sampling.cpp
+    src/core/scene.cpp
     src/core/shape.cpp
     src/core/sobolmatrices.cpp
     src/core/spectrum.cpp
