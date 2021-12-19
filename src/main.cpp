@@ -8,6 +8,8 @@
 #include "cameras/orthographic.h"
 #include "cameras/perspective.h"
 
+#include "integrator.h"
+
 #include "scene.h"
 
 #include "sampler.h"
@@ -24,7 +26,6 @@
 
 using namespace PBRender;
 
-int NUM_PROCS =  omp_get_num_procs();
 
 std::vector<char> color2Img(std::vector<Spectrum> col) {
     int N = col.size();
@@ -57,7 +58,6 @@ void test() {
     worldScene = std::make_unique<Scene>(agg);
 
     // initialize camera
-    Camera *cam;
     Point3f eye( 0.0f, 5.0f , -3.0f), look( 0.0, 0.0, 1.0f );
     Vector3f up(0.0f, 1.0f, 0.0f);
 
@@ -65,63 +65,23 @@ void test() {
     Transform Camera2World = Inverse(lookat);
 
     Vector2f fullResolution(800, 600);
-    cam = CreatePerspectiveCamera( Camera2World, fullResolution, 90.0f);
-
-    Vector3f Light(10.0, 10.0,-1.0);
-    Light = Normalize(Light);
+    std::shared_ptr<Camera> camera;
+    camera = std::shared_ptr<PerspectiveCamera>(CreatePerspectiveCamera(Camera2World, fullResolution, 90.0f));
 
     // sampler
     Bounds2i imageBound(Point2i(0, 0), Point2i(fullResolution.x, fullResolution.y));
-    std::shared_ptr<Sampler> hns = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(32, imageBound));
+    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(32, imageBound));
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
-    std::cout << "Rendering begins! " << "Using " << NUM_PROCS << " cores." << std::endl;
 
-    omp_set_num_threads(NUM_PROCS);
-    #pragma omp parallel for
-    for (size_t i = 0; i < int(fullResolution.x); i++)
-    {
-        for (size_t j = 0; j < int(fullResolution.y); j++)
-        {
-            int offset = (i + (int)fullResolution.x * j);
-            std::unique_ptr<Sampler> pixel_sampler = hns->Clone(offset);
-
-            Point2i pixel(i, j);
-            pixel_sampler->StartPixel(pixel);
-            Spectrum colObj(0.0f);
-
-            do {
-                CameraSample cs;
-                cs = pixel_sampler->GetCameraSample(pixel);
-
-                Ray r;
-                cam->GenerateRay(cs, &r) ;
-                float tHit;
-                SurfaceInteraction isect;
-
-                if (worldScene->Intersect(r, &isect)) {
-                    float Li = Dot(Light, isect.n);
-                    Li = Clamp(Li, 0.0, 1.0);
-                    Li = sqrt(Li);
-
-                    colObj[0] += Li;
-                    colObj[1] += Li;
-                    colObj[2] += Li;
-                }
-            } while (pixel_sampler->StartNextSample());
-
-            colObj /= (float)pixel_sampler->samplesPerPixel;
-            col[offset] = colObj;
-        }
-        
-    }
+    // integrator
+    std::shared_ptr<Integrator> integrator;
+    integrator = std::make_shared<SamplerIntegrator>(camera, sampler, imageBound);
+    integrator->Test(*worldScene, fullResolution, col);
 
     auto buf = color2Img(col);
-    std::cout << "Rendering is finished!" << std::endl;
 
     stbi_write_png("test.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
-
-    delete cam;
 }
 
 int main(int argc, char *argv[]) {

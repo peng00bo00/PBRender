@@ -77,8 +77,19 @@ class Camera;
 struct CameraSample;
 class ProjectiveCamera;
 
-class Film;
-class FilmTile;
+// class Film;
+// class FilmTile;
+
+// Sampler
+class Sampler;
+class RNG;
+
+// Scene
+class Scene;
+
+// Integrator
+class Integrator;
+class SamplerIntegrator;
 
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {

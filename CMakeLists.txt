@@ -21,6 +21,7 @@ INCLUDE_DIRECTORIES ( src/core )
 SET ( CORE_HEADERS
     src/core/camera.h
     src/core/geometry.h
+    src/core/integrator.h
     src/core/interaction.h
     src/core/lowdiscrepancy.h
     src/core//modelloader.h
@@ -38,6 +39,7 @@ SET ( CORE_HEADERS
 SET ( CORE_SOURCE 
     src/core/camera.cpp
     src/core/geometry.cpp
+    src/core/integrator.cpp
     src/core/interaction.cpp
     src/core/lowdiscrepancy.cpp
     src/core//modelloader.cpp
