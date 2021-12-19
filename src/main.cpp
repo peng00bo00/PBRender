@@ -52,10 +52,30 @@ void test() {
     loader.loadModel("./teapot.obj", Object2WorldModel);
     loader.buildNoTextureModel(Object2WorldModel, prims);
 
-    auto agg = CreateBVHAccelerator(prims);
+    // floor
+    int nTrianglesFloor = 2;
+    int vertexIndicesFloor[6] = { 0 ,1 ,2 ,3 ,4 ,5 };
+    int nVerticesFloor = 6;
+    const float yPos_Floor = -2.0;
+
+    Point3f P_Floor [6] = {
+        Point3f(-16.0, yPos_Floor, 16.0), Point3f(16.0, yPos_Floor, 16.0), Point3f(-16.0, yPos_Floor, -16.0),
+        Point3f( 16.0, yPos_Floor, 16.0), Point3f(16.0, yPos_Floor,-16.0), Point3f(-16.0, yPos_Floor, -16.0)
+    };
+
+    Transform tri_Object2World2, tri_World2Object2;
+    std::shared_ptr<TriangleMesh> meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
+                                                                             nVerticesFloor, P_Floor, nullptr, nullptr, nullptr, nullptr);
+    std::vector<std::shared_ptr<Shape>> trisFloor;
+
+    for(int i = 0 ; i < nTrianglesFloor; ++i)
+        trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
+    
+    for(int i = 0 ; i < nTrianglesFloor; ++i)
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i]));
 
     std::unique_ptr<Scene> worldScene;
-    worldScene = std::make_unique<Scene>(agg);
+    worldScene = std::make_unique<Scene>(CreateBVHAccelerator(prims));
 
     // initialize camera
     Point3f eye( 0.0f, 5.0f , -3.0f), look( 0.0, 0.0, 1.0f );

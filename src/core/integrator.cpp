@@ -9,8 +9,6 @@
 #include "camera.h"
 // #include "stats.h"
 
-#include <omp.h>
-
 namespace PBRender {
 
 static long long nCameraRays = 0;
@@ -23,14 +21,8 @@ void SamplerIntegrator::Render(const Scene &scene) {}
 
 // current rendering pipeline, to be changed later...
 void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution, std::vector<Spectrum> &col) {
-    Vector3f Light(10.0, 10.0,-1.0);
-    Light = Normalize(Light);
+    Point3f Light(1.0, 10.0,-10.0);
 
-    int NUM_PROCS =  omp_get_num_procs();
-    std::cout << "Rendering begins! " << "Using " << NUM_PROCS << " cores." << std::endl;
-
-    omp_set_num_threads(NUM_PROCS);
-    #pragma omp parallel for
     for (size_t i = 0; i < int(fullResolution.x); i++)
     {
         for (size_t j = 0; j < int(fullResolution.y); j++)
@@ -52,8 +44,19 @@ void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution,
                 SurfaceInteraction isect;
 
                 if (scene.Intersect(r, &isect)) {
-                    float Li = Dot(Light, isect.n);
-                    Li = Clamp(Li, 0.0, 1.0);
+                    Vector3f LightNorm = Light - isect.p;
+                    LightNorm = Normalize(LightNorm);
+
+                    Vector3f viewInv = -r.d;
+                    Vector3f H = Normalize(viewInv + LightNorm);
+
+                    float Ls = Dot(H, isect.n ) ; Ls = ( Ls > 0.0f ) ? Ls : 0.0f;
+                    Ls = pow(Ls, 32);
+
+                    float Ld = Dot(LightNorm, isect.n);
+                    Ld = (Ld > 0.0f) ? Ld : 0.0f;
+
+                    float Li = (0.2 + 0.2 * Ld + 0.6 * Ls );
                     Li = sqrt(Li);
 
                     colObj[0] += Li;
