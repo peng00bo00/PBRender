@@ -1,4 +1,7 @@
 #include "shapes/triangle.h"
+#include "texture.h"
+#include "textures/constant.h"
+#include "sampling.h"
 
 namespace PBRender {
 
@@ -64,14 +67,6 @@ Bounds3f Triangle::WorldBound() const {
     const Point3f &p1 = mesh->p[v[1]];
     const Point3f &p2 = mesh->p[v[2]];
     return Union(Bounds3f(p0, p1), p2);
-}
-
-float Triangle::Area() const {
-    // Get triangle vertices in _p0_, _p1_, and _p2_
-    const Point3f &p0 = mesh->p[v[0]];
-    const Point3f &p1 = mesh->p[v[1]];
-    const Point3f &p2 = mesh->p[v[2]];
-    return 0.5 * Cross(p1 - p0, p2 - p0).Length();
 }
 
 bool Triangle::Intersect(const Ray &ray, float *tHit, SurfaceInteraction *isect,
@@ -459,6 +454,80 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const {
     // }
     ++nHits;
     return true;
+}
+
+float Triangle::Area() const {
+    // Get triangle vertices in _p0_, _p1_, and _p2_
+    const Point3f &p0 = mesh->p[v[0]];
+    const Point3f &p1 = mesh->p[v[1]];
+    const Point3f &p2 = mesh->p[v[2]];
+    return 0.5 * Cross(p1 - p0, p2 - p0).Length();
+}
+
+Interaction Triangle::Sample(const Point2f &u, float *pdf) const {
+    Point2f b = UniformSampleTriangle(u);
+    // Get triangle vertices in _p0_, _p1_, and _p2_
+    const Point3f &p0 = mesh->p[v[0]];
+    const Point3f &p1 = mesh->p[v[1]];
+    const Point3f &p2 = mesh->p[v[2]];
+    Interaction it;
+    it.p = b[0] * p0 + b[1] * p1 + (1 - b[0] - b[1]) * p2;
+    // Compute surface normal for sampled point on triangle
+    it.n = Normalize(Normal3f(Cross(p1 - p0, p2 - p0)));
+    // Ensure correct orientation of the geometric normal; follow the same
+    // approach as was used in Triangle::Intersect().
+    if (mesh->n) {
+        Normal3f ns(b[0] * mesh->n[v[0]] + b[1] * mesh->n[v[1]] +
+                    (1 - b[0] - b[1]) * mesh->n[v[2]]);
+        it.n = Faceforward(it.n, ns);
+    } 
+    // else if (reverseOrientation ^ transformSwapsHandedness)
+    //     it.n *= -1;
+
+    // Compute error bounds for sampled point on triangle
+    Point3f pAbsSum =
+        Abs(b[0] * p0) + Abs(b[1] * p1) + Abs((1 - b[0] - b[1]) * p2);
+    // it.pError = gamma(6) * Vector3f(pAbsSum.x, pAbsSum.y, pAbsSum.z);
+    *pdf = 1 / Area();
+    return it;
+}
+
+float Triangle::SolidAngle(const Point3f &p, int nSamples) const {
+    // Project the vertices into the unit sphere around p.
+    std::array<Vector3f, 3> pSphere = {
+        Normalize(mesh->p[v[0]] - p), Normalize(mesh->p[v[1]] - p),
+        Normalize(mesh->p[v[2]] - p)
+    };
+
+    // http://math.stackexchange.com/questions/9819/area-of-a-spherical-triangle
+    // Girard's theorem: surface area of a spherical triangle on a unit
+    // sphere is the 'excess angle' alpha+beta+gamma-pi, where
+    // alpha/beta/gamma are the interior angles at the vertices.
+    //
+    // Given three vertices on the sphere, a, b, c, then we can compute,
+    // for example, the angle c->a->b by
+    //
+    // cos theta =  Dot(Cross(c, a), Cross(b, a)) /
+    //              (Length(Cross(c, a)) * Length(Cross(b, a))).
+    //
+    Vector3f cross01 = (Cross(pSphere[0], pSphere[1]));
+    Vector3f cross12 = (Cross(pSphere[1], pSphere[2]));
+    Vector3f cross20 = (Cross(pSphere[2], pSphere[0]));
+
+    // Some of these vectors may be degenerate. In this case, we don't want
+    // to normalize them so that we don't hit an assert. This is fine,
+    // since the corresponding dot products below will be zero.
+    if (cross01.LengthSquared() > 0) cross01 = Normalize(cross01);
+    if (cross12.LengthSquared() > 0) cross12 = Normalize(cross12);
+    if (cross20.LengthSquared() > 0) cross20 = Normalize(cross20);
+
+    // We only need to do three cross products to evaluate the angles at
+    // all three vertices, though, since we can take advantage of the fact
+    // that Cross(a, b) = -Cross(b, a).
+    return std::abs(
+        std::acos(Clamp(Dot(cross01, -cross12), -1, 1)) +
+        std::acos(Clamp(Dot(cross12, -cross20), -1, 1)) +
+        std::acos(Clamp(Dot(cross20, -cross01), -1, 1)) - Pi);
 }
 
 std::vector<std::shared_ptr<Shape>> CreateTriangleMesh(

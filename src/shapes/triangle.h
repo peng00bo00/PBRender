@@ -38,19 +38,22 @@ class Triangle : public Shape {
             triMeshBytes += sizeof(*this);
             faceIndex = mesh->faceIndices.size() ? mesh->faceIndices[triNumber] : 0;
         }
+
         Bounds3f ObjectBound() const;
         Bounds3f WorldBound() const;
+
         bool Intersect(const Ray &ray, float *tHit, SurfaceInteraction *isect,
                        bool testAlphaTexture = true) const;
         bool IntersectP(const Ray &ray, bool testAlphaTexture = true) const;
+
         float Area() const;
 
-        // using Shape::Sample;  // Bring in the other Sample() overload.
-        // Interaction Sample(const Point2f &u, float *pdf) const;
+        using Shape::Sample;  // Bring in the other Sample() overload.
+        Interaction Sample(const Point2f &u, float *pdf) const;
 
-        // // Returns the solid angle subtended by the triangle w.r.t. the given
-        // // reference point p.
-        // float SolidAngle(const Point3f &p, int nSamples = 0) const;
+        // Returns the solid angle subtended by the triangle w.r.t. the given
+        // reference point p.
+        float SolidAngle(const Point3f &p, int nSamples = 0) const;
 
     private:
         // Triangle Private Methods

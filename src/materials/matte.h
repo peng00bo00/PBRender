@@ -26,5 +26,4 @@ class MatteMaterial : public Material {
 };
 
 // MatteMaterial *CreateMatteMaterial(const TextureParams &mp);
-
 }

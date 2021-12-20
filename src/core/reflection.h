@@ -92,15 +92,19 @@ class BxDF {
         BxDF(BxDFType type) : type(type) {}
 
         bool MatchesFlags(BxDFType t) const { return (type & t) == type; }
+
         virtual Spectrum f(const Vector3f &wo, const Vector3f &wi) const = 0;
         virtual Spectrum Sample_f(const Vector3f &wo, Vector3f *wi,
                                  const Point2f &sample, float *pdf,
                                  BxDFType *sampledType = nullptr) const;
+        
         virtual Spectrum rho(const Vector3f &wo, int nSamples,
                              const Point2f *samples) const;
         virtual Spectrum rho(int nSamples, const Point2f *samples1,
                              const Point2f *samples2) const;
+        
         virtual float Pdf(const Vector3f &wo, const Vector3f &wi) const;
+        
         virtual std::string ToString() const = 0;
 
     public:
@@ -118,9 +122,12 @@ class LambertianReflection : public BxDF {
         // LambertianReflection Public Methods
         LambertianReflection(const Spectrum &R)
             : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R) {}
+        
         Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+
         Spectrum rho(const Vector3f &, int, const Point2f *) const { return R; }
         Spectrum rho(int, const Point2f *, const Point2f *) const { return R; }
+
         std::string ToString() const;
 
     private:
