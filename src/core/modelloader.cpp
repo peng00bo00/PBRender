@@ -3,14 +3,12 @@
 namespace PBRender {
 
 void ModelLoader::processNode(aiNode *node, const aiScene *scene, const Transform &ObjectToWorld) {
-    for (size_t i = 0; i < node->mNumMeshes; ++i)
-    {
+    for (size_t i = 0; i < node->mNumMeshes; ++i) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
         meshes.push_back(processMesh(mesh, scene, ObjectToWorld));
     }
 
-    for (size_t i = 0; i < node->mNumChildren; ++i)
-    {
+    for (size_t i = 0; i < node->mNumChildren; ++i) {
         processNode(node->mChildren[i], scene, ObjectToWorld);
     }
 }
@@ -90,7 +88,10 @@ std::shared_ptr<TriangleMesh> ModelLoader::processMesh(aiMesh *mesh, const aiSce
     return tm;
 }
 
-void ModelLoader::buildNoTextureModel(Transform &Object2World, std::vector<std::shared_ptr<Primitive>> &prims) {
+void ModelLoader::buildNoTextureModel(
+        Transform &Object2World, 
+        std::vector<std::shared_ptr<Primitive>> &prims,
+        std::shared_ptr<Material> material) {
     std::vector<std::shared_ptr<Shape>> trisObj;
     Transform World2Object = Inverse(Object2World);
     int shapeID = 0;
@@ -108,7 +109,7 @@ void ModelLoader::buildNoTextureModel(Transform &Object2World, std::vector<std::
     std::cout << "Find " << shapeID << " triangles." << std::endl;
 
     for (size_t i = 0; i<trisObj.size() ; ++i) {
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisObj[i]));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisObj[i], material));
     }
 }
 

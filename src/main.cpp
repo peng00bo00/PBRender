@@ -2,7 +2,7 @@
 
 #include "geometry.h"
 #include "transform.h"
-// #include "modelloader.h"
+#include "modelloader.h"
 
 #include "accelerators/bvh.h"
 #include "cameras/orthographic.h"
@@ -67,9 +67,9 @@ void test() {
     Object2WorldModel = Translate(Vector3f(0.0, 0.0, 1.0)) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
 
-    // ModelLoader loader;
-    // loader.loadModel("./teapot.obj", Object2WorldModel);
-    // loader.buildNoTextureModel(Object2WorldModel, prims);
+    ModelLoader loader;
+    loader.loadModel("./teapot.obj", Object2WorldModel);
+    loader.buildNoTextureModel(Object2WorldModel, prims, modelMaterial);
 
     // floor
     int nTrianglesFloor = 2;

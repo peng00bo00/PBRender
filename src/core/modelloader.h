@@ -18,7 +18,9 @@ class ModelLoader {
         void processNode(aiNode *node, const aiScene *scene, const Transform &ObjectToWorld);
         std::shared_ptr<TriangleMesh> processMesh(aiMesh *mesh, const aiScene *scene, const Transform &ObjectToWorld);
 
-        void buildNoTextureModel(Transform &Object2World, std::vector<std::shared_ptr<Primitive>> &prims);
+        void buildNoTextureModel(Transform &Object2World, 
+                                 std::vector<std::shared_ptr<Primitive>> &prims,
+                                 std::shared_ptr<Material> material);
 
     public:
         std::vector<std::shared_ptr<TriangleMesh>> meshes;
