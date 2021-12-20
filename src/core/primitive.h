@@ -2,6 +2,7 @@
 
 #include "PBRender.h"
 #include "shape.h"
+#include "material.h"
 #include "transform.h"
 
 namespace PBRender {
@@ -12,7 +13,11 @@ class Primitive {
         virtual Bounds3f WorldBound() const = 0;
         virtual bool Intersect(const Ray &r, SurfaceInteraction *) const = 0;
         virtual bool IntersectP(const Ray &r) const = 0;
-        virtual void ComputeScatteringFunctions() const = 0;
+        virtual void ComputeScatteringFunctions(
+            SurfaceInteraction *isect,
+            TransportMode mode,
+            bool allowMultipleLobes
+        ) const = 0;
 
 };
 
@@ -21,16 +26,24 @@ class GeometricPrimitive : public Primitive {
         virtual Bounds3f WorldBound() const;
         virtual bool Intersect(const Ray &r, SurfaceInteraction *isect) const;
         virtual bool IntersectP(const Ray &r) const;
-        GeometricPrimitive(const std::shared_ptr<Shape> &shape);
-        void ComputeScatteringFunctions() const;
+        GeometricPrimitive(const std::shared_ptr<Shape> &shape,
+                           const std::shared_ptr<Material> &material);
+        const Material *GetMaterial() const;
+        void ComputeScatteringFunctions(SurfaceInteraction *isect,
+                                        TransportMode mode,
+                                        bool allowMultipleLobes) const;
 
     private:
         std::shared_ptr<Shape> shape;
+        std::shared_ptr<Material> material;
 };
 
 class Aggregate : public Primitive {
     public:
-        void ComputeScatteringFunctions() const;
+        const Material *GetMaterial() const;
+        void ComputeScatteringFunctions(SurfaceInteraction *isect,
+                                        TransportMode mode,
+                                        bool allowMultipleLobes) const;
 };
 
 }

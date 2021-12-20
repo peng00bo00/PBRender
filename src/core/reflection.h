@@ -182,7 +182,12 @@ class BSDF {
 
     private:
         // BSDF Private Methods
-        ~BSDF() {}
+        ~BSDF() {
+            for (size_t i = 0; i < nBxDFs; ++i)
+            {
+                bxdfs[i]->~BxDF();
+            }
+        }
 
     private:
         // BSDF Private Data

@@ -1,4 +1,5 @@
 #include "primitive.h"
+#include "interaction.h"
 
 namespace PBRender {
 
@@ -6,8 +7,27 @@ static long long primitiveMemory = 0;
 
 Primitive::~Primitive() {}
 
-GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape)
-    : shape(shape) {
+const Material *Aggregate::GetMaterial() const {
+    std::cerr <<
+        "Aggregate::GetMaterial() method"
+        "called; should have gone to GeometricPrimitive"
+        << std::endl;
+    return nullptr;
+}
+
+void Aggregate::ComputeScatteringFunctions(SurfaceInteraction *isect,
+                                           TransportMode mode,
+                                           bool allowMultipleLobes) const {
+    std::cerr <<
+        "Aggregate::ComputeScatteringFunctions() method"
+        "called; should have gone to GeometricPrimitive"
+        << std::endl;
+}
+
+GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape,
+                                       const std::shared_ptr<Material> &material    )
+    : shape(shape),
+      material(material) {
     primitiveMemory += sizeof(*this);
 }
 
@@ -34,12 +54,16 @@ bool GeometricPrimitive::Intersect(const Ray &r,
     return true;
 }
 
-void GeometricPrimitive::ComputeScatteringFunctions() const {
-
-}
-
-void Aggregate::ComputeScatteringFunctions() const {
-
+void GeometricPrimitive::ComputeScatteringFunctions(
+    SurfaceInteraction *isect,
+    TransportMode mode,
+    bool allowMultipleLobes) const {
+    // ProfilePhase p(Prof::ComputeScatteringFuncs);
+    if (material)
+        material->ComputeScatteringFunctions(isect, mode,
+                                             allowMultipleLobes);
+    // CHECK_GE(Dot(isect->n, isect->shading.n), 0.);
+    assert(Dot(isect->n, isect->shading.n) > 0.);
 }
 
 }

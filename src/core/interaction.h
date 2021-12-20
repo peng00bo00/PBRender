@@ -33,11 +33,17 @@ class SurfaceInteraction : public Interaction {
 						   const Shape *sh,
 						   int faceIndex = 0);
 		
+		~SurfaceInteraction() {
+			// if(bsdf) bsdf->~BSDF();
+		}
+		
 		void SetShadingGeometry(const Vector3f &dpdu, const Vector3f &dpdv,
                                 const Normal3f &dndu, const Normal3f &dndv,
                                 bool orientationIsAuthoritative);
 		
-		void ComputeScatteringFunctions();
+		void ComputeScatteringFunctions(const Ray &ray,
+									    bool allowMultipleLobes = false,
+										TransportMode mode = TransportMode::Radiance);
 	
 	public:
 		Point2f uv;

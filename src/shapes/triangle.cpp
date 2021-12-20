@@ -221,10 +221,10 @@ bool Triangle::Intersect(const Ray &ray, float *tHit, SurfaceInteraction *isect,
     //     if (mesh->alphaMask->Evaluate(isectLocal) == 0) return false;
     // }
 
-    // // Fill in _SurfaceInteraction_ from triangle hit
-    // *isect = SurfaceInteraction(pHit, pError, uvHit, -ray.d, dpdu, dpdv,
-    //                             Normal3f(0, 0, 0), Normal3f(0, 0, 0), ray.time,
-    //                             this, faceIndex);
+    // Fill in _SurfaceInteraction_ from triangle hit
+    *isect = SurfaceInteraction(pHit, pError, uvHit, -ray.d, dpdu, dpdv,
+                                Normal3f(0, 0, 0), Normal3f(0, 0, 0), ray.time,
+                                this, faceIndex);
 
     // Override surface normal in _isect_ for triangle
     isect->n = isect->shading.n = Normal3f(Normalize(Cross(dp02, dp12)));

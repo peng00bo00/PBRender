@@ -39,29 +39,22 @@ void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution,
                 cs = pixel_sampler->GetCameraSample(pixel);
 
                 Ray r;
-                camera->GenerateRay(cs, &r) ;
-                float tHit;
+                camera->GenerateRay(cs, &r);
                 SurfaceInteraction isect;
 
                 if (scene.Intersect(r, &isect)) {
+                    // scattering
+                    isect.ComputeScatteringFunctions(r);
+                    Vector3f wo = isect.wo;
+
                     Vector3f LightNorm = Light - isect.p;
                     LightNorm = Normalize(LightNorm);
 
-                    Vector3f viewInv = -r.d;
-                    Vector3f H = Normalize(viewInv + LightNorm);
+                    Vector3f wi = LightNorm;
+                    Spectrum f = isect.bsdf->f(wo, wi);
+                    float pdf = isect.bsdf->Pdf(wo, wi);
 
-                    float Ls = Dot(H, isect.n ) ; Ls = ( Ls > 0.0f ) ? Ls : 0.0f;
-                    Ls = pow(Ls, 32);
-
-                    float Ld = Dot(LightNorm, isect.n);
-                    Ld = (Ld > 0.0f) ? Ld : 0.0f;
-
-                    float Li = (0.2 + 0.2 * Ld + 0.6 * Ls );
-                    Li = sqrt(Li);
-
-                    colObj[0] += Li;
-                    colObj[1] += Li;
-                    colObj[2] += Li;
+                    colObj += pdf * f * 3.0f;
                 }
             } while (pixel_sampler->StartNextSample());
 

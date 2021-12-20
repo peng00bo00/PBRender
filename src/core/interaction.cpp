@@ -1,4 +1,7 @@
 #include "interaction.h"
+#include "transform.h"
+#include "primitive.h"
+#include "shape.h"
 
 namespace PBRender {
 
@@ -50,6 +53,14 @@ void SurfaceInteraction::SetShadingGeometry(const Vector3f &dpdus,
     shading.dpdv = dpdvs;
     shading.dndu = dndus;
     shading.dndv = dndvs;
+}
+
+void SurfaceInteraction::ComputeScatteringFunctions(const Ray &ray,
+                                                    bool allowMultipleLobes,
+                                                    TransportMode mode) {
+    // ComputeDifferentials(ray);
+    primitive->ComputeScatteringFunctions(this, mode,
+                                          allowMultipleLobes);
 }
 
 }

@@ -2,7 +2,7 @@
 
 #include "geometry.h"
 #include "transform.h"
-#include "modelloader.h"
+// #include "modelloader.h"
 
 #include "accelerators/bvh.h"
 #include "cameras/orthographic.h"
@@ -18,6 +18,12 @@
 #include "shapes/sphere.h"
 #include "shapes/triangle.h"
 #include "spectrum.h"
+
+#include "texture.h"
+#include "textures/constant.h"
+
+#include "material.h"
+#include "materials/matte.h"
 
 #include <stb_image_write.h>
 
@@ -41,14 +47,29 @@ std::vector<char> color2Img(std::vector<Spectrum> col) {
 
 void test() {
 
+    // textures
+    Spectrum floorColor, modelColor;
+    floorColor[0] = 0.2; floorColor[1] = 0.3; floorColor[2] = 0.9;
+    modelColor[0] = 0.8; modelColor[1] = 0.1; modelColor[2] = 0.2;
+
+    std::shared_ptr<Texture<Spectrum>> KdFloor = std::make_shared<ConstantTexture<Spectrum>>(floorColor);
+    std::shared_ptr<Texture<Spectrum>> KdModel = std::make_shared<ConstantTexture<Spectrum>>(modelColor);
+
+    auto sigma   = std::make_shared<ConstantTexture<float>>(0.0f);
+    auto bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
+
+    // materials
+    auto modelMaterial = std::make_shared<MatteMaterial>(KdModel, sigma, bumpMap);
+    auto floorMaterial = std::make_shared<MatteMaterial>(KdFloor, sigma, bumpMap);
+
     // initialize worldScene
     Transform Object2WorldModel = Scale( 1.0, 1.0, 1.0 );
     Object2WorldModel = Translate(Vector3f(0.0, 0.0, 1.0)) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
 
-    ModelLoader loader;
-    loader.loadModel("./teapot.obj", Object2WorldModel);
-    loader.buildNoTextureModel(Object2WorldModel, prims);
+    // ModelLoader loader;
+    // loader.loadModel("./teapot.obj", Object2WorldModel);
+    // loader.buildNoTextureModel(Object2WorldModel, prims);
 
     // floor
     int nTrianglesFloor = 2;
@@ -70,7 +91,7 @@ void test() {
         trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
     
     for(int i = 0 ; i < nTrianglesFloor; ++i)
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i]));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial));
 
     std::unique_ptr<Scene> worldScene;
     worldScene = std::make_unique<Scene>(CreateBVHAccelerator(prims));
