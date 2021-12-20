@@ -88,7 +88,7 @@ void test() {
 
     // sampler
     Bounds2i imageBound(Point2i(0, 0), Point2i(fullResolution.x, fullResolution.y));
-    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(32, imageBound));
+    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(16, imageBound));
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
 

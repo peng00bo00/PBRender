@@ -21,8 +21,10 @@ SET ( CORE_HEADERS
     src/core/integrator.h
     src/core/interaction.h
     src/core/lowdiscrepancy.h
+    src/core/material.h
     src/core//modelloader.h
     src/core/primitive.h
+    src/core/reflection.h
     src/core/rng.h
     src/core/sampler.h
     src/core/sampling.h
@@ -30,6 +32,7 @@ SET ( CORE_HEADERS
     src/core/shape.h
     src/core/sobolmatrices.h
     src/core/spectrum.h
+    src/core/texture.h
     src/core/transform.h
 )
 
@@ -39,7 +42,9 @@ SET ( CORE_SOURCE
     src/core/integrator.cpp
     src/core/interaction.cpp
     src/core/lowdiscrepancy.cpp
+    src/core/material.cpp
     src/core//modelloader.cpp
+    src/core/reflection.cpp
     src/core/primitive.cpp
     src/core/sampler.cpp
     src/core/sampling.cpp
@@ -47,14 +52,17 @@ SET ( CORE_SOURCE
     src/core/shape.cpp
     src/core/sobolmatrices.cpp
     src/core/spectrum.cpp
+    src/core/texture.cpp
     src/core/transform.cpp
 )
 
 FILE ( GLOB PBRender_SOURCE
+    src/accelerators/*
     src/cameras/*
+    src/materials/*
     src/samplers/*
     src/shapes/*
-    src/accelerators/*
+    src/textures/*
 )
 
 ADD_LIBRARY ( PBRender_LIB STATIC

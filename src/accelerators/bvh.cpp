@@ -261,7 +261,10 @@ int BVHAccel::flattenBVHTree(BVHBuildNode *node, int *offset) {
     return myOffset;
 }
 
-BVHAccel::~BVHAccel() { delete nodes; }
+BVHAccel::~BVHAccel() {
+    if (!nodes) return;
+    delete nodes;
+}
 
 bool BVHAccel::Intersect(const Ray &ray, SurfaceInteraction *isect) const {
     if (!nodes) return false;

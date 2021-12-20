@@ -91,6 +91,19 @@ class Scene;
 class Integrator;
 class SamplerIntegrator;
 
+// BxDF
+class BxDF;
+class BRDF;
+class BTDF;
+class BSDF;
+
+// Material
+class Material;
+
+// Texture
+template <typename T>
+class Texture;
+
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {
     uint32_t ui;

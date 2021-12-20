@@ -3,6 +3,7 @@
 #include "PBRender.h"
 #include "geometry.h"
 #include "transform.h"
+#include "material.h"
 
 namespace PBRender {
 
@@ -23,13 +24,38 @@ struct Interaction {
 };
 
 class SurfaceInteraction : public Interaction {
-	public:
+    public:
 		SurfaceInteraction() {}
+		SurfaceInteraction(const Point3f &p, const Vector3f &pError,
+						   const Point2f &uv, const Vector3f &wo,
+						   const Vector3f &dpdu, const Vector3f &dpdv,
+						   const Normal3f &dndu, const Normal3f &dndv, float time,
+						   const Shape *sh,
+						   int faceIndex = 0);
+		
+		void SetShadingGeometry(const Vector3f &dpdu, const Vector3f &dpdv,
+                                const Normal3f &dndu, const Normal3f &dndv,
+                                bool orientationIsAuthoritative);
+		
 		void ComputeScatteringFunctions();
 	
 	public:
+		Point2f uv;
+		Vector3f dpdu, dpdv;
+		Normal3f dndu, dndv;
 		const Shape *shape = nullptr;
+		struct {
+			Normal3f n;
+			Vector3f dpdu, dpdv;
+			Normal3f dndu, dndv;
+		} shading;
 		const Primitive *primitive = nullptr;
+		BSDF *bsdf = nullptr;
+		// BSSRDF *bssrdf = nullptr;
+		mutable Vector3f dpdx, dpdy;
+		mutable float dudx = 0, dvdx = 0, dudy = 0, dvdy = 0;
+
+		int faceIndex = 0;
 };
 
 class MediumInteraction : public Interaction {

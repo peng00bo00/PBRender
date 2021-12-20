@@ -600,14 +600,16 @@ class Normal3 {
 
         template <typename U>
         Normal3<T> operator/(U f) const {
-            CHECK_NE(f, 0);
+            // CHECK_NE(f, 0);
+            assert(f != 0);
             float inv = (float)1 / f;
             return Normal3<T>(x * inv, y * inv, z * inv);
         }
 
         template <typename U>
         Normal3<T> &operator/=(U f) {
-            CHECK_NE(f, 0);
+            // CHECK_NE(f, 0);
+            assert(f != 0);
             float inv = (float)1 / f;
             x *= inv;
             y *= inv;
