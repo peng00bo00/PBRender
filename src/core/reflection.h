@@ -180,7 +180,8 @@ class BSDF {
         // BSDF Public Data
         const float eta;
 
-    private:
+    // private:
+    public:
         // BSDF Private Methods
         ~BSDF() {
             for (size_t i = 0; i < nBxDFs; ++i)

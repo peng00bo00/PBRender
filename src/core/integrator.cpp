@@ -55,6 +55,11 @@ void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution,
                     float pdf = isect.bsdf->Pdf(wo, wi);
 
                     colObj += pdf * f * 3.0f;
+
+                    if(isect.bsdf) {
+                        delete isect.bsdf;
+                        isect.bsdf = nullptr;
+                    }
                 }
             } while (pixel_sampler->StartNextSample());
 
