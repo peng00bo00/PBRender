@@ -97,10 +97,10 @@ void test() {
     worldScene = std::make_unique<Scene>(CreateBVHAccelerator(prims));
 
     // initialize camera
-    Point3f eye( 0.0f, 5.0f , -3.0f), look( 0.0, 0.0, 1.0f );
+    Point3f eye(0.0f, 5.0f,-3.0f), look(0.0, 0.0, 1.0f);
     Vector3f up(0.0f, 1.0f, 0.0f);
 
-    Transform lookat = LookAt ( eye, look, up ) ;
+    Transform lookat = LookAt(eye, look, up);
     Transform Camera2World = Inverse(lookat);
 
     Vector2f fullResolution(800, 600);
