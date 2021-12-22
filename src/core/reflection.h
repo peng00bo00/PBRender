@@ -208,4 +208,68 @@ inline int BSDF::NumComponents(BxDFType flags) const {
     return num;
 }
 
+class Fresnel {
+  public:
+    // Fresnel Interface
+    virtual ~Fresnel();
+    virtual Spectrum Evaluate(float cosI) const = 0;
+    virtual std::string ToString() const = 0;
+};
+
+inline std::ostream &operator<<(std::ostream &os, const Fresnel &f) {
+    os << f.ToString();
+    return os;
+}
+
+class FresnelConductor : public Fresnel {
+    public:
+        // FresnelConductor Public Methods
+        Spectrum Evaluate(float cosThetaI) const;
+        FresnelConductor(const Spectrum &etaI, const Spectrum &etaT,
+                         const Spectrum &k)
+            : etaI(etaI), etaT(etaT), k(k) {}
+        std::string ToString() const;
+
+    private:
+        Spectrum etaI, etaT, k;
+};
+
+class FresnelDielectric : public Fresnel {
+    public:
+        // FresnelDielectric Public Methods
+        Spectrum Evaluate(float cosThetaI) const;
+        FresnelDielectric(float etaI, float etaT) : etaI(etaI), etaT(etaT) {}
+        std::string ToString() const;
+
+    private:
+        float etaI, etaT;
+};
+
+class FresnelNoOp : public Fresnel {
+    public:
+        Spectrum Evaluate(float) const { return Spectrum(1.); }
+        std::string ToString() const { return "[ FresnelNoOp ]"; }
+};
+
+class SpecularReflection : public BxDF {
+    public:
+        // SpecularReflection Public Methods
+        SpecularReflection(const Spectrum &R, Fresnel *fresnel)
+            : BxDF(BxDFType(BSDF_REFLECTION | BSDF_SPECULAR)),
+            R(R),
+            fresnel(fresnel) {}
+        Spectrum f(const Vector3f &wo, const Vector3f &wi) const {
+            return Spectrum(0.f);
+        }
+        Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &sample,
+                        float *pdf, BxDFType *sampledType) const;
+        float Pdf(const Vector3f &wo, const Vector3f &wi) const { return 0; }
+        std::string ToString() const;
+
+    private:
+        // SpecularReflection Private Data
+        const Spectrum R;
+        const Fresnel *fresnel;
+};
+
 }
