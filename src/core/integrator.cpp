@@ -9,6 +9,8 @@
 #include "camera.h"
 // #include "stats.h"
 
+#include "light.h"
+
 namespace PBRender {
 
 static long long nCameraRays = 0;
@@ -21,7 +23,7 @@ void SamplerIntegrator::Render(const Scene &scene) {}
 
 // current rendering pipeline, to be changed later...
 void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution, std::vector<Spectrum> &col) {
-    Point3f Light(1.0, 10.0,-10.0);
+    Point3f LightPosition(10.0, 10.0,-10.0);
 
     for (size_t i = 0; i < int(fullResolution.x); i++)
     {
@@ -43,18 +45,23 @@ void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution,
                 SurfaceInteraction isect;
 
                 if (scene.Intersect(r, &isect)) {
-                    // scattering
-                    isect.ComputeScatteringFunctions(r);
-                    Vector3f wo = isect.wo;
+                    Interaction p1;
+                    p1.p = LightPosition;
+                    VisibilityTester t(isect, p1);
+                    if (t.Unoccluded(scene)) {
+                        // scattering
+                        isect.ComputeScatteringFunctions(r);
+                        Vector3f wo = isect.wo;
 
-                    Vector3f LightNorm = Light - isect.p;
-                    LightNorm = Normalize(LightNorm);
+                        Vector3f LightNorm = LightPosition - isect.p;
+                        LightNorm = Normalize(LightNorm);
 
-                    Vector3f wi = LightNorm;
-                    Spectrum f = isect.bsdf->f(wo, wi);
-                    float pdf = isect.bsdf->Pdf(wo, wi);
+                        Vector3f wi = LightNorm;
+                        Spectrum f = isect.bsdf->f(wo, wi);
+                        float pdf = isect.bsdf->Pdf(wo, wi);
 
-                    colObj += pdf * f * 3.0f;
+                        colObj += pdf * f * 3.0f;
+                    }
 
                     if(isect.bsdf) {
                         delete isect.bsdf;

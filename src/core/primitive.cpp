@@ -7,6 +7,14 @@ static long long primitiveMemory = 0;
 
 Primitive::~Primitive() {}
 
+const AreaLight *Aggregate::GetAreaLight() const {
+    std::cerr <<
+        "Aggregate::GetAreaLight() method"
+        "called; should have gone to GeometricPrimitive"
+        << std::endl;
+    return nullptr;
+}
+
 const Material *Aggregate::GetMaterial() const {
     std::cerr <<
         "Aggregate::GetMaterial() method"
@@ -52,6 +60,14 @@ bool GeometricPrimitive::Intersect(const Ray &r,
     //     isect->mediumInterface = MediumInterface(r.medium);
 
     return true;
+}
+
+const AreaLight *GeometricPrimitive::GetAreaLight() const {
+    return areaLight.get();
+}
+
+const Material *GeometricPrimitive::GetMaterial() const {
+    return material.get();
 }
 
 void GeometricPrimitive::ComputeScatteringFunctions(

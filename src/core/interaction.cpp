@@ -13,7 +13,7 @@ SurfaceInteraction::SurfaceInteraction(
     int faceIndex)
     // : Interaction(p, Normal3f(Normalize(Cross(dpdu, dpdv))), pError, wo, time,
     //               nullptr),
-    : Interaction(p, Normal3f(Normalize(Cross(dpdu, dpdv))), wo, time),
+    : Interaction(p, Normal3f(Normalize(Cross(dpdu, dpdv))), pError, wo, time),
       uv(uv),
       dpdu(dpdu),
       dpdv(dpdv),
