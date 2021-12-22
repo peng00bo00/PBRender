@@ -17,7 +17,7 @@ class Camera {
         virtual ~Camera();
 
         virtual float GenerateRay(const CameraSample &sample, Ray *ray) const = 0;
-        // virtual loat GenerateRayDifferential(const CameraSample &sample, RayDifferential *rd) const;
+        // virtual float GenerateRayDifferential(const CameraSample &sample, RayDifferential *rd) const;
 
         // virtual Spectrum We(const Ray &ray, Point2f *pRaster2 = nullptr) const;
         // virtual void Pdf_We(const Ray &ray, float *pdfPos, float *pdfDir) const;
@@ -93,13 +93,14 @@ class ProjectiveCamera : public Camera {
             
             RasterToScreen = Inverse(ScreenToRaster);
             RasterToCamera = Inverse(CameraToScreen) * RasterToScreen;
-        };
+        }
     
     protected:
         // ProjectiveCamera Protected Data
         Transform CameraToScreen, RasterToCamera;
         Transform ScreenToRaster, RasterToScreen;
         float lensRadius, focalDistance;
+
 };
 
 }
