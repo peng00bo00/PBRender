@@ -104,6 +104,11 @@ class Material;
 template <typename T>
 class Texture;
 
+// Light
+class Light;
+class VisibilityTester;
+class AreaLight;
+
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {
     uint32_t ui;

@@ -20,6 +20,7 @@ SET ( CORE_HEADERS
     src/core/geometry.h
     src/core/integrator.h
     src/core/interaction.h
+    src/core/light.h
     src/core/lowdiscrepancy.h
     src/core/material.h
     src/core//modelloader.h
@@ -41,6 +42,7 @@ SET ( CORE_SOURCE
     src/core/geometry.cpp
     src/core/integrator.cpp
     src/core/interaction.cpp
+    src/core/light.cpp
     src/core/lowdiscrepancy.cpp
     src/core/material.cpp
     src/core//modelloader.cpp
