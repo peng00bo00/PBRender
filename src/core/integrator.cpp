@@ -36,19 +36,9 @@ void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution,
 
                 Ray r;
                 camera->GenerateRay(cs, &r);
-                SurfaceInteraction isect;
-
-                VisibilityTester vist;
-                Vector3f wi;
-                Interaction p1;
-                float pdf_light;
 
                 colObj += Li(r, scene, *pixel_sampler, 0);
                     
-                if(isect.bsdf) {
-                    delete isect.bsdf;
-                    isect.bsdf = nullptr;
-                }
             } while (pixel_sampler->StartNextSample());
 
             colObj /= (float)pixel_sampler->samplesPerPixel;

@@ -67,10 +67,15 @@ void test() {
     // materials
     auto modelMaterial = std::make_shared<MatteMaterial>(KdModel, sigma, bumpMap);
     auto floorMaterial = std::make_shared<MatteMaterial>(KdFloor, sigma, bumpMap);
+    
+    Spectrum mirrorColor(1.f);
+    std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(mirrorColor);
+    std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(KrMirror , bumpMap);
+
 
     // initialize worldScene
     Transform Object2WorldModel = Scale( 1.0, 1.0, 1.0 );
-    Object2WorldModel = Translate(Vector3f(0.0, 0.0, 1.0)) * Object2WorldModel;
+    Object2WorldModel = Translate(Vector3f(0.0, 0.0, 3.0)) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
 
     ModelLoader loader;
@@ -78,10 +83,6 @@ void test() {
     loader.buildNoTextureModel(Object2WorldModel, prims, modelMaterial);
 
     // floor
-    Spectrum mirrorColor(1.f);
-    std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(mirrorColor);
-    std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(KrMirror , bumpMap);
-
     int nTrianglesFloor = 2;
     int vertexIndicesFloor[6] = { 0 ,1 ,2 ,3 ,4 ,5 };
     int nVerticesFloor = 6;
@@ -118,7 +119,7 @@ void test() {
     };
 
     Transform tri_Object2World_AreaLight;
-    tri_Object2World_AreaLight = Translate(Vector3f(1.f, 3.0f, -2.0f)) * tri_Object2World_AreaLight;
+    tri_Object2World_AreaLight = Translate(Vector3f(1.0f, 5.0f, -1.0f)) * tri_Object2World_AreaLight;
     Transform tri_World2Object_AreaLight = Inverse(tri_Object2World_AreaLight);
 
     auto meshAreaLight = std::make_shared<TriangleMesh>(tri_Object2World_AreaLight, nTrianglesAreaLight, vertexIndicesAreaLight,
