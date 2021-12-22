@@ -37,7 +37,7 @@ Spectrum WhittedIntegrator::Li(const Ray &ray, const Scene &scene,
         return Li(isect.SpawnRay(ray.d), scene, sampler, depth);
     
     // Compute emitted light if ray hit an area light source
-    // L += isect.Le(wo);
+    L += isect.Le(wo);
 
     // Add contribution of each light source
     for (const auto &light : scene.lights) {
