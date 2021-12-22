@@ -2,8 +2,6 @@
 #include "scene.h"
 #include "sampling.h"
 
-#include "spectrum.h"
-
 namespace PBRender {
 
 static long long numLights     = 0;

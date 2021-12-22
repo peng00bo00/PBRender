@@ -3,27 +3,23 @@
 #include "PBRender.h"
 #include "geometry.h"
 #include "primitive.h"
-// #include "light.h"
+#include "light.h"
 
 namespace PBRender {
 
 class Scene {
     public:
         // Scene Public Methods
-        // Scene(std::shared_ptr<Primitive> aggregate,
-        //     const std::vector<std::shared_ptr<Light>> &lights)
-        //     : lights(lights), aggregate(aggregate) {
-        //     // Scene Constructor Implementation
-        //     worldBound = aggregate->WorldBound();
-        //     for (const auto &light : lights) {
-        //         light->Preprocess(*this);
-        //         if (light->flags & (int)LightFlags::Infinite)
-        //             infiniteLights.push_back(light);
-        //     }
-        // }
-        Scene(std::shared_ptr<Primitive> aggregate)
-            : aggregate(aggregate) {
-                worldBound = aggregate->WorldBound();
+        Scene(std::shared_ptr<Primitive> aggregate,
+            const std::vector<std::shared_ptr<Light>> &lights)
+            : lights(lights), aggregate(aggregate) {
+            // Scene Constructor Implementation
+            worldBound = aggregate->WorldBound();
+            for (const auto &light : lights) {
+                light->Preprocess(*this);
+                if (light->flags & (int)LightFlags::Infinite)
+                    infiniteLights.push_back(light);
+            }
         }
 
         const Bounds3f &WorldBound() const { return worldBound; }
@@ -33,12 +29,12 @@ class Scene {
         // bool IntersectTr(Ray ray, Sampler &sampler, SurfaceInteraction *isect,
         //                 Spectrum *transmittance) const;
     
-    // public:
-    //     // Scene Public Data
-    //     std::vector<std::shared_ptr<Light>> lights;
-    //     // Store infinite light sources separately for cases where we only want
-    //     // to loop over them.
-    //     std::vector<std::shared_ptr<Light>> infiniteLights;
+    public:
+        // Scene Public Data
+        std::vector<std::shared_ptr<Light>> lights;
+        // Store infinite light sources separately for cases where we only want
+        // to loop over them.
+        std::vector<std::shared_ptr<Light>> infiniteLights;
     
     private:
         // Scene Private Data

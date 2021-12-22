@@ -25,6 +25,9 @@
 #include "material.h"
 #include "materials/matte.h"
 
+#include "light.h"
+#include "lights/point.h"
+
 #include <stb_image_write.h>
 
 
@@ -37,9 +40,9 @@ std::vector<char> color2Img(std::vector<Spectrum> col) {
 
     for (size_t i = 0; i < N; ++i)
     {
-        buf[3 * i + 0] = 255 * col[i][0];
-        buf[3 * i + 1] = 255 * col[i][1];
-        buf[3 * i + 2] = 255 * col[i][2];
+        buf[3 * i + 0] = 255 * Clamp(col[i][0], 0.0f, 1.0f);
+        buf[3 * i + 1] = 255 * Clamp(col[i][1], 0.0f, 1.0f);
+        buf[3 * i + 2] = 255 * Clamp(col[i][2], 0.0f, 1.0f);
     }
     
     return buf;
@@ -93,8 +96,18 @@ void test() {
     for(int i = 0 ; i < nTrianglesFloor; ++i)
         prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial));
 
+    // light
+    Spectrum LightI(30.0f);
+    Transform LightToWorld;
+    LightToWorld = Translate(Vector3f(3.0f, 5.0f,-3.0f)) * LightToWorld;
+
+    auto pointLight = std::make_shared<PointLight>(LightToWorld, LightI);
+    std::vector<std::shared_ptr<Light>> lights;
+    lights.push_back(pointLight);
+
+    // scene
     std::unique_ptr<Scene> worldScene;
-    worldScene = std::make_unique<Scene>(CreateBVHAccelerator(prims));
+    worldScene = std::make_unique<Scene>(CreateBVHAccelerator(prims), lights);
 
     // initialize camera
     Point3f eye(0.0f, 5.0f,-3.0f), look(0.0, 0.0, 1.0f);

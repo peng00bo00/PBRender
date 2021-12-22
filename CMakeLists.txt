@@ -61,6 +61,7 @@ SET ( CORE_SOURCE
 FILE ( GLOB PBRender_SOURCE
     src/accelerators/*
     src/cameras/*
+    src/lights/*
     src/materials/*
     src/samplers/*
     src/shapes/*
