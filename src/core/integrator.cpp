@@ -16,15 +16,17 @@ static long long nCameraRays = 0;
 // Integrator Method Definitions
 Integrator::~Integrator() {}
 
-void SamplerIntegrator::Render(const Scene &scene) {}
+// void SamplerIntegrator::Render(const Scene &scene) {}
 
 
 // current rendering pipeline, to be changed later...
-void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution, std::vector<Spectrum> &col) {
+void SamplerIntegrator::Render(const Scene &scene, std::vector<Spectrum> &col) {
+    int rasterX = pixelBounds.pMax.x - pixelBounds.pMin.x;
+    int rasterY = pixelBounds.pMax.y - pixelBounds.pMin.y;
 
-    for (size_t i = 0; i < int(fullResolution.x); ++i) {
-        for (size_t j = 0; j < int(fullResolution.y); ++j) {
-            int offset = (i + (int)fullResolution.x * j);
+    for (size_t i = 0; i < rasterX; ++i) {
+        for (size_t j = 0; j < rasterY; ++j) {
+            int offset = (i + rasterX * j);
             std::unique_ptr<Sampler> pixel_sampler = sampler->Clone(offset);
 
             Point2i pixel(i, j);

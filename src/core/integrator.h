@@ -16,8 +16,8 @@ class Integrator {
     public:
         // Integrator Interface
         virtual ~Integrator();
-        virtual void Render(const Scene &scene) = 0;
-        virtual void Test(const Scene &scene, const Vector2f &fullResolution, std::vector<Spectrum> &col) = 0;
+        // virtual void Render(const Scene &scene) = 0;
+        virtual void Render(const Scene &scene, std::vector<Spectrum> &col) = 0;
 };
 
 // SamplerIntegrator Declarations
@@ -30,8 +30,8 @@ class SamplerIntegrator : public Integrator {
 
         virtual void Preprocess(const Scene &scene, Sampler &sampler) {}
 
-        void Render(const Scene &scene);
-        void Test(const Scene &scene, const Vector2f &fullResolution, std::vector<Spectrum> &col);
+        // void Render(const Scene &scene);
+        void Render(const Scene &scene, std::vector<Spectrum> &col);
 
         virtual Spectrum Li(const Ray &ray, const Scene &scene,
                             Sampler &sampler, 

@@ -67,7 +67,7 @@ void test() {
     // materials
     auto modelMaterial = std::make_shared<MatteMaterial>(KdModel, sigma, bumpMap);
     auto floorMaterial = std::make_shared<MatteMaterial>(KdFloor, sigma, bumpMap);
-    
+
     Spectrum mirrorColor(1.f);
     std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(mirrorColor);
     std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(KrMirror , bumpMap);
@@ -171,7 +171,7 @@ void test() {
     // integrator
     std::shared_ptr<WhittedIntegrator> integrator;
     integrator = std::make_shared<WhittedIntegrator>(5, camera, sampler, imageBound);
-    integrator->Test(*worldScene, fullResolution, col);
+    integrator->Render(*worldScene, col);
 
     auto buf = color2Img(col);
 
