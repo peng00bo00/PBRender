@@ -17,6 +17,10 @@ class Sphere : public Shape {
         bool Intersect(const Ray &ray, float *tHit, SurfaceInteraction *isect,
                        bool testAlphaTexture) const;
         bool IntersectP(const Ray &ray, bool testAlphaTexture) const;
+
+        Interaction Sample(const Point2f &u, float *pdf) const;
+        Interaction Sample(const Interaction &ref, const Point2f &u,
+                           float *pdf) const;
         
         float Area() const;
 

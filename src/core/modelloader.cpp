@@ -109,7 +109,7 @@ void ModelLoader::buildNoTextureModel(
     std::cout << "Find " << shapeID << " triangles." << std::endl;
 
     for (size_t i = 0; i<trisObj.size() ; ++i) {
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisObj[i], material));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisObj[i], material, nullptr));
     }
 }
 

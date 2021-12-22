@@ -27,6 +27,7 @@
 
 #include "light.h"
 #include "lights/point.h"
+#include "lights/diffuse.h"
 
 #include <stb_image_write.h>
 
@@ -94,16 +95,50 @@ void test() {
         trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
     
     for(int i = 0 ; i < nTrianglesFloor; ++i)
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
 
     // light
-    Spectrum LightI(30.0f);
-    Transform LightToWorld;
-    LightToWorld = Translate(Vector3f(3.0f, 5.0f,-3.0f)) * LightToWorld;
-
-    auto pointLight = std::make_shared<PointLight>(LightToWorld, LightI);
     std::vector<std::shared_ptr<Light>> lights;
-    lights.push_back(pointLight);
+
+    std::vector<std::shared_ptr<AreaLight>> areaLights;
+    int nTrianglesAreaLight = 2;
+    int vertexIndicesAreaLight[6] = {0, 1, 2, 3, 4, 5};
+    int nVerticesAreaLight = 6;
+    const float yPos_AreaLight = 5.0;
+
+    Point3f P_AreaLight[6] = {
+        Point3f(-1.4, yPos_AreaLight, 1.4), Point3f(-1.4, yPos_AreaLight,-1.4), Point3f(1.4, yPos_AreaLight, 1.4),
+        Point3f( 1.4, yPos_AreaLight, 1.4), Point3f(-1.4, yPos_AreaLight,-1.4), Point3f(1.4, yPos_AreaLight,-1.4)
+    };
+
+    Transform tri_Object2World_AreaLight;
+    tri_Object2World_AreaLight = Translate(Vector3f(1.f, 3.0f, -2.0f)) * tri_Object2World_AreaLight;
+    Transform tri_World2Object_AreaLight = Inverse(tri_Object2World_AreaLight);
+
+    auto meshAreaLight = std::make_shared<TriangleMesh>(tri_Object2World_AreaLight, nTrianglesAreaLight, vertexIndicesAreaLight,
+                                                        nVerticesAreaLight, P_AreaLight, nullptr, nullptr, nullptr, nullptr);
+    
+    std::vector<std::shared_ptr<Shape>> trisAreaLight;
+    for (size_t i = 0; i < nTrianglesAreaLight; ++i) {
+        trisAreaLight.push_back(
+            std::make_shared<Triangle>(&tri_Object2World_AreaLight, &tri_World2Object_AreaLight, false, meshAreaLight, i)
+        );
+    }
+
+    std::shared_ptr<AreaLight> area;
+    for (size_t i = 0; i < nTrianglesAreaLight; i++)
+    {
+        area = std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight,
+                                                  Spectrum(5.0f),
+                                                  5,
+                                                  trisAreaLight[i],
+                                                  false);
+        lights.push_back(area);
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i],
+                                                             floorMaterial,
+                                                             area));
+    }
+    
 
     // scene
     std::unique_ptr<Scene> worldScene;

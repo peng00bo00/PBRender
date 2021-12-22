@@ -1,4 +1,5 @@
 #include "primitive.h"
+#include "light.h"
 #include "interaction.h"
 
 namespace PBRender {
@@ -33,9 +34,11 @@ void Aggregate::ComputeScatteringFunctions(SurfaceInteraction *isect,
 }
 
 GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape,
-                                       const std::shared_ptr<Material> &material    )
+                                       const std::shared_ptr<Material> &material,
+                                       const std::shared_ptr<AreaLight> &areaLight)
     : shape(shape),
-      material(material) {
+      material(material),
+      areaLight(areaLight) {
     primitiveMemory += sizeof(*this);
 }
 

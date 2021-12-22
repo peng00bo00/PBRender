@@ -22,10 +22,8 @@ void SamplerIntegrator::Render(const Scene &scene) {}
 // current rendering pipeline, to be changed later...
 void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution, std::vector<Spectrum> &col) {
 
-    for (size_t i = 0; i < int(fullResolution.x); i++)
-    {
-        for (size_t j = 0; j < int(fullResolution.y); j++)
-        {
+    for (size_t i = 0; i < int(fullResolution.x); ++i) {
+        for (size_t j = 0; j < int(fullResolution.y); ++j) {
             int offset = (i + (int)fullResolution.x * j);
             std::unique_ptr<Sampler> pixel_sampler = sampler->Clone(offset);
 
@@ -34,8 +32,7 @@ void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution,
             Spectrum colObj(0.0f);
 
             do {
-                CameraSample cs;
-                cs = pixel_sampler->GetCameraSample(pixel);
+                CameraSample cs = pixel_sampler->GetCameraSample(pixel);
 
                 Ray r;
                 camera->GenerateRay(cs, &r);
@@ -48,24 +45,26 @@ void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution,
                     float pdf_light;
 
                     // sample light
-                    Spectrum Li = scene.lights[0]->Sample_Li(isect, 
-                                                             pixel_sampler->Get2D(),
-                                                             &wi,
-                                                             &pdf_light,
-                                                             &vist);
+                    for (size_t count = 0; count < scene.lights.size(); ++count) {
+                        Spectrum Li = scene.lights[count]->Sample_Li(isect, 
+                                                                     pixel_sampler->Get2D(),
+                                                                     &wi,
+                                                                     &pdf_light,
+                                                                     &vist);
+                        
 
-                    if (vist.Unoccluded(scene)) {
-                        isect.ComputeScatteringFunctions(r);
-                        Vector3f wo = isect.wo;
+                        if (vist.Unoccluded(scene)) {
+                            isect.ComputeScatteringFunctions(r);
+                            Vector3f wo = isect.wo;
 
-                        Spectrum f = isect.bsdf->f(wo, wi);
+                            Spectrum f = isect.bsdf->f(wo, wi);
 
-                        float pdf_scattering = isect.bsdf->Pdf(wo, wi);
+                            float pdf_scattering = isect.bsdf->Pdf(wo, wi);
 
-                        colObj += Li * pdf_scattering * f * 3.0f / pdf_light;
+                            colObj += Li * pdf_scattering * f * 10.0f / pdf_light / scene.lights.size();
+                        }
                     }
-
-
+                    
                     if(isect.bsdf) {
                         delete isect.bsdf;
                         isect.bsdf = nullptr;
