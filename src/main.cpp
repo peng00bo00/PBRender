@@ -8,10 +8,6 @@
 #include "cameras/orthographic.h"
 #include "cameras/perspective.h"
 
-#include "integrator.h"
-
-#include "scene.h"
-
 #include "sampler.h"
 #include "samplers/halton.h"
 
@@ -24,10 +20,16 @@
 
 #include "material.h"
 #include "materials/matte.h"
+#include "materials/mirror.h"
 
 #include "light.h"
 #include "lights/point.h"
 #include "lights/diffuse.h"
+
+#include "scene.h"
+
+#include "integrator.h"
+#include "integrators/whitted.h"
 
 #include <stb_image_write.h>
 
@@ -76,6 +78,10 @@ void test() {
     loader.buildNoTextureModel(Object2WorldModel, prims, modelMaterial);
 
     // floor
+    Spectrum mirrorColor(1.f);
+    std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(mirrorColor);
+    std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(KrMirror , bumpMap);
+
     int nTrianglesFloor = 2;
     int vertexIndicesFloor[6] = { 0 ,1 ,2 ,3 ,4 ,5 };
     int nVerticesFloor = 6;
@@ -95,7 +101,7 @@ void test() {
         trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
     
     for(int i = 0 ; i < nTrianglesFloor; ++i)
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], mirrorMaterial, nullptr));
 
     // light
     std::vector<std::shared_ptr<Light>> lights;
@@ -129,7 +135,7 @@ void test() {
     for (size_t i = 0; i < nTrianglesAreaLight; i++)
     {
         area = std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight,
-                                                  Spectrum(5.0f),
+                                                  Spectrum(20.0f),
                                                   5,
                                                   trisAreaLight[i],
                                                   false);
@@ -162,8 +168,8 @@ void test() {
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
 
     // integrator
-    std::shared_ptr<Integrator> integrator;
-    integrator = std::make_shared<SamplerIntegrator>(camera, sampler, imageBound);
+    std::shared_ptr<WhittedIntegrator> integrator;
+    integrator = std::make_shared<WhittedIntegrator>(5, camera, sampler, imageBound);
     integrator->Test(*worldScene, fullResolution, col);
 
     auto buf = color2Img(col);

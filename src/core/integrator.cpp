@@ -38,37 +38,16 @@ void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution,
                 camera->GenerateRay(cs, &r);
                 SurfaceInteraction isect;
 
-                if (scene.Intersect(r, &isect)) {
-                    VisibilityTester vist;
-                    Vector3f wi;
-                    Interaction p1;
-                    float pdf_light;
+                VisibilityTester vist;
+                Vector3f wi;
+                Interaction p1;
+                float pdf_light;
 
-                    // sample light
-                    for (size_t count = 0; count < scene.lights.size(); ++count) {
-                        Spectrum Li = scene.lights[count]->Sample_Li(isect, 
-                                                                     pixel_sampler->Get2D(),
-                                                                     &wi,
-                                                                     &pdf_light,
-                                                                     &vist);
-                        
-
-                        if (vist.Unoccluded(scene)) {
-                            isect.ComputeScatteringFunctions(r);
-                            Vector3f wo = isect.wo;
-
-                            Spectrum f = isect.bsdf->f(wo, wi);
-
-                            float pdf_scattering = isect.bsdf->Pdf(wo, wi);
-
-                            colObj += Li * pdf_scattering * f * 10.0f / pdf_light / scene.lights.size();
-                        }
-                    }
+                colObj += Li(r, scene, *pixel_sampler, 0);
                     
-                    if(isect.bsdf) {
-                        delete isect.bsdf;
-                        isect.bsdf = nullptr;
-                    }
+                if(isect.bsdf) {
+                    delete isect.bsdf;
+                    isect.bsdf = nullptr;
                 }
             } while (pixel_sampler->StartNextSample());
 
@@ -81,5 +60,47 @@ void SamplerIntegrator::Test(const Scene &scene, const Vector2f &fullResolution,
     std::cout << "Rendering is finished!" << std::endl;
 
 };
+
+Spectrum SamplerIntegrator::SpecularReflect(
+    const Ray &ray, const SurfaceInteraction &isect,
+    const Scene &scene, Sampler &sampler, 
+    // MemoryArena &arena, 
+    int depth) const {
+    // Compute specular reflection direction _wi_ and BSDF value
+    Vector3f wo = isect.wo, wi;
+    float pdf;
+    BxDFType type = BxDFType(BSDF_REFLECTION | BSDF_SPECULAR);
+    Spectrum f = isect.bsdf->Sample_f(wo, &wi, sampler.Get2D(), &pdf, type);
+
+    // Return contribution of specular reflection
+    const Normal3f &ns = isect.shading.n;
+    if (pdf > 0.f && !f.IsBlack() && AbsDot(wi, ns) != 0.f) {
+        // Compute ray differential _rd_ for specular reflection
+        // RayDifferential rd = isect.SpawnRay(wi);
+        // if (ray.hasDifferentials) {
+        //     rd.hasDifferentials = true;
+        //     rd.rxOrigin = isect.p + isect.dpdx;
+        //     rd.ryOrigin = isect.p + isect.dpdy;
+        //     // Compute differential reflected directions
+        //     Normal3f dndx = isect.shading.dndu * isect.dudx +
+        //                     isect.shading.dndv * isect.dvdx;
+        //     Normal3f dndy = isect.shading.dndu * isect.dudy +
+        //                     isect.shading.dndv * isect.dvdy;
+        //     Vector3f dwodx = -ray.rxDirection - wo,
+        //              dwody = -ray.ryDirection - wo;
+        //     float dDNdx = Dot(dwodx, ns) + Dot(wo, dndx);
+        //     float dDNdy = Dot(dwody, ns) + Dot(wo, dndy);
+        //     rd.rxDirection =
+        //         wi - dwodx + 2.f * Vector3f(Dot(wo, ns) * dndx + dDNdx * ns);
+        //     rd.ryDirection =
+        //         wi - dwody + 2.f * Vector3f(Dot(wo, ns) * dndy + dDNdy * ns);
+        // }
+        // return f * Li(rd, scene, sampler, arena, depth + 1) * AbsDot(wi, ns) /
+        //        pdf;
+        Ray rd = isect.SpawnRay(wi);
+        return f * Li(rd, scene, sampler, depth + 1) * AbsDot(wi, ns) / pdf;
+    } else
+        return Spectrum(0.f);
+}
 
 }

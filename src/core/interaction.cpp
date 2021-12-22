@@ -3,6 +3,9 @@
 #include "primitive.h"
 #include "shape.h"
 
+#include "light.h"
+#include "spectrum.h"
+
 namespace PBRender {
 
 // SurfaceInteraction Method Definitions
@@ -61,6 +64,11 @@ void SurfaceInteraction::ComputeScatteringFunctions(const Ray &ray,
     // ComputeDifferentials(ray);
     primitive->ComputeScatteringFunctions(this, mode,
                                           allowMultipleLobes);
+}
+
+Spectrum SurfaceInteraction::Le(const Vector3f &w) const {
+    const AreaLight *area = primitive->GetAreaLight();
+    return area ? area->L(*this, w) : Spectrum(0.f);
 }
 
 }

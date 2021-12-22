@@ -28,9 +28,22 @@ class SamplerIntegrator : public Integrator {
                           const Bounds2i &pixelBounds)
         : camera(camera), sampler(sampler), pixelBounds(pixelBounds) {}
 
+        virtual void Preprocess(const Scene &scene, Sampler &sampler) {}
+
         void Render(const Scene &scene);
         void Test(const Scene &scene, const Vector2f &fullResolution, std::vector<Spectrum> &col);
-    
+
+        virtual Spectrum Li(const Ray &ray, const Scene &scene,
+                            Sampler &sampler, 
+                            // MemoryArena &arena,
+                            int depth = 0) const = 0;
+
+        Spectrum SpecularReflect(const Ray &ray,
+                                 const SurfaceInteraction &isect,
+                                 const Scene &scene, Sampler &sampler,
+                                 //  MemoryArena &arena, 
+                                 int depth) const;
+
     protected:
         // SamplerIntegrator Protected Data
         std::shared_ptr<const Camera> camera;

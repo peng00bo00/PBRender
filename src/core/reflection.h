@@ -258,6 +258,10 @@ class SpecularReflection : public BxDF {
             : BxDF(BxDFType(BSDF_REFLECTION | BSDF_SPECULAR)),
             R(R),
             fresnel(fresnel) {}
+        ~SpecularReflection() {
+            fresnel->~Fresnel();
+        }
+
         Spectrum f(const Vector3f &wo, const Vector3f &wi) const {
             return Spectrum(0.f);
         }

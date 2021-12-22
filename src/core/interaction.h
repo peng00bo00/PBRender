@@ -88,7 +88,8 @@ class SurfaceInteraction : public Interaction {
 		void ComputeScatteringFunctions(const Ray &ray,
 									    bool allowMultipleLobes = false,
 										TransportMode mode = TransportMode::Radiance);
-	
+		Spectrum Le(const Vector3f &w) const;
+		
 	public:
 		Point2f uv;
 		Vector3f dpdu, dpdv;
