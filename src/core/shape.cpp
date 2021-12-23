@@ -9,7 +9,8 @@ Shape::Shape(const Transform *ObjectToWorld, const Transform *WorldToObject,
              bool reverseOrientation)
     : ObjectToWorld(ObjectToWorld),
       WorldToObject(WorldToObject),
-      reverseOrientation(reverseOrientation) {
+      reverseOrientation(reverseOrientation),
+      transformSwapsHandedness(ObjectToWorld->SwapsHandedness()) {
     ++nShapesCreated;
 }
 

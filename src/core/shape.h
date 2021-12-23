@@ -49,7 +49,7 @@ class Shape {
         // Shape Public Data
         const Transform *ObjectToWorld, *WorldToObject;
         const bool reverseOrientation;
-        // const bool transformSwapsHandedness;
+        const bool transformSwapsHandedness;
 };
 
 }
