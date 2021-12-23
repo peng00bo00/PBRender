@@ -9,6 +9,8 @@
 #include "camera.h"
 // #include "stats.h"
 
+#include "omp.h"
+
 namespace PBRender {
 
 static long long nCameraRays = 0;
@@ -24,6 +26,8 @@ void SamplerIntegrator::Render(const Scene &scene, std::vector<Spectrum> &col) {
     int rasterX = pixelBounds.pMax.x - pixelBounds.pMin.x;
     int rasterY = pixelBounds.pMax.y - pixelBounds.pMin.y;
 
+    omp_set_num_threads(4);
+    #pragma omp parallel for collapse(2)
     for (size_t i = 0; i < rasterX; ++i) {
         for (size_t j = 0; j < rasterY; ++j) {
             int offset = (i + rasterX * j);
