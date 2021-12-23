@@ -283,4 +283,98 @@ std::string SpecularReflection::ToString() const {
            std::string(" fresnel: ") + fresnel->ToString() + std::string(" ]");
 }
 
+Spectrum SpecularTransmission::Sample_f(const Vector3f &wo, Vector3f *wi,
+                                        const Point2f &sample, float *pdf,
+                                        BxDFType *sampledType) const {
+    // Figure out which $\eta$ is incident and which is transmitted
+    bool entering = CosTheta(wo) > 0;
+    float etaI = entering ? etaA : etaB;
+    float etaT = entering ? etaB : etaA;
+
+    // Compute ray direction for specular transmission
+    if (!Refract(wo, Faceforward(Normal3f(0, 0, 1), wo), etaI / etaT, wi))
+        return 0;
+    *pdf = 1;
+    Spectrum ft = T * (Spectrum(1.) - fresnel.Evaluate(CosTheta(*wi)));
+    // Account for non-symmetry with transmission to different medium
+    if (mode == TransportMode::Radiance) ft *= (etaI * etaI) / (etaT * etaT);
+    return ft / AbsCosTheta(*wi);
+}
+
+std::string SpecularTransmission::ToString() const {
+    // return std::string("[ SpecularTransmission: T: ") + T.ToString() +
+    //        StringPrintf(" etaA: %f etaB: %f ", etaA, etaB) +
+    //        std::string(" fresnel: ") + fresnel.ToString() +
+    //        std::string(" mode : ") +
+    //        (mode == TransportMode::Radiance ? std::string("RADIANCE")
+    //                                         : std::string("IMPORTANCE")) +
+    //        std::string(" ]");
+    
+    std::ostringstream ss;
+    ss << "[ SpecularTransmission: T: " << T.ToString();
+    ss << "  etaA: " << etaA << " etaB: " << etaB;
+    ss << " fresenl: " << fresnel.ToString();
+    ss << " mode: " << (mode == TransportMode::Radiance ? std::string("RADIANCE")
+                                            : std::string("IMPORTANCE"));
+    ss << " ]";
+
+    return ss.str();
+}
+
+Spectrum FresnelSpecular::Sample_f(const Vector3f &wo, Vector3f *wi,
+                                   const Point2f &u, float *pdf,
+                                   BxDFType *sampledType) const {
+    float F = FrDielectric(CosTheta(wo), etaA, etaB);
+    if (u[0] < F) {
+        // Compute specular reflection for _FresnelSpecular_
+
+        // Compute perfect specular reflection direction
+        *wi = Vector3f(-wo.x, -wo.y, wo.z);
+        if (sampledType)
+            *sampledType = BxDFType(BSDF_SPECULAR | BSDF_REFLECTION);
+        *pdf = F;
+        return F * R / AbsCosTheta(*wi);
+    } else {
+        // Compute specular transmission for _FresnelSpecular_
+
+        // Figure out which $\eta$ is incident and which is transmitted
+        bool entering = CosTheta(wo) > 0;
+        float etaI = entering ? etaA : etaB;
+        float etaT = entering ? etaB : etaA;
+
+        // Compute ray direction for specular transmission
+        if (!Refract(wo, Faceforward(Normal3f(0, 0, 1), wo), etaI / etaT, wi))
+            return 0;
+        Spectrum ft = T * (1 - F);
+
+        // Account for non-symmetry with transmission to different medium
+        if (mode == TransportMode::Radiance)
+            ft *= (etaI * etaI) / (etaT * etaT);
+        if (sampledType)
+            *sampledType = BxDFType(BSDF_SPECULAR | BSDF_TRANSMISSION);
+        *pdf = 1 - F;
+        return ft / AbsCosTheta(*wi);
+    }
+}
+
+std::string FresnelSpecular::ToString() const {
+    // return std::string("[ FresnelSpecular R: ") + R.ToString() +
+    //        std::string(" T: ") + T.ToString() +
+    //        StringPrintf(" etaA: %f etaB: %f ", etaA, etaB) +
+    //        std::string(" mode : ") +
+    //        (mode == TransportMode::Radiance ? std::string("RADIANCE")
+    //                                         : std::string("IMPORTANCE")) +
+    //        std::string(" ]");
+
+    std::ostringstream ss;
+    ss << "[ FresnelSpecular R: " << R.ToString();
+    ss << " T: " << T.ToString();
+    ss << " etaA: " << etaA << " etaB: " << etaB;
+    ss << " mode: " << (mode == TransportMode::Radiance ? std::string("RADIANCE")
+                                            : std::string("IMPORTANCE"));
+    ss << " ]";
+
+    return ss.str();
+}
+
 }

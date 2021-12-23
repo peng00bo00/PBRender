@@ -21,6 +21,7 @@
 #include "material.h"
 #include "materials/matte.h"
 #include "materials/mirror.h"
+#include "materials/glass.h"
 
 #include "light.h"
 #include "lights/point.h"
@@ -55,7 +56,7 @@ void test() {
 
     // textures
     Spectrum floorColor, modelColor;
-    floorColor[0] = 0.2; floorColor[1] = 0.3; floorColor[2] = 0.9;
+    floorColor[0] = 0.8; floorColor[1] = 0.8; floorColor[2] = 0.8;
     modelColor[0] = 0.8; modelColor[1] = 0.1; modelColor[2] = 0.2;
 
     std::shared_ptr<Texture<Spectrum>> KdFloor = std::make_shared<ConstantTexture<Spectrum>>(floorColor);
@@ -72,6 +73,11 @@ void test() {
     std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(mirrorColor);
     std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(KrMirror , bumpMap);
 
+    auto glassEta = std::make_shared<ConstantTexture<float>>(1.2f);
+    auto glassKr  = std::make_shared<ConstantTexture<Spectrum>>(1.0f);
+    auto glassKt  = std::make_shared<ConstantTexture<Spectrum>>(1.0f);
+
+    auto glassMaterial = std::make_shared<PerfectGlassMaterial>(glassKr, glassKt, glassEta, bumpMap);
 
     // initialize worldScene
     Transform Object2WorldModel = Scale( 1.0, 1.0, 1.0 );
@@ -80,7 +86,7 @@ void test() {
 
     ModelLoader loader;
     loader.loadModel("./teapot.obj", Object2WorldModel);
-    loader.buildNoTextureModel(Object2WorldModel, prims, modelMaterial);
+    loader.buildNoTextureModel(Object2WorldModel, prims, glassMaterial);
 
     // floor
     int nTrianglesFloor = 2;
@@ -102,7 +108,7 @@ void test() {
         trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
     
     for(int i = 0 ; i < nTrianglesFloor; ++i)
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], mirrorMaterial, nullptr));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
 
     // light
     std::vector<std::shared_ptr<Light>> lights;

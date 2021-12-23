@@ -276,4 +276,65 @@ class SpecularReflection : public BxDF {
         const Fresnel *fresnel;
 };
 
+class SpecularTransmission : public BxDF {
+    public:
+        // SpecularTransmission Public Methods
+        SpecularTransmission(const Spectrum &T, float etaA, float etaB,
+                            TransportMode mode)
+            : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_SPECULAR)),
+              T(T),
+              etaA(etaA),
+              etaB(etaB),
+              fresnel(etaA, etaB),
+              mode(mode) {}
+        
+        Spectrum f(const Vector3f &wo, const Vector3f &wi) const {
+            return Spectrum(0.f);
+        }
+
+        Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &sample,
+                          float *pdf, BxDFType *sampledType) const;
+        
+        float Pdf(const Vector3f &wo, const Vector3f &wi) const { return 0; }
+
+        std::string ToString() const;
+
+    private:
+        // SpecularTransmission Private Data
+        const Spectrum T;
+        const float etaA, etaB;
+        const FresnelDielectric fresnel;
+        const TransportMode mode;
+};
+
+class FresnelSpecular : public BxDF {
+    public:
+        // FresnelSpecular Public Methods
+        FresnelSpecular(const Spectrum &R, const Spectrum &T, float etaA,
+                        float etaB, TransportMode mode)
+            : BxDF(BxDFType(BSDF_REFLECTION | BSDF_TRANSMISSION | BSDF_SPECULAR)),
+              R(R),
+              T(T),
+              etaA(etaA),
+              etaB(etaB),
+              mode(mode) {}
+        
+        Spectrum f(const Vector3f &wo, const Vector3f &wi) const {
+            return Spectrum(0.f);
+        }
+
+        Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
+                          float *pdf, BxDFType *sampledType) const;
+        
+        float Pdf(const Vector3f &wo, const Vector3f &wi) const { return 0; }
+        
+        std::string ToString() const;
+
+    private:
+        // FresnelSpecular Private Data
+        const Spectrum R, T;
+        const float etaA, etaB;
+        const TransportMode mode;
+};
+
 }
