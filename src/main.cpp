@@ -26,6 +26,7 @@
 #include "light.h"
 #include "lights/point.h"
 #include "lights/diffuse.h"
+#include "lights/infinite.h"
 
 #include "scene.h"
 
@@ -33,6 +34,7 @@
 #include "integrators/whitted.h"
 
 #include <stb_image_write.h>
+#include <stb_image.h>
 
 
 using namespace PBRender;
@@ -84,35 +86,163 @@ void test() {
     Object2WorldModel = Translate(Vector3f(0.0, 0.0, 3.0)) * Object2WorldModel;
     std::vector<std::shared_ptr<Primitive>> prims;
 
-    ModelLoader loader;
-    loader.loadModel("./teapot.obj", Object2WorldModel);
-    loader.buildNoTextureModel(Object2WorldModel, prims, glassMaterial);
+    // ModelLoader loader;
+    // loader.loadModel("./teapot.obj", Object2WorldModel);
+    // loader.buildNoTextureModel(Object2WorldModel, prims, modelMaterial);
 
     // floor
-    int nTrianglesFloor = 2;
-    int vertexIndicesFloor[6] = { 0 ,1 ,2 ,3 ,4 ,5 };
-    int nVerticesFloor = 6;
-    const float yPos_Floor = -2.0;
+    // int nTrianglesFloor = 2;
+    // int vertexIndicesFloor[6] = { 0 ,1 ,2 ,3 ,4 ,5 };
+    // int nVerticesFloor = 6;
+    // const float yPos_Floor = -2.0;
 
-    Point3f P_Floor [6] = {
-        Point3f(-16.0, yPos_Floor, 16.0), Point3f(16.0, yPos_Floor, 16.0), Point3f(-16.0, yPos_Floor, -16.0),
-        Point3f( 16.0, yPos_Floor, 16.0), Point3f(16.0, yPos_Floor,-16.0), Point3f(-16.0, yPos_Floor, -16.0)
-    };
+    // Point3f P_Floor [6] = {
+    //     Point3f(-16.0, yPos_Floor, 16.0), Point3f(16.0, yPos_Floor, 16.0), Point3f(-16.0, yPos_Floor, -16.0),
+    //     Point3f( 16.0, yPos_Floor, 16.0), Point3f(16.0, yPos_Floor,-16.0), Point3f(-16.0, yPos_Floor, -16.0)
+    // };
+
+    // Transform tri_Object2World2, tri_World2Object2;
+    // std::shared_ptr<TriangleMesh> meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
+    //                                                                          nVerticesFloor, P_Floor, nullptr, nullptr, nullptr, nullptr);
+    // std::vector<std::shared_ptr<Shape>> trisFloor;
+
+    // for(int i = 0 ; i < nTrianglesFloor; ++i)
+    //     trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
+    
+    // for(int i = 0 ; i < nTrianglesFloor; ++i)
+    //     prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
+
+    // Transform InfinityLightToWorld;
+    // Point3f InfinityLightCenter(0.f, 0.f, 0.f);
+    // float InfinityLightRadius = 10.0f;
+
+    // auto inifinityLight = std::make_shared<SkyBoxLight>(InfinityLightToWorld, InfinityLightCenter, InfinityLightRadius, 1);
+    // std::string imageFile("./GrandCanyon_C_YumaPoint/GCanyon_C_YumaPoint_8k.jpg");
+    // inifinityLight->loadImage(const_cast<char*>(imageFile.c_str()));
+    // lights.push_back(inifinityLight);
+
+    // texture
+    Spectrum LeftWall, RightWall, Floor, Ceiling, BackWall;
+    LeftWall[0]  = 0.63; LeftWall[1]  =0.065; LeftWall[2]  = 0.05;
+    RightWall[0] = 0.14; RightWall[1] = 0.45; RightWall[2] = 0.09;
+    BackWall[0]  = 0.725;BackWall[1]  = 0.71; BackWall[2]  = 0.68;
+
+    Floor[0]   = 0.725; Floor[1]   = 0.71; Floor[2]   = 0.68;
+    Ceiling[0] = 0.725; Ceiling[1] = 0.71, Ceiling[2] = 0.68;
+
+    auto LeftWallTexture  = std::make_shared<ConstantTexture<Spectrum>>(LeftWall);
+    auto RightWallTexture = std::make_shared<ConstantTexture<Spectrum>>(RightWall);
+    auto FloorTexture     = std::make_shared<ConstantTexture<Spectrum>>(Floor);
+    auto CeilingTexture   = std::make_shared<ConstantTexture<Spectrum>>(Ceiling);
+    auto BackWallTexture  = std::make_shared<ConstantTexture<Spectrum>>(BackWall);
+
+    // materials
+    // auto sigma   = std::make_shared<ConstantTexture<float>>(0.0f);
+    // auto bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
+    
+    auto LeftWallMaterial = std::make_shared<MatteMaterial>(LeftWallTexture, sigma, bumpMap);
+    auto RightWallMaterial= std::make_shared<MatteMaterial>(RightWallTexture, sigma, bumpMap);
+    auto FloorMaterial    = std::make_shared<MatteMaterial>(FloorTexture, sigma, bumpMap);
+    auto CeilingMaterial  = std::make_shared<MatteMaterial>(CeilingTexture, sigma, bumpMap);
+    auto BackWallMaterial = std::make_shared<MatteMaterial>(BackWallTexture, sigma, bumpMap);
+
+    std::vector<std::shared_ptr<Shape>> trisFloor;
+
+    // CornellBox
+    int nTrianglesFloor = 2;
+    int vertexIndicesFloor[6] = {0, 1, 2, 3, 4, 5};
+    int nVerticesFloor = 6;
+
+    float length_Floor = 5.0f;
+    int offset = 0;
 
     Transform tri_Object2World2, tri_World2Object2;
-    std::shared_ptr<TriangleMesh> meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
-                                                                             nVerticesFloor, P_Floor, nullptr, nullptr, nullptr, nullptr);
-    std::vector<std::shared_ptr<Shape>> trisFloor;
+
+    // Floor
+    // Point3f P_Floor[6] = {
+    //     Point3f(0.f, 0.f, length_Floor), Point3f(length_Floor, 0.f, length_Floor), Point3f(0.f, 0.f, 0.f),
+    //     Point3f(length_Floor, 0.f, length_Floor), Point3f(length_Floor, 0.f, 0.f), Point3f(0.f, 0.f, 0.f)
+    // };
+
+    // std::shared_ptr<TriangleMesh> meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
+    //                                                                          nVerticesFloor, P_Floor, nullptr, nullptr, nullptr, nullptr);
+
+    // for(int i = 0 ; i < nTrianglesFloor; ++i)
+    //     trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
+    
+    // for(int i = 0 ; i < nTrianglesFloor; ++i)
+    //     prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i+offset], FloorMaterial, nullptr));
+    
+    // offset += nTrianglesFloor;
+    
+    // Ceiling
+    // Point3f P_Ceiling[6] = {
+    //     Point3f(0.f, length_Floor, length_Floor), Point3f(0.f, length_Floor, 0.f), Point3f(length_Floor, length_Floor, length_Floor),
+    //     Point3f(length_Floor, length_Floor, length_Floor), Point3f(0.f, length_Floor, 0.f), Point3f(length_Floor, length_Floor, 0.f),
+    // };
+
+    // meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
+    //                                            nVerticesFloor, P_Ceiling, nullptr, nullptr, nullptr, nullptr);
+
+    // for(int i = 0 ; i < nTrianglesFloor; ++i)
+    //     trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
+    
+    // for(int i = 0 ; i < nTrianglesFloor; ++i)
+    //     prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i+offset], CeilingMaterial, nullptr));
+    
+    // offset += nTrianglesFloor;
+    
+    // // BackWall
+    // Point3f P_BackWall[6] = {
+    //     Point3f(0.f, 0.f, 0.f), Point3f(length_Floor, 0.f, 0.f), Point3f(length_Floor, length_Floor, 0.f),
+    //     Point3f(0.f, 0.f, 0.f), Point3f(length_Floor, length_Floor, 0.f), Point3f(0.f, length_Floor, 0.f),
+    // };
+
+    // meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
+    //                                            nVerticesFloor, P_BackWall, nullptr, nullptr, nullptr, nullptr);
+
+    // for(int i = 0 ; i < nTrianglesFloor; ++i)
+    //     trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
+    
+    // for(int i = 0 ; i < nTrianglesFloor; ++i)
+    //     prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i+offset], BackWallMaterial, nullptr));
+    
+    // offset += nTrianglesFloor;
+    
+    // RightWall
+    Point3f P_RightWall[6] = {
+        Point3f(0.f, 0.f, 0.f), Point3f(0.f, length_Floor, length_Floor), Point3f(0.f, 0.f, length_Floor),
+        Point3f(0.f, 0.f, 0.f), Point3f(0.f, length_Floor, 0.f), Point3f(0.f, length_Floor, length_Floor),
+    };
+
+    auto meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
+                                               nVerticesFloor, P_RightWall, nullptr, nullptr, nullptr, nullptr);
+
+    for(int i = 0 ; i < nTrianglesFloor; ++i)
+        trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, true, meshFloor, i));
+    
+    for(int i = 0 ; i < nTrianglesFloor; ++i)
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i+offset], RightWallMaterial, nullptr));
+    
+    offset += nTrianglesFloor;
+    
+    // LeftWall
+    Point3f P_LeftWall[6] = {
+        Point3f(length_Floor, 0.f, 0.f), Point3f(length_Floor, length_Floor,length_Floor), Point3f(length_Floor, 0.f, length_Floor),
+        Point3f(length_Floor, 0.f, 0.f), Point3f(length_Floor, length_Floor, 0.f), Point3f(length_Floor, length_Floor, length_Floor)
+    };
+
+    meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
+                                               nVerticesFloor, P_LeftWall, nullptr, nullptr, nullptr, nullptr);
 
     for(int i = 0 ; i < nTrianglesFloor; ++i)
         trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
     
     for(int i = 0 ; i < nTrianglesFloor; ++i)
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
-
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i+offset], LeftWallMaterial, nullptr));
+    
     // light
     std::vector<std::shared_ptr<Light>> lights;
-
     std::vector<std::shared_ptr<AreaLight>> areaLights;
     int nTrianglesAreaLight = 2;
     int vertexIndicesAreaLight[6] = {0, 1, 2, 3, 4, 5};
@@ -151,14 +281,13 @@ void test() {
                                                              floorMaterial,
                                                              area));
     }
-    
 
     // scene
     std::unique_ptr<Scene> worldScene;
     worldScene = std::make_unique<Scene>(CreateBVHAccelerator(prims), lights);
 
     // initialize camera
-    Point3f eye(0.0f, 5.0f,-3.0f), look(0.0, 0.0, 1.0f);
+    Point3f eye(2.5f, 2.5f, 6.0f), look(2.5, 2.5, 0.0f);
     Vector3f up(0.0f, 1.0f, 0.0f);
 
     Transform lookat = LookAt(eye, look, up);
