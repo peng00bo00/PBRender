@@ -33,6 +33,7 @@
 #include "integrator.h"
 #include "integrators/whitted.h"
 #include "integrators/directlighting.h"
+#include "integrators/path.h"
 
 #include <stb_image_write.h>
 #include <stb_image.h>
@@ -41,7 +42,7 @@
 using namespace PBRender;
 
 
-std::vector<char> color2Img(std::vector<Spectrum> col) {
+std::vector<char> color2Img(std::vector<Spectrum> &col) {
     int N = col.size();
     std::vector<char> buf(N * 3);
 
@@ -60,7 +61,7 @@ void test() {
     // textures
     Spectrum floorColor, modelColor;
     floorColor[0] = 0.8; floorColor[1] = 0.8; floorColor[2] = 0.8;
-    modelColor[0] = 0.1; modelColor[1] = 0.8; modelColor[2] = 0.2;
+    modelColor[0] = 0.8; modelColor[1] = 0.8; modelColor[2] = 0.8;
 
     std::shared_ptr<Texture<Spectrum>> KdFloor = std::make_shared<ConstantTexture<Spectrum>>(floorColor);
     std::shared_ptr<Texture<Spectrum>> KdModel = std::make_shared<ConstantTexture<Spectrum>>(modelColor);
@@ -208,7 +209,7 @@ void test() {
     std::cout << "Finish background!" << std::endl;
 
     // model
-    Transform Object2WorldModel = Scale( 12.0, 12.0, 12.0 );
+    Transform Object2WorldModel = Scale( 15.0, 15.0, 15.0 );
     Object2WorldModel = Translate(Vector3f(length_Floor/2, 0, 2.0)) * Object2WorldModel;
 
     ModelLoader loader;
@@ -276,7 +277,7 @@ void test() {
 
     // sampler
     Bounds2i imageBound(Point2i(0, 0), Point2i(fullResolution.x, fullResolution.y));
-    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(16, imageBound));
+    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(24, imageBound));
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
 
@@ -284,11 +285,16 @@ void test() {
     // std::shared_ptr<WhittedIntegrator> integrator;
     // integrator = std::make_shared<WhittedIntegrator>(128, camera, sampler, imageBound);
     
-    auto integrator = std::make_shared<DirectLightingIntegrator>(LightStrategy::UniformSampleAll,
-                                                                 16,
-                                                                 camera,
-                                                                 sampler,
-                                                                 imageBound);
+    // auto integrator = std::make_shared<DirectLightingIntegrator>(LightStrategy::UniformSampleAll,
+    //                                                              64,
+    //                                                              camera,
+    //                                                              sampler,
+    //                                                              imageBound);
+
+    auto integrator = std::make_shared<PathIntegrator>(64,
+                                                       camera,
+                                                       sampler,
+                                                       imageBound);
 
     std::cout << "Start rendering!" << std::endl;
     integrator->Render(*worldScene, col);
