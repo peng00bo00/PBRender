@@ -32,6 +32,7 @@
 
 #include "integrator.h"
 #include "integrators/whitted.h"
+#include "integrators/directlighting.h"
 
 #include <stb_image_write.h>
 #include <stb_image.h>
@@ -280,8 +281,15 @@ void test() {
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
 
     // integrator
-    std::shared_ptr<WhittedIntegrator> integrator;
-    integrator = std::make_shared<WhittedIntegrator>(128, camera, sampler, imageBound);
+    // std::shared_ptr<WhittedIntegrator> integrator;
+    // integrator = std::make_shared<WhittedIntegrator>(128, camera, sampler, imageBound);
+    
+    auto integrator = std::make_shared<DirectLightingIntegrator>(LightStrategy::UniformSampleAll,
+                                                                 16,
+                                                                 camera,
+                                                                 sampler,
+                                                                 imageBound);
+
     std::cout << "Start rendering!" << std::endl;
     integrator->Render(*worldScene, col);
 

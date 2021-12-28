@@ -110,6 +110,9 @@ class Light;
 class VisibilityTester;
 class AreaLight;
 
+struct Distribution1D;
+class Distribution2D;
+
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {
     uint32_t ui;
