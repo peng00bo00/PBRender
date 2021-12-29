@@ -38,6 +38,8 @@
 #include <stb_image_write.h>
 #include <stb_image.h>
 
+#include "omp.h"
+
 
 using namespace PBRender;
 
@@ -277,7 +279,7 @@ void test() {
 
     // sampler
     Bounds2i imageBound(Point2i(0, 0), Point2i(fullResolution.x, fullResolution.y));
-    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(64, imageBound));
+    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(128, imageBound));
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
 
@@ -297,7 +299,23 @@ void test() {
                                                        imageBound);
 
     std::cout << "Start rendering!" << std::endl;
-    integrator->Render(*worldScene, col);
+    // integrator->Render(*worldScene, col);
+
+    // rendering with openmp for now
+    integrator->Preprocess(*worldScene, *sampler);
+
+    omp_set_num_threads(omp_get_num_procs());
+    #pragma omp parallel for collapse(2) schedule(dynamic)
+    for (size_t i = 0; i < (int)fullResolution.x; ++i) {
+        for (size_t j = 0; j < (int)fullResolution.y; ++j) {
+
+            int offset = (i + fullResolution.x * j);
+            auto colObj = integrator->RenderPixel(*worldScene, i, j);
+
+            col[offset] = colObj;
+        }
+    }
+
 
     auto buf = color2Img(col);
 

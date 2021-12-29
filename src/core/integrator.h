@@ -54,6 +54,9 @@ class SamplerIntegrator : public Integrator {
         // void Render(const Scene &scene);
         void Render(const Scene &scene, std::vector<Spectrum> &col);
 
+        // current setting for openmp
+        Spectrum RenderPixel(const Scene &scene, int i, int j);
+
         virtual Spectrum Li(const Ray &ray, const Scene &scene,
                             Sampler &sampler, 
                             // MemoryArena &arena,

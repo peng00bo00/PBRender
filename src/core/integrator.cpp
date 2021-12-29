@@ -204,7 +204,8 @@ void SamplerIntegrator::Render(const Scene &scene, std::vector<Spectrum> &col) {
     int rasterY = pixelBounds.pMax.y - pixelBounds.pMin.y;
 
     omp_set_num_threads(4);
-    #pragma omp parallel for collapse(2)
+    #pragma omp parallel for
+    {
     for (size_t i = 0; i < rasterX; ++i) {
         for (size_t j = 0; j < rasterY; ++j) {
             int offset = (i + rasterX * j);
@@ -229,10 +230,39 @@ void SamplerIntegrator::Render(const Scene &scene, std::vector<Spectrum> &col) {
         }
         
     }
+    }
+
 
     std::cout << "Rendering is finished!" << std::endl;
 
 };
+
+Spectrum SamplerIntegrator::RenderPixel(const Scene &scene, int i, int j) {
+    Spectrum colObj(0.0f);
+
+    int rasterX = pixelBounds.pMax.x - pixelBounds.pMin.x;
+    int rasterY = pixelBounds.pMax.y - pixelBounds.pMin.y;
+
+    int offset = (i + rasterX * j);
+    std::unique_ptr<Sampler> pixel_sampler = sampler->Clone(offset);
+
+    Point2i pixel(i, j);
+    pixel_sampler->StartPixel(pixel);
+
+    do {
+        CameraSample cs = pixel_sampler->GetCameraSample(pixel);
+
+        Ray r;
+        camera->GenerateRay(cs, &r);
+
+        colObj += Li(r, scene, *pixel_sampler, 0);
+                    
+    } while (pixel_sampler->StartNextSample());
+
+    colObj /= (float)pixel_sampler->samplesPerPixel;
+
+    return colObj;
+}
 
 Spectrum SamplerIntegrator::SpecularReflect(
     const Ray &ray, const SurfaceInteraction &isect,
