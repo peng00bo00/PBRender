@@ -210,7 +210,7 @@ void test() {
 
     // model
     Transform Object2WorldModel = Scale( 15.0, 15.0, 15.0 );
-    Object2WorldModel = Translate(Vector3f(length_Floor/2, 0, 2.0)) * Object2WorldModel;
+    Object2WorldModel = Translate(Vector3f(length_Floor/2+0.2, 0, 2.0)) * Object2WorldModel;
 
     ModelLoader loader;
     loader.loadModel("./bunny.obj", Object2WorldModel);
@@ -277,7 +277,7 @@ void test() {
 
     // sampler
     Bounds2i imageBound(Point2i(0, 0), Point2i(fullResolution.x, fullResolution.y));
-    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(24, imageBound));
+    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(64, imageBound));
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
 
@@ -291,7 +291,7 @@ void test() {
     //                                                              sampler,
     //                                                              imageBound);
 
-    auto integrator = std::make_shared<PathIntegrator>(64,
+    auto integrator = std::make_shared<PathIntegrator>(128,
                                                        camera,
                                                        sampler,
                                                        imageBound);

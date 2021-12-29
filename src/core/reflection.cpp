@@ -160,7 +160,7 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
         std::min((int)std::floor(u[0] * matchingComps), matchingComps - 1);
 
     // Get _BxDF_ pointer for chosen component
-    BxDF *bxdf = nullptr;
+    std::shared_ptr<BxDF> bxdf = nullptr;
     int count = comp;
     for (int i = 0; i < nBxDFs; ++i)
         if (bxdfs[i]->MatchesFlags(type) && count-- == 0) {

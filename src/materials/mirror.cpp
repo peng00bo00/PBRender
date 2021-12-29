@@ -15,12 +15,13 @@ void MirrorMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     if (bumpMap) Bump(bumpMap, si);
 
     // si->bsdf = ARENA_ALLOC(arena, BSDF)(*si);
-    si->bsdf = new BSDF(*si);
+    // si->bsdf = new BSDF(*si);
+    si->bsdf = std::make_shared<BSDF>(*si);
     Spectrum R = Kr->Evaluate(*si).Clamp();
     if (!R.IsBlack())
         // si->bsdf->Add(ARENA_ALLOC(arena, SpecularReflection)(
         //     R, ARENA_ALLOC(arena, FresnelNoOp)()));
-        si->bsdf->Add(new SpecularReflection(R, new FresnelNoOp()));
+        si->bsdf->Add(std::make_shared<SpecularReflection>(SpecularReflection(R, std::make_shared<FresnelNoOp>(FresnelNoOp()))));
 }
 
 }

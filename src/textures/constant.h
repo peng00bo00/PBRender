@@ -22,10 +22,10 @@ class ConstantTexture : public Texture<T> {
 // ConstantTexture<Spectrum> *CreateConstantSpectrumTexture(
 //     const Transform &tex2world, const TextureParams &tp);
 
-ConstantTexture<float> *CreateConstantFloatTexture(const Transform &tex2world,
+std::shared_ptr<ConstantTexture<float>> CreateConstantFloatTexture(const Transform &tex2world,
                                                    const float tp);
 
-ConstantTexture<Spectrum> *CreateConstantSpectrumTexture(
+std::shared_ptr<ConstantTexture<Spectrum>> CreateConstantSpectrumTexture(
     const Transform &tex2world, const Spectrum tp);
 
 }

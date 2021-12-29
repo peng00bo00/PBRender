@@ -85,6 +85,8 @@ std::shared_ptr<TriangleMesh> ModelLoader::processMesh(aiMesh *mesh, const aiSce
     delete[] N;
     delete[] uv;
 
+    delete[] vertexIndices;
+
     return tm;
 }
 

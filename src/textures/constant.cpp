@@ -14,14 +14,14 @@ namespace PBRender {
 //         tp.FindSpectrum("value", Spectrum(1.f)));
 // }
 
-ConstantTexture<float> *CreateConstantFloatTexture(const Transform &tex2world,
+std::shared_ptr<ConstantTexture<float>> CreateConstantFloatTexture(const Transform &tex2world,
                                                    const float tp) {
-    return new ConstantTexture<float>(tp);
+    return std::make_shared<ConstantTexture<float>>(tp);
 }
 
-ConstantTexture<Spectrum> *CreateConstantSpectrumTexture(
+std::shared_ptr<ConstantTexture<Spectrum>> CreateConstantSpectrumTexture(
     const Transform &tex2world, const float &tp) {
-    return new ConstantTexture<Spectrum>(Spectrum(tp));
+    return std::make_shared<ConstantTexture<Spectrum>>(Spectrum(tp));
 }
 
 }

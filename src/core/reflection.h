@@ -146,10 +146,12 @@ class BSDF {
               ss(Normalize(si.shading.dpdu)),
               ts(Cross(ns, ss)) {}
         
-        void Add(BxDF *b) {
+        void Add(std::shared_ptr<BxDF> b) {
             // CHECK_LT(nBxDFs, MaxBxDFs);
             assert(nBxDFs < MaxBxDFs);
-            bxdfs[nBxDFs++] = b;
+            // bxdfs[nBxDFs++] = b;
+            bxdfs.push_back(b);
+            nBxDFs++;
         }
 
         int NumComponents(BxDFType flags = BSDF_ALL) const;
@@ -183,12 +185,7 @@ class BSDF {
     // private:
     public:
         // BSDF Private Methods
-        ~BSDF() {
-            for (size_t i = 0; i < nBxDFs; ++i)
-            {
-                bxdfs[i]->~BxDF();
-            }
-        }
+        ~BSDF() {}
 
     private:
         // BSDF Private Data
@@ -196,7 +193,8 @@ class BSDF {
         const Vector3f ss, ts;
         int nBxDFs = 0;
         static constexpr int MaxBxDFs = 8;
-        BxDF *bxdfs[MaxBxDFs];
+        // BxDF *bxdfs[MaxBxDFs];
+        std::vector<std::shared_ptr<BxDF>> bxdfs;
         friend class MixMaterial;
 };
 
@@ -254,10 +252,11 @@ class FresnelNoOp : public Fresnel {
 class SpecularReflection : public BxDF {
     public:
         // SpecularReflection Public Methods
-        SpecularReflection(const Spectrum &R, Fresnel *fresnel)
+        SpecularReflection(const Spectrum &R, std::shared_ptr<Fresnel> fresnel_ptr)
             : BxDF(BxDFType(BSDF_REFLECTION | BSDF_SPECULAR)),
             R(R),
-            fresnel(fresnel) {}
+            fresnel(fresnel_ptr) {}
+        
         ~SpecularReflection() {
             fresnel->~Fresnel();
         }
@@ -273,7 +272,8 @@ class SpecularReflection : public BxDF {
     private:
         // SpecularReflection Private Data
         const Spectrum R;
-        const Fresnel *fresnel;
+        // const Fresnel *fresnel;
+        std::shared_ptr<Fresnel> fresnel;
 };
 
 class SpecularTransmission : public BxDF {
