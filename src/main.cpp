@@ -116,7 +116,7 @@ void test() {
     // metal
     Spectrum eta;
     // eta[0] = 0.18f; eta[1] = 0.15f; eta[2] = 0.81f;
-    eta[0] = 0.98f; eta[1] = 0.98f; eta[2] = 0.98f;
+    eta[0] = 0.02f; eta[1] = 0.02f; eta[2] = 0.02f;
     auto etaM = std::make_shared<ConstantTexture<Spectrum>>(eta);
 
     Spectrum k;
@@ -124,8 +124,8 @@ void test() {
     auto kM = std::make_shared<ConstantTexture<Spectrum>>(k);
 
     auto roughness  = std::make_shared<ConstantTexture<float>>(0.01f);
-    auto uRoughness = std::make_shared<ConstantTexture<float>>(0.3f);
-    auto vRoughness = std::make_shared<ConstantTexture<float>>(0.3f);
+    auto uRoughness = std::make_shared<ConstantTexture<float>>(0.1f);
+    auto vRoughness = std::make_shared<ConstantTexture<float>>(0.1f);
 
     auto metalMaterial = std::make_shared<MetalMaterial>(etaM , kM,
                             roughness, uRoughness, vRoughness, bumpMap, false);
@@ -261,7 +261,7 @@ void test() {
 
     ModelLoader loader;
     loader.loadModel("./bunny.obj", Object2WorldModel);
-    loader.buildNoTextureModel(Object2WorldModel, prims, plasticMaterial);
+    loader.buildNoTextureModel(Object2WorldModel, prims, metalMaterial);
 
     std::cout << "Finish model loading!" << std::endl;
     
