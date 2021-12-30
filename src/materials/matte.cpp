@@ -41,9 +41,10 @@ void MatteMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     float sig = Clamp(sigma->Evaluate(*si), 0, 90);
     if (!r.IsBlack()) {
         if (sig == 0)
-            si->bsdf->Add(std::make_shared<LambertianReflection>(LambertianReflection(r)));
-        // else
-        //     si->bsdf->Add(ARENA_ALLOC(arena, OrenNayar)(r, sig));
+            si->bsdf->Add(std::make_shared<LambertianReflection>(r));
+        else
+            // si->bsdf->Add(ARENA_ALLOC(arena, OrenNayar)(r, sig));
+            si->bsdf->Add(std::make_shared<OrenNayar>(r, sig));
     }
 }
 

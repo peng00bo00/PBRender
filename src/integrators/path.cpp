@@ -82,7 +82,6 @@ Spectrum PathIntegrator::Li(const Ray &r, const Scene &scene, Sampler &sampler,
             Spectrum Ld = beta * UniformSampleOneLight(isect, scene, 
                                                     //    arena,
                                                        sampler, false, distrib);
-            // std::cout << "Sampled direct lighting Ld = " << Ld << std::endl;
             if (Ld.IsBlack()) ++zeroRadiancePaths;
             // CHECK_GE(Ld.y(), 0.f);
             assert(Ld.y() >= 0.0f);
@@ -95,7 +94,6 @@ Spectrum PathIntegrator::Li(const Ray &r, const Scene &scene, Sampler &sampler,
         BxDFType flags;
         Spectrum f = isect.bsdf->Sample_f(wo, &wi, sampler.Get2D(), &pdf,
                                           BSDF_ALL, &flags);
-        // std::cout << "Sampled BSDF, f = " << f << ", pdf = " << pdf << std::endl;
         if (f.IsBlack() || pdf == 0.f) break;
         beta *= f * AbsDot(wi, isect.shading.n) / pdf;
         // std::cout << "Updated beta = " << beta << std::endl;

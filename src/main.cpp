@@ -22,6 +22,7 @@
 #include "materials/matte.h"
 #include "materials/mirror.h"
 #include "materials/glass.h"
+#include "materials/plastic.h"
 
 #include "light.h"
 #include "lights/point.h"
@@ -84,6 +85,15 @@ void test() {
     auto glassKt  = std::make_shared<ConstantTexture<Spectrum>>(1.0f);
 
     auto glassMaterial = std::make_shared<PerfectGlassMaterial>(glassKr, glassKt, glassEta, bumpMap);
+
+    // plastic
+    Spectrum purple;
+    purple[0] = 0.35; purple[1] = 0.12; purple[2] = 0.48;
+    auto plasticKd = std::make_shared<ConstantTexture<Spectrum>>(purple);
+    auto plasticKr = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(1.0f) - purple);
+    auto plasticRoughness = std::make_shared<ConstantTexture<float>>(0.1f);
+
+    auto plasticMaterial = std::make_shared<PlasticMaterial>(plasticKd, plasticKr, plasticRoughness, bumpMap, true);
 
     // texture
     Spectrum LeftWall, RightWall, Floor, Ceiling, BackWall;
@@ -216,7 +226,7 @@ void test() {
 
     ModelLoader loader;
     loader.loadModel("./bunny.obj", Object2WorldModel);
-    loader.buildNoTextureModel(Object2WorldModel, prims, modelMaterial);
+    loader.buildNoTextureModel(Object2WorldModel, prims, plasticMaterial);
 
     std::cout << "Finish model loading!" << std::endl;
     
@@ -304,7 +314,8 @@ void test() {
     // rendering with openmp for now
     integrator->Preprocess(*worldScene, *sampler);
 
-    omp_set_num_threads(omp_get_num_procs());
+    // omp_set_num_threads(omp_get_num_procs());
+    omp_set_num_threads(8);
     #pragma omp parallel for collapse(2) schedule(dynamic)
     for (size_t i = 0; i < (int)fullResolution.x; ++i) {
         for (size_t j = 0; j < (int)fullResolution.y; ++j) {

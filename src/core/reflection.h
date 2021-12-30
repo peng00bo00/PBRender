@@ -2,7 +2,7 @@
 
 #include "PBRender.h"
 #include "geometry.h"
-// #include "microfacet.h"
+#include "microfacet.h"
 #include "shape.h"
 #include "spectrum.h"
 
@@ -117,6 +117,32 @@ inline std::ostream &operator<<(std::ostream &os, const BxDF &bxdf) {
     return os;
 }
 
+class ScaledBxDF : public BxDF {
+    public:
+        // ScaledBxDF Public Methods
+        ScaledBxDF(BxDF *bxdf, const Spectrum &scale)
+            : BxDF(BxDFType(bxdf->type)), bxdf(bxdf), scale(scale) {}
+        
+        Spectrum rho(const Vector3f &w, int nSamples,
+                     const Point2f *samples) const {
+            return scale * bxdf->rho(w, nSamples, samples);
+        }
+        Spectrum rho(int nSamples, const Point2f *samples1,
+                    const Point2f *samples2) const {
+            return scale * bxdf->rho(nSamples, samples1, samples2);
+        }
+
+        Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+        Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &sample,
+                          float *pdf, BxDFType *sampledType) const;
+        float Pdf(const Vector3f &wo, const Vector3f &wi) const;
+        std::string ToString() const;
+
+    private:
+        BxDF *bxdf;
+        Spectrum scale;
+};
+
 class LambertianReflection : public BxDF {
     public:
         // LambertianReflection Public Methods
@@ -133,6 +159,47 @@ class LambertianReflection : public BxDF {
     private:
         // LambertianReflection Private Data
         const Spectrum R;
+};
+
+class LambertianTransmission : public BxDF {
+    public:
+        LambertianTransmission(const Spectrum &T)
+            : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_DIFFUSE)), T(T) {}
+        
+        Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+
+        Spectrum rho(const Vector3f &, int, const Point2f *) const { return T; }
+        Spectrum rho(int, const Point2f *, const Point2f *) const { return T; }
+
+        Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
+                          float *pdf, BxDFType *sampledType) const;
+        
+        float Pdf(const Vector3f &wo, const Vector3f &wi) const;
+
+        std::string ToString() const;
+    
+    private:
+        Spectrum T;
+};
+
+class OrenNayar : public BxDF {
+    public:
+        OrenNayar(const Spectrum &R, float sigma)
+            : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R) {
+            sigma = Radians(sigma);
+            float sigma2 = sigma * sigma;
+
+            A = 1.f - (sigma2 / (2.f * (sigma2 + 0.33f)));
+            B = 0.45f * sigma2 / (sigma2 + 0.09f);
+        }
+
+        Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+
+        std::string ToString() const;
+    
+    private:
+        const Spectrum R;
+        float A, B;
 };
 
 // BSDF Declarations
@@ -336,5 +403,78 @@ class FresnelSpecular : public BxDF {
         const float etaA, etaB;
         const TransportMode mode;
 };
+
+class MicrofacetReflection : public BxDF {
+  public:
+    // MicrofacetReflection Public Methods
+    MicrofacetReflection(const Spectrum &R,
+                         std::shared_ptr<MicrofacetDistribution> distribution,
+                         std::shared_ptr<Fresnel> fresnel)
+        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_GLOSSY)),
+          R(R),
+          distribution(distribution),
+          fresnel(fresnel) {}
+    Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+    Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
+                      float *pdf, BxDFType *sampledType) const;
+    float Pdf(const Vector3f &wo, const Vector3f &wi) const;
+    std::string ToString() const;
+
+  private:
+    // MicrofacetReflection Private Data
+    const Spectrum R;
+    std::shared_ptr<MicrofacetDistribution> distribution;
+    std::shared_ptr<Fresnel> fresnel;
+};
+
+class MicrofacetTransmission : public BxDF {
+    public:
+        // MicrofacetTransmission Public Methods
+        MicrofacetTransmission(const Spectrum &T,
+                            MicrofacetDistribution *distribution, float etaA,
+                            float etaB, TransportMode mode)
+            : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_GLOSSY)),
+            T(T),
+            distribution(distribution),
+            etaA(etaA),
+            etaB(etaB),
+            fresnel(etaA, etaB),
+            mode(mode) {}
+        Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+        Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
+                        float *pdf, BxDFType *sampledType) const;
+        float Pdf(const Vector3f &wo, const Vector3f &wi) const;
+        std::string ToString() const;
+
+    private:
+        // MicrofacetTransmission Private Data
+        const Spectrum T;
+        const MicrofacetDistribution *distribution;
+        const float etaA, etaB;
+        const FresnelDielectric fresnel;
+        const TransportMode mode;
+};
+
+class FresnelBlend : public BxDF {
+    public:
+        // FresnelBlend Public Methods
+        FresnelBlend(const Spectrum &Rd, const Spectrum &Rs,
+                    MicrofacetDistribution *distrib);
+        Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+        Spectrum SchlickFresnel(float cosTheta) const {
+            auto pow5 = [](float v) { return (v * v) * (v * v) * v; };
+            return Rs + pow5(1 - cosTheta) * (Spectrum(1.) - Rs);
+        }
+        Spectrum Sample_f(const Vector3f &wi, Vector3f *sampled_f, const Point2f &u,
+                        float *pdf, BxDFType *sampledType) const;
+        float Pdf(const Vector3f &wo, const Vector3f &wi) const;
+        std::string ToString() const;
+
+    private:
+        // FresnelBlend Private Data
+        const Spectrum Rd, Rs;
+        MicrofacetDistribution *distribution;
+};
+
 
 }

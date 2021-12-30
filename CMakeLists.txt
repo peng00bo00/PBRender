@@ -28,6 +28,7 @@ SET ( CORE_HEADERS
     src/core/lightdistrib.h
     src/core/lowdiscrepancy.h
     src/core/material.h
+    src/core/microfacet.h
     src/core//modelloader.h
     src/core/primitive.h
     src/core/reflection.h
@@ -51,6 +52,7 @@ SET ( CORE_SOURCE
     src/core/lightdistrib.cpp
     src/core/lowdiscrepancy.cpp
     src/core/material.cpp
+    src/core/microfacet.cpp
     src/core//modelloader.cpp
     src/core/reflection.cpp
     src/core/primitive.cpp
