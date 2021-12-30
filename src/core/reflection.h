@@ -431,7 +431,8 @@ class MicrofacetTransmission : public BxDF {
     public:
         // MicrofacetTransmission Public Methods
         MicrofacetTransmission(const Spectrum &T,
-                            MicrofacetDistribution *distribution, float etaA,
+                            std::shared_ptr<MicrofacetDistribution> distribution, 
+                            float etaA,
                             float etaB, TransportMode mode)
             : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_GLOSSY)),
             T(T),
@@ -449,7 +450,8 @@ class MicrofacetTransmission : public BxDF {
     private:
         // MicrofacetTransmission Private Data
         const Spectrum T;
-        const MicrofacetDistribution *distribution;
+        // const MicrofacetDistribution *distribution;
+        std::shared_ptr<MicrofacetDistribution> distribution;
         const float etaA, etaB;
         const FresnelDielectric fresnel;
         const TransportMode mode;

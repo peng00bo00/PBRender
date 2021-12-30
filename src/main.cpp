@@ -81,15 +81,32 @@ void test() {
     std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(mirrorColor);
     std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(KrMirror , bumpMap);
 
-    auto glassEta = std::make_shared<ConstantTexture<float>>(1.2f);
-    auto glassKr  = std::make_shared<ConstantTexture<Spectrum>>(1.0f);
-    auto glassKt  = std::make_shared<ConstantTexture<Spectrum>>(1.0f);
+    // auto glassEta = std::make_shared<ConstantTexture<float>>(1.2f);
+    // auto glassKr  = std::make_shared<ConstantTexture<Spectrum>>(1.0f);
+    // auto glassKt  = std::make_shared<ConstantTexture<Spectrum>>(1.0f);
 
-    auto glassMaterial = std::make_shared<PerfectGlassMaterial>(glassKr, glassKt, glassEta, bumpMap);
+    // auto glassMaterial = std::make_shared<PerfectGlassMaterial>(glassKr, glassKt, glassEta, bumpMap);
+
+    // glass
+    Spectrum c1;
+    c1[0] = 0.98f; c1[1] = 0.98f; c1[2] = 0.98f;
+    auto Kr = std::make_shared<ConstantTexture<Spectrum>>(c1);
+
+    Spectrum c2;
+    c2[0] = 0.98f; c2[1] = 0.98f; c2[2] = 0.98f;
+    auto Kt = std::make_shared<ConstantTexture<Spectrum>>(c2);
+
+    auto index = std::make_shared<ConstantTexture<float>>(1.5f);
+
+    auto RoughnessU = std::make_shared<ConstantTexture<float>>(0.5f);
+    auto RoughnessV = std::make_shared<ConstantTexture<float>>(0.5f);
+
+    auto glassMaterial = std::make_shared<GlassMaterial>(Kr, Kt, RoughnessU, RoughnessV, index, bumpMap, false);
 
     // plastic
     Spectrum purple;
-    purple[0] = 0.35; purple[1] = 0.12; purple[2] = 0.48;
+    // purple[0] = 0.35; purple[1] = 0.12; purple[2] = 0.48;
+    purple[0] = 0.98; purple[1] = 0.98; purple[2] = 0.98;
     auto plasticKd = std::make_shared<ConstantTexture<Spectrum>>(purple);
     auto plasticKr = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(1.0f) - purple);
     auto plasticRoughness = std::make_shared<ConstantTexture<float>>(0.1f);
@@ -98,7 +115,8 @@ void test() {
 
     // metal
     Spectrum eta;
-    eta[0] = 0.18f; eta[1] = 0.15f; eta[2] = 0.81f;
+    // eta[0] = 0.18f; eta[1] = 0.15f; eta[2] = 0.81f;
+    eta[0] = 0.98f; eta[1] = 0.98f; eta[2] = 0.98f;
     auto etaM = std::make_shared<ConstantTexture<Spectrum>>(eta);
 
     Spectrum k;
@@ -106,8 +124,8 @@ void test() {
     auto kM = std::make_shared<ConstantTexture<Spectrum>>(k);
 
     auto roughness  = std::make_shared<ConstantTexture<float>>(0.01f);
-    auto uRoughness = std::make_shared<ConstantTexture<float>>(0.0f);
-    auto vRoughness = std::make_shared<ConstantTexture<float>>(0.0f);
+    auto uRoughness = std::make_shared<ConstantTexture<float>>(0.3f);
+    auto vRoughness = std::make_shared<ConstantTexture<float>>(0.3f);
 
     auto metalMaterial = std::make_shared<MetalMaterial>(etaM , kM,
                             roughness, uRoughness, vRoughness, bumpMap, false);
@@ -243,7 +261,7 @@ void test() {
 
     ModelLoader loader;
     loader.loadModel("./bunny.obj", Object2WorldModel);
-    loader.buildNoTextureModel(Object2WorldModel, prims, metalMaterial);
+    loader.buildNoTextureModel(Object2WorldModel, prims, plasticMaterial);
 
     std::cout << "Finish model loading!" << std::endl;
     
@@ -331,8 +349,8 @@ void test() {
     // rendering with openmp for now
     integrator->Preprocess(*worldScene, *sampler);
 
-    // omp_set_num_threads(omp_get_num_procs());
-    omp_set_num_threads(8);
+    omp_set_num_threads(omp_get_num_procs());
+    // omp_set_num_threads(8);
     #pragma omp parallel for collapse(2) schedule(dynamic)
     for (size_t i = 0; i < (int)fullResolution.x; ++i) {
         for (size_t j = 0; j < (int)fullResolution.y; ++j) {
