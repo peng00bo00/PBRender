@@ -23,6 +23,7 @@
 #include "materials/mirror.h"
 #include "materials/glass.h"
 #include "materials/plastic.h"
+#include "materials/metal.h"
 
 #include "light.h"
 #include "lights/point.h"
@@ -94,6 +95,22 @@ void test() {
     auto plasticRoughness = std::make_shared<ConstantTexture<float>>(0.1f);
 
     auto plasticMaterial = std::make_shared<PlasticMaterial>(plasticKd, plasticKr, plasticRoughness, bumpMap, true);
+
+    // metal
+    Spectrum eta;
+    eta[0] = 0.18f; eta[1] = 0.15f; eta[2] = 0.81f;
+    auto etaM = std::make_shared<ConstantTexture<Spectrum>>(eta);
+
+    Spectrum k;
+    k[0] = 0.11f; k[1] = 0.11f; k[2] = 0.11f;
+    auto kM = std::make_shared<ConstantTexture<Spectrum>>(k);
+
+    auto roughness  = std::make_shared<ConstantTexture<float>>(0.01f);
+    auto uRoughness = std::make_shared<ConstantTexture<float>>(0.0f);
+    auto vRoughness = std::make_shared<ConstantTexture<float>>(0.0f);
+
+    auto metalMaterial = std::make_shared<MetalMaterial>(etaM , kM,
+                            roughness, uRoughness, vRoughness, bumpMap, false);
 
     // texture
     Spectrum LeftWall, RightWall, Floor, Ceiling, BackWall;
@@ -226,7 +243,7 @@ void test() {
 
     ModelLoader loader;
     loader.loadModel("./bunny.obj", Object2WorldModel);
-    loader.buildNoTextureModel(Object2WorldModel, prims, plasticMaterial);
+    loader.buildNoTextureModel(Object2WorldModel, prims, metalMaterial);
 
     std::cout << "Finish model loading!" << std::endl;
     

@@ -9,10 +9,10 @@ namespace PBRender {
 
 template <typename T>
 class Texture {
-  public:
-    // Texture Interface
-    virtual T Evaluate(const SurfaceInteraction &) const = 0;
-    virtual ~Texture() {}
+    public:
+		// Texture Interface
+		virtual T Evaluate(const SurfaceInteraction &) const = 0;
+		virtual ~Texture() {}
 };
 
 }
