@@ -30,6 +30,7 @@ SET ( CORE_HEADERS
     src/core/lowdiscrepancy.h
     src/core/material.h
     src/core/microfacet.h
+    src/core/mipmap.h
     src/core//modelloader.h
     src/core/primitive.h
     src/core/reflection.h

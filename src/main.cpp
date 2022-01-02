@@ -25,6 +25,8 @@
 #include "materials/plastic.h"
 #include "materials/metal.h"
 
+#include "mipmap.h"
+
 #include "light.h"
 #include "lights/point.h"
 #include "lights/diffuse.h"
@@ -369,9 +371,46 @@ void test() {
 }
 
 int main(int argc, char *argv[]) {
+    int mW = 400, mH = 235;
+    Spectrum *mpdata = new Spectrum[mW * mH];
+    for (int i = 0; i < mW; ++i) {
+        for (int j = 0; j < mH; ++j) {
+            int offset = i + j * mW;
 
-    test();
+            Spectrum s;
+            s[0] = i / (float) 800;
+            s[1] = j / (float) 800;
+            s[2] = 0.4f;
+
+            mpdata[offset] = s;
+        }
+    }
+
+    MIPMap<Spectrum> mp(Point2i(mW, mH), mpdata, true);
+
+    int RasterWidth = 800;
+    int RasterHeight= 600;
+    int N = RasterWidth * RasterHeight;
+
+    std::vector<Spectrum> col(N);
+
+    for (size_t i = 0; i < RasterWidth; ++i) {
+        for (size_t j = 0; j < RasterHeight; ++j) {
+            int offset = (i + RasterWidth * j);
+            auto colObj = mp.Lookup(Point2f((i+1) / (float) RasterWidth, (j+1) / 
+                            (float) RasterHeight), 0.15f);
+
+            col[offset] = colObj;
+        }
+    }
+
+    auto buf = color2Img(col);
+    stbi_write_png("test2.png", RasterWidth, RasterHeight, 3, buf.data(), 0);
+
+    // test();
     std::cout << "Finish!" << std::endl;
+
+    delete[] mpdata;
 
     return 0;
 }
