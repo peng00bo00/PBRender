@@ -1,6 +1,6 @@
-CMAKE_MINIMUM_REQUIRED ( VERSION 3.9.0 )
+CMAKE_MINIMUM_REQUIRED(VERSION 3.9.0)
 
-PROJECT ( PBRender )
+PROJECT(PBRender)
 
 SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,19 +8,19 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_BUILD_TYPE Release)
 
 # ASSIMP
-FIND_PACKAGE ( ASSIMP REQUIRED )
-INCLUDE_DIRECTORIES ( ${ASSIMP_INCLUDE_DIR} )
+FIND_PACKAGE(ASSIMP REQUIRED)
+INCLUDE_DIRECTORIES(${ASSIMP_INCLUDE_DIR})
 
 # STBIM
-ADD_SUBDIRECTORY ( src/ext/stbim )
+ADD_SUBDIRECTORY(src/ext/stbim)
 
 # OpenMP
-FIND_PACKAGE( OpenMP REQUIRED )
+FIND_PACKAGE(OpenMP REQUIRED)
 
-INCLUDE_DIRECTORIES ( src )
-INCLUDE_DIRECTORIES ( src/core )
+INCLUDE_DIRECTORIES(src)
+INCLUDE_DIRECTORIES(src/core)
 
-SET ( CORE_HEADERS
+SET(CORE_HEADERS
     src/core/camera.h
     src/core/geometry.h
     src/core/integrator.h
@@ -46,7 +46,7 @@ SET ( CORE_HEADERS
     src/core/transform.h
 )
 
-SET ( CORE_SOURCE 
+SET(CORE_SOURCE 
     src/core/camera.cpp
     src/core/geometry.cpp
     src/core/integrator.cpp
@@ -70,7 +70,7 @@ SET ( CORE_SOURCE
     src/core/transform.cpp
 )
 
-FILE ( GLOB PBRender_SOURCE
+FILE(GLOB PBRender_SOURCE
     src/accelerators/*
     src/cameras/*
     src/integrators/*
@@ -81,11 +81,11 @@ FILE ( GLOB PBRender_SOURCE
     src/textures/*
 )
 
-ADD_LIBRARY ( PBRender_LIB STATIC
+ADD_LIBRARY(PBRender_LIB STATIC
     ${CORE_HEADERS}
     ${CORE_SOURCE}
     ${PBRender_SOURCE}
 )
 
-ADD_EXECUTABLE ( render src/main.cpp )
-TARGET_LINK_LIBRARIES ( render PUBLIC PBRender_LIB STBIM ${ASSIMP_LIBRARIES} OpenMP::OpenMP_CXX )
+ADD_EXECUTABLE(render src/main.cpp)
+TARGET_LINK_LIBRARIES(render PUBLIC PBRender_LIB STBIM ${ASSIMP_LIBRARIES} OpenMP::OpenMP_CXX)

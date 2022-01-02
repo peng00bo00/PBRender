@@ -92,11 +92,13 @@ void test() {
     // glass
     Spectrum c1;
     c1[0] = 0.98f; c1[1] = 0.98f; c1[2] = 0.98f;
+    // c1[0] = 0.18f; c1[1] = 0.15f; c1[2] = 0.81f;
     auto Kr = std::make_shared<ConstantTexture<Spectrum>>(c1);
 
     Spectrum c2;
-    c2[0] = 0.98f; c2[1] = 0.98f; c2[2] = 0.98f;
-    auto Kt = std::make_shared<ConstantTexture<Spectrum>>(c2);
+    // c2[0] = 0.98f; c2[1] = 0.98f; c2[2] = 0.98f;
+    c2[0] = 0.18f; c2[1] = 0.15f; c2[2] = 0.81f;
+    auto Kt = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(1.0f) - c2);
 
     auto index = std::make_shared<ConstantTexture<float>>(1.5f);
 
@@ -106,11 +108,11 @@ void test() {
     auto glassMaterial = std::make_shared<GlassMaterial>(Kr, Kt, RoughnessU, RoughnessV, index, bumpMap, false);
 
     // plastic
-    Spectrum purple;
-    // purple[0] = 0.35; purple[1] = 0.12; purple[2] = 0.48;
-    purple[0] = 0.98; purple[1] = 0.98; purple[2] = 0.98;
-    auto plasticKd = std::make_shared<ConstantTexture<Spectrum>>(purple);
-    auto plasticKr = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(1.0f) - purple);
+    Spectrum plasticK;
+    // plasticK[0] = 0.18; plasticK[1] = 0.15; plasticK[2] = 0.81;
+    plasticK[0] = 0.98; plasticK[1] = 0.98; plasticK[2] = 0.98;
+    auto plasticKd = std::make_shared<ConstantTexture<Spectrum>>(plasticK);
+    auto plasticKr = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(1.0f) - plasticK);
     auto plasticRoughness = std::make_shared<ConstantTexture<float>>(0.1f);
 
     auto plasticMaterial = std::make_shared<PlasticMaterial>(plasticKd, plasticKr, plasticRoughness, bumpMap, true);
@@ -263,7 +265,7 @@ void test() {
 
     ModelLoader loader;
     loader.loadModel("./bunny.obj", Object2WorldModel);
-    loader.buildNoTextureModel(Object2WorldModel, prims, metalMaterial);
+    loader.buildNoTextureModel(Object2WorldModel, prims, plasticMaterial);
 
     std::cout << "Finish model loading!" << std::endl;
     
