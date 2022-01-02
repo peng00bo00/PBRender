@@ -478,4 +478,57 @@ class FresnelBlend : public BxDF {
         MicrofacetDistribution *distribution;
 };
 
+struct FourierBSDFTable {
+    // FourierBSDFTable Public Data
+    float eta;
+    int mMax;
+    int nChannels;
+    int nMu;
+    float *mu;
+    int *m;
+    int *aOffset;
+    float *a;
+    float *a0;
+    float *cdf;
+    float *recip;
+
+    ~FourierBSDFTable() {
+        delete[] mu;
+        delete[] m;
+        delete[] aOffset;
+        delete[] a;
+        delete[] a0;
+        delete[] cdf;
+        delete[] recip;
+    }
+
+    // FourierBSDFTable Public Methods
+    static bool Read(const std::string &filename, FourierBSDFTable *table);
+    const float *GetAk(int offsetI, int offsetO, int *mptr) const {
+        *mptr = m[offsetO * nMu + offsetI];
+        return a + aOffset[offsetO * nMu + offsetI];
+    }
+    bool GetWeightsAndOffset(float cosTheta, int *offset,
+                             float weights[4]) const;
+};
+
+class FourierBSDF : public BxDF {
+    public:
+        // FourierBSDF Public Methods
+        Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+        FourierBSDF(const FourierBSDFTable &bsdfTable, TransportMode mode)
+            : BxDF(BxDFType(BSDF_REFLECTION | BSDF_TRANSMISSION | BSDF_GLOSSY)),
+            bsdfTable(bsdfTable),
+            mode(mode) {}
+        Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
+                        float *pdf, BxDFType *sampledType) const;
+        float Pdf(const Vector3f &wo, const Vector3f &wi) const;
+        std::string ToString() const;
+
+    private:
+        // FourierBSDF Private Data
+        const FourierBSDFTable &bsdfTable;
+        const TransportMode mode;
+};
+
 }

@@ -12,6 +12,9 @@
 #include <iostream>
 #include <sstream>
 
+// Global Macros
+#define ALLOCA(TYPE, COUNT) (TYPE *) alloca((COUNT) * sizeof(TYPE))
+
 namespace PBRender {
 
 // Global Constants

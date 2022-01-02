@@ -2,7 +2,7 @@
 #include "spectrum.h"
 #include "sampler.h"
 #include "sampling.h"
-// #include "interpolation.h"
+#include "interpolation.h"
 #include "scene.h"
 #include "interaction.h"
 // #include "stats.h"
@@ -621,5 +621,207 @@ float FresnelBlend::Pdf(const Vector3f &wo, const Vector3f &wi) const {
     float pdf_wh = distribution->Pdf(wo, wh);
     return .5f * (AbsCosTheta(wi) * InvPi + pdf_wh / (4 * Dot(wo, wh)));
 }
+
+Spectrum FourierBSDF::f(const Vector3f &wo, const Vector3f &wi) const {
+    // Find the zenith angle cosines and azimuth difference angle
+    float muI = CosTheta(-wi), muO = CosTheta(wo);
+    float cosPhi = CosDPhi(-wi, wo);
+
+    // Compute Fourier coefficients $a_k$ for $(\mui, \muo)$
+
+    // Determine offsets and weights for $\mui$ and $\muo$
+    int offsetI, offsetO;
+    float weightsI[4], weightsO[4];
+    if (!bsdfTable.GetWeightsAndOffset(muI, &offsetI, weightsI) ||
+        !bsdfTable.GetWeightsAndOffset(muO, &offsetO, weightsO))
+        return Spectrum(0.f);
+
+    // Allocate storage to accumulate _ak_ coefficients
+    float *ak = ALLOCA(float, bsdfTable.mMax * bsdfTable.nChannels);
+    memset(ak, 0, bsdfTable.mMax * bsdfTable.nChannels * sizeof(float));
+
+    // Accumulate weighted sums of nearby $a_k$ coefficients
+    int mMax = 0;
+    for (int b = 0; b < 4; ++b) {
+        for (int a = 0; a < 4; ++a) {
+            // Add contribution of _(a, b)_ to $a_k$ values
+            float weight = weightsI[a] * weightsO[b];
+            if (weight != 0) {
+                int m;
+                const float *ap = bsdfTable.GetAk(offsetI + a, offsetO + b, &m);
+                mMax = std::max(mMax, m);
+                for (int c = 0; c < bsdfTable.nChannels; ++c)
+                    for (int k = 0; k < m; ++k)
+                        ak[c * bsdfTable.mMax + k] += weight * ap[c * m + k];
+            }
+        }
+    }
+
+    // Evaluate Fourier expansion for angle $\phi$
+    float Y = std::max((float)0, Fourier(ak, mMax, cosPhi));
+    float scale = muI != 0 ? (1 / std::abs(muI)) : (float)0;
+
+    // Update _scale_ to account for adjoint light transport
+    if (mode == TransportMode::Radiance && muI * muO > 0) {
+        float eta = muI > 0 ? 1 / bsdfTable.eta : bsdfTable.eta;
+        scale *= eta * eta;
+    }
+    if (bsdfTable.nChannels == 1)
+        return Spectrum(Y * scale);
+    else {
+        // Compute and return RGB colors for tabulated BSDF
+        float R = Fourier(ak + 1 * bsdfTable.mMax, mMax, cosPhi);
+        float B = Fourier(ak + 2 * bsdfTable.mMax, mMax, cosPhi);
+        float G = 1.39829f * Y - 0.100913f * B - 0.297375f * R;
+        float rgb[3] = {R * scale, G * scale, B * scale};
+        return Spectrum::FromRGB(rgb).Clamp();
+    }
+}
+
+std::string FourierBSDF::ToString() const {
+    // return StringPrintf("[ FourierBSDF eta: %f mMax: %d nChannels: %d nMu: %d ",
+    //                     bsdfTable.eta, bsdfTable.mMax, bsdfTable.nChannels,
+    //                     bsdfTable.nMu) +
+    //        std::string(" mode : ") +
+    //        (mode == TransportMode::Radiance ? std::string("RADIANCE")
+    //                                         : std::string("IMPORTANCE")) +
+    //        std::string(" ]");
+
+    std::ostringstream ss;
+
+    ss << "[ FourierBSDF eta: " << bsdfTable.eta << " mMax: " << bsdfTable.mMax
+       << " nChannels: " << bsdfTable.nChannels << " nMu: " << bsdfTable.nMu
+       << " mode: " << (mode == TransportMode::Radiance ? std::string("RADIANCE")
+                                                        : std::string("IMPORTANCE"))
+       << " ]";
+
+    return ss.str();
+}
+
+bool FourierBSDFTable::GetWeightsAndOffset(float cosTheta, int *offset,
+                                           float weights[4]) const {
+    return CatmullRomWeights(nMu, mu, cosTheta, offset, weights);
+}
+
+Spectrum FourierBSDF::Sample_f(const Vector3f &wo, Vector3f *wi,
+                               const Point2f &u, float *pdf,
+                               BxDFType *sampledType) const {
+    // Sample zenith angle component for _FourierBSDF_
+    float muO = CosTheta(wo);
+    float pdfMu;
+    float muI = SampleCatmullRom2D(bsdfTable.nMu, bsdfTable.nMu, bsdfTable.mu,
+                                   bsdfTable.mu, bsdfTable.a0, bsdfTable.cdf,
+                                   muO, u[1], nullptr, &pdfMu);
+
+    // Compute Fourier coefficients $a_k$ for $(\mui, \muo)$
+
+    // Determine offsets and weights for $\mui$ and $\muo$
+    int offsetI, offsetO;
+    float weightsI[4], weightsO[4];
+    if (!bsdfTable.GetWeightsAndOffset(muI, &offsetI, weightsI) ||
+        !bsdfTable.GetWeightsAndOffset(muO, &offsetO, weightsO))
+        return Spectrum(0.f);
+
+    // Allocate storage to accumulate _ak_ coefficients
+    float *ak = ALLOCA(float, bsdfTable.mMax * bsdfTable.nChannels);
+    memset(ak, 0, bsdfTable.mMax * bsdfTable.nChannels * sizeof(float));
+
+    // Accumulate weighted sums of nearby $a_k$ coefficients
+    int mMax = 0;
+    for (int b = 0; b < 4; ++b) {
+        for (int a = 0; a < 4; ++a) {
+            // Add contribution of _(a, b)_ to $a_k$ values
+            float weight = weightsI[a] * weightsO[b];
+            if (weight != 0) {
+                int m;
+                const float *ap = bsdfTable.GetAk(offsetI + a, offsetO + b, &m);
+                mMax = std::max(mMax, m);
+                for (int c = 0; c < bsdfTable.nChannels; ++c)
+                    for (int k = 0; k < m; ++k)
+                        ak[c * bsdfTable.mMax + k] += weight * ap[c * m + k];
+            }
+        }
+    }
+
+    // Importance sample the luminance Fourier expansion
+    float phi, pdfPhi;
+    float Y = SampleFourier(ak, bsdfTable.recip, mMax, u[0], &pdfPhi, &phi);
+    *pdf = std::max((float)0, pdfPhi * pdfMu);
+
+    // Compute the scattered direction for _FourierBSDF_
+    float sin2ThetaI = std::max((float)0, 1 - muI * muI);
+    float norm = std::sqrt(sin2ThetaI / Sin2Theta(wo));
+    if (std::isinf(norm)) norm = 0;
+    float sinPhi = std::sin(phi), cosPhi = std::cos(phi);
+    *wi = -Vector3f(norm * (cosPhi * wo.x - sinPhi * wo.y),
+                    norm * (sinPhi * wo.x + cosPhi * wo.y), muI);
+
+    // Mathematically, wi will be normalized (if wo was). However, in
+    // practice, floating-point rounding error can cause some error to
+    // accumulate in the computed value of wi here. This can be
+    // catastrophic: if the ray intersects an object with the FourierBSDF
+    // again and the wo (based on such a wi) is nearly perpendicular to the
+    // surface, then the wi computed at the next intersection can end up
+    // being substantially (like 4x) longer than normalized, which leads to
+    // all sorts of errors, including negative spectral values. Therefore,
+    // we normalize again here.
+    *wi = Normalize(*wi);
+
+    // Evaluate remaining Fourier expansions for angle $\phi$
+    float scale = muI != 0 ? (1 / std::abs(muI)) : (float)0;
+    if (mode == TransportMode::Radiance && muI * muO > 0) {
+        float eta = muI > 0 ? 1 / bsdfTable.eta : bsdfTable.eta;
+        scale *= eta * eta;
+    }
+
+    if (bsdfTable.nChannels == 1) return Spectrum(Y * scale);
+    float R = Fourier(ak + 1 * bsdfTable.mMax, mMax, cosPhi);
+    float B = Fourier(ak + 2 * bsdfTable.mMax, mMax, cosPhi);
+    float G = 1.39829f * Y - 0.100913f * B - 0.297375f * R;
+    float rgb[3] = {R * scale, G * scale, B * scale};
+    return Spectrum::FromRGB(rgb).Clamp();
+}
+
+float FourierBSDF::Pdf(const Vector3f &wo, const Vector3f &wi) const {
+    // Find the zenith angle cosines and azimuth difference angle
+    float muI = CosTheta(-wi), muO = CosTheta(wo);
+    float cosPhi = CosDPhi(-wi, wo);
+
+    // Compute luminance Fourier coefficients $a_k$ for $(\mui, \muo)$
+    int offsetI, offsetO;
+    float weightsI[4], weightsO[4];
+    if (!bsdfTable.GetWeightsAndOffset(muI, &offsetI, weightsI) ||
+        !bsdfTable.GetWeightsAndOffset(muO, &offsetO, weightsO))
+        return 0;
+    float *ak = ALLOCA(float, bsdfTable.mMax);
+    memset(ak, 0, bsdfTable.mMax * sizeof(float));
+    int mMax = 0;
+    for (int o = 0; o < 4; ++o) {
+        for (int i = 0; i < 4; ++i) {
+            float weight = weightsI[i] * weightsO[o];
+            if (weight == 0) continue;
+
+            int order;
+            const float *coeffs =
+                bsdfTable.GetAk(offsetI + i, offsetO + o, &order);
+            mMax = std::max(mMax, order);
+
+            for (int k = 0; k < order; ++k) ak[k] += *coeffs++ * weight;
+        }
+    }
+
+    // Evaluate probability of sampling _wi_
+    float rho = 0;
+    for (int o = 0; o < 4; ++o) {
+        if (weightsO[o] == 0) continue;
+        rho +=
+            weightsO[o] *
+            bsdfTable.cdf[(offsetO + o) * bsdfTable.nMu + bsdfTable.nMu - 1] *
+            (2 * Pi);
+    }
+    float Y = Fourier(ak, mMax, cosPhi);
+    return (rho > 0 && Y > 0) ? (Y / rho) : 0;
+}
+
 
 }
