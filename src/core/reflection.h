@@ -274,11 +274,11 @@ inline int BSDF::NumComponents(BxDFType flags) const {
 }
 
 class Fresnel {
-  public:
-    // Fresnel Interface
-    virtual ~Fresnel();
-    virtual Spectrum Evaluate(float cosI) const = 0;
-    virtual std::string ToString() const = 0;
+    public:
+        // Fresnel Interface
+        virtual ~Fresnel();
+        virtual Spectrum Evaluate(float cosI) const = 0;
+        virtual std::string ToString() const = 0;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const Fresnel &f) {
@@ -477,6 +477,5 @@ class FresnelBlend : public BxDF {
         const Spectrum Rd, Rs;
         MicrofacetDistribution *distribution;
 };
-
 
 }

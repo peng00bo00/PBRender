@@ -24,6 +24,7 @@ SET ( CORE_HEADERS
     src/core/geometry.h
     src/core/integrator.h
     src/core/interaction.h
+    src/core/interpolation.h
     src/core/light.h
     src/core/lightdistrib.h
     src/core/lowdiscrepancy.h
@@ -48,6 +49,7 @@ SET ( CORE_SOURCE
     src/core/geometry.cpp
     src/core/integrator.cpp
     src/core/interaction.cpp
+    src/core/interpolation.cpp
     src/core/light.cpp
     src/core/lightdistrib.cpp
     src/core/lowdiscrepancy.cpp
