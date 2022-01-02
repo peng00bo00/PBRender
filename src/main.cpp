@@ -47,19 +47,19 @@
 
 using namespace PBRender;
 
+char TO_BYTE(float v) {
+    return (uint8_t) Clamp(255.f * GammaCorrect(v) + 0.5f, 0.f, 255.f);
+}
 
-std::vector<char> color2Img(std::vector<Spectrum> &col) {
-    int N = col.size();
-    std::vector<char> buf(N * 3);
+void color2Img(std::vector<Spectrum> &col, std::vector<char> &buf) {
 
-    for (size_t i = 0; i < N; ++i)
+    #pragma omp simd
+    for (size_t i = 0; i < col.size(); ++i)
     {
-        buf[3 * i + 0] = 255 * Clamp(col[i][0], 0.0f, 1.0f);
-        buf[3 * i + 1] = 255 * Clamp(col[i][1], 0.0f, 1.0f);
-        buf[3 * i + 2] = 255 * Clamp(col[i][2], 0.0f, 1.0f);
+        buf[3 * i + 0] = TO_BYTE(col[i][0]);
+        buf[3 * i + 1] = TO_BYTE(col[i][1]);
+        buf[3 * i + 2] = TO_BYTE(col[i][2]);
     }
-    
-    return buf;
 }
 
 void test() {
@@ -297,7 +297,7 @@ void test() {
     std::shared_ptr<AreaLight> area;
     for (size_t i = 0; i < nTrianglesAreaLight; i++) {
         area = std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight,
-                                                  Spectrum(100.0f),
+                                                  Spectrum(30.0f),
                                                   5,
                                                   trisAreaLight[i],
                                                   false);
@@ -326,7 +326,7 @@ void test() {
 
     // sampler
     Bounds2i imageBound(Point2i(0, 0), Point2i(fullResolution.x, fullResolution.y));
-    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(128, imageBound));
+    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(256, imageBound));
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
 
@@ -351,8 +351,8 @@ void test() {
     // rendering with openmp for now
     integrator->Preprocess(*worldScene, *sampler);
 
-    omp_set_num_threads(omp_get_num_procs());
-    // omp_set_num_threads(8);
+    // omp_set_num_threads(omp_get_num_procs());
+    omp_set_num_threads(8);
     #pragma omp parallel for collapse(2) schedule(dynamic)
     for (size_t i = 0; i < (int)fullResolution.x; ++i) {
         for (size_t j = 0; j < (int)fullResolution.y; ++j) {
@@ -365,52 +365,55 @@ void test() {
     }
 
 
-    auto buf = color2Img(col);
+    auto buf = std::vector<char>();
+    buf.resize(3 * col.size());
+
+    color2Img(col, buf);
 
     stbi_write_png("test.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
 }
 
 int main(int argc, char *argv[]) {
-    int mW = 400, mH = 235;
-    Spectrum *mpdata = new Spectrum[mW * mH];
-    for (int i = 0; i < mW; ++i) {
-        for (int j = 0; j < mH; ++j) {
-            int offset = i + j * mW;
+    // int mW = 400, mH = 235;
+    // Spectrum *mpdata = new Spectrum[mW * mH];
+    // for (int i = 0; i < mW; ++i) {
+    //     for (int j = 0; j < mH; ++j) {
+    //         int offset = i + j * mW;
 
-            Spectrum s;
-            s[0] = i / (float) 800;
-            s[1] = j / (float) 800;
-            s[2] = 0.4f;
+    //         Spectrum s;
+    //         s[0] = i / (float) 800;
+    //         s[1] = j / (float) 800;
+    //         s[2] = 0.4f;
 
-            mpdata[offset] = s;
-        }
-    }
+    //         mpdata[offset] = s;
+    //     }
+    // }
 
-    MIPMap<Spectrum> mp(Point2i(mW, mH), mpdata, true);
+    // MIPMap<Spectrum> mp(Point2i(mW, mH), mpdata, true);
 
-    int RasterWidth = 800;
-    int RasterHeight= 600;
-    int N = RasterWidth * RasterHeight;
+    // int RasterWidth = 800;
+    // int RasterHeight= 600;
+    // int N = RasterWidth * RasterHeight;
 
-    std::vector<Spectrum> col(N);
+    // std::vector<Spectrum> col(N);
 
-    for (size_t i = 0; i < RasterWidth; ++i) {
-        for (size_t j = 0; j < RasterHeight; ++j) {
-            int offset = (i + RasterWidth * j);
-            auto colObj = mp.Lookup(Point2f((i+1) / (float) RasterWidth, (j+1) / 
-                            (float) RasterHeight), 0.15f);
+    // for (size_t i = 0; i < RasterWidth; ++i) {
+    //     for (size_t j = 0; j < RasterHeight; ++j) {
+    //         int offset = (i + RasterWidth * j);
+    //         auto colObj = mp.Lookup(Point2f((i+1) / (float) RasterWidth, (j+1) / 
+    //                         (float) RasterHeight), 0.15f);
 
-            col[offset] = colObj;
-        }
-    }
+    //         col[offset] = colObj;
+    //     }
+    // }
 
-    auto buf = color2Img(col);
-    stbi_write_png("test2.png", RasterWidth, RasterHeight, 3, buf.data(), 0);
+    // auto buf = color2Img(col);
+    // stbi_write_png("test2.png", RasterWidth, RasterHeight, 3, buf.data(), 0);
 
-    // test();
+    // delete[] mpdata;
+
+    test();
     std::cout << "Finish!" << std::endl;
-
-    delete[] mpdata;
 
     return 0;
 }
