@@ -11,9 +11,9 @@ LightDistribution::~LightDistribution() {}
 
 std::unique_ptr<LightDistribution> CreateLightSampleDistribution(
     const std::string &name, const Scene &scene) {
-    // if (name == "uniform" || scene.lights.size() == 1)
-    //     return std::unique_ptr<LightDistribution>{
-    //         new UniformLightDistribution(scene)};
+    if (name == "uniform" || scene.lights.size() == 1)
+        return std::unique_ptr<LightDistribution>{
+            new UniformLightDistribution(scene)};
     // else if (name == "power")
     //     return std::unique_ptr<LightDistribution>{
     //         new PowerLightDistribution(scene)};
