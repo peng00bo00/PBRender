@@ -22,7 +22,7 @@ void DirectLightingIntegrator::Preprocess(const Scene &scene,
     }
 }
 
-Spectrum DirectLightingIntegrator::Li(const Ray &ray, 
+Spectrum DirectLightingIntegrator::Li(const RayDifferential &ray, 
                                       const Scene &scene,
                                       Sampler &sampler, 
                                       int depth) const {

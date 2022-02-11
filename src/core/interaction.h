@@ -85,9 +85,10 @@ class SurfaceInteraction : public Interaction {
                                 const Normal3f &dndu, const Normal3f &dndv,
                                 bool orientationIsAuthoritative);
 		
-		void ComputeScatteringFunctions(const Ray &ray,
+		void ComputeScatteringFunctions(const RayDifferential &ray,
 									    bool allowMultipleLobes = false,
 										TransportMode mode = TransportMode::Radiance);
+		void ComputeDifferentials(const RayDifferential &r) const;
 		Spectrum Le(const Vector3f &w) const;
 		
 	public:

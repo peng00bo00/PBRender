@@ -29,11 +29,11 @@ void PathIntegrator::Preprocess(const Scene &scene, Sampler &sampler) {
         CreateLightSampleDistribution(lightSampleStrategy, scene);
 }
 
-Spectrum PathIntegrator::Li(const Ray &r, const Scene &scene, Sampler &sampler, 
+Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene, Sampler &sampler, 
                             // MemoryArena &arena, 
                             int depth) const {
     Spectrum L(0.f), beta(1.f);
-    Ray ray(r);
+    RayDifferential ray(r);
     bool specularBounce = false;
     int bounces;
 

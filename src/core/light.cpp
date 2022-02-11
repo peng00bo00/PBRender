@@ -21,7 +21,7 @@ Light::Light(int flags, const Transform &LightToWorld,
 
 Light::~Light() {}
 
-Spectrum Light::Le(const Ray &ray) const { return Spectrum(0.f); }
+Spectrum Light::Le(const RayDifferential &ray) const { return Spectrum(0.f); }
 
 bool VisibilityTester::Unoccluded(const Scene &scene) const {
     return !scene.IntersectP(p0.SpawnRayTo(p1));

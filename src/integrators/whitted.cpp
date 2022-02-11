@@ -6,7 +6,7 @@
 
 namespace PBRender {
 
-Spectrum WhittedIntegrator::Li(const Ray &ray, const Scene &scene,
+Spectrum WhittedIntegrator::Li(const RayDifferential &ray, const Scene &scene,
                                Sampler &sampler, int depth) const {
     Spectrum L(0.);
 

@@ -36,9 +36,9 @@ Interaction Shape::Sample(const Interaction &ref, const Point2f &u,
 
 float Shape::Pdf(const Interaction &ref, const Vector3f &wi) const {
     // Intersect sample ray with area light geometry
-    // Ray ray = ref.SpawnRay(wi);
-	Point3f o = OffsetRayOrigin(ref.p, Vector3f(), ref.n, wi);
-	Ray ray(o, wi);
+    Ray ray = ref.SpawnRay(wi);
+	// Point3f o = OffsetRayOrigin(ref.p, Vector3f(), ref.n, wi);
+	// Ray ray(o, wi);
 
     float tHit;
     SurfaceInteraction isectLight;

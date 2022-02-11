@@ -328,13 +328,12 @@ void test() {
 
     // sampler
     Bounds2i imageBound(Point2i(0, 0), Point2i(fullResolution.x, fullResolution.y));
-    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(256, imageBound));
+    std::shared_ptr<Sampler> sampler = std::shared_ptr<HaltonSampler>(CreateHaltonSampler(16, imageBound));
 
     std::vector<Spectrum> col(int(fullResolution.x) * int(fullResolution.y));
 
     // integrator
-    // std::shared_ptr<WhittedIntegrator> integrator;
-    // integrator = std::make_shared<WhittedIntegrator>(128, camera, sampler, imageBound);
+    // auto integrator = std::make_shared<WhittedIntegrator>(128, camera, sampler, imageBound);
     
     // auto integrator = std::make_shared<DirectLightingIntegrator>(LightStrategy::UniformSampleAll,
     //                                                              64,

@@ -34,8 +34,8 @@ class OrthographicCamera : public ProjectiveCamera {
     
 
         float GenerateRay(const CameraSample &sample, Ray *) const;
-        // float GenerateRayDifferential(const CameraSample &sample,
-        //                               RayDifferential *) const;
+        float GenerateRayDifferential(const CameraSample &sample,
+                                      RayDifferential *) const;
 
     private:
         // OrthographicCamera Private Data
