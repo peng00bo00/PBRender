@@ -341,7 +341,7 @@ void test() {
     //                                                              sampler,
     //                                                              imageBound);
 
-    auto integrator = std::make_shared<PathIntegrator>(128,
+    auto integrator = std::make_shared<PathIntegrator>(256,
                                                        camera,
                                                        sampler,
                                                        imageBound);
