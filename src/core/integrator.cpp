@@ -252,11 +252,6 @@ Spectrum SamplerIntegrator::RenderPixel(const Scene &scene, int i, int j) {
     do {
         CameraSample cameraSample = pixel_sampler->GetCameraSample(pixel);
 
-        // Ray r;
-        // camera->GenerateRay(cs, &r);
-
-        // colObj += Li(r, scene, *pixel_sampler, 0);
-
         RayDifferential ray;
         float rayWeight = camera->GenerateRayDifferential(cameraSample, &ray);
         ray.ScaleDifferentials(1 / std::sqrt((float)pixel_sampler->samplesPerPixel));

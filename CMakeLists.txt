@@ -13,6 +13,9 @@ INCLUDE_DIRECTORIES(${ASSIMP_INCLUDE_DIR})
 
 # STBIM
 ADD_SUBDIRECTORY(src/ext/stbim)
+INCLUDE_DIRECTORIES(
+    src/ext/stbim
+)
 
 # OpenMP
 FIND_PACKAGE(OpenMP REQUIRED)
@@ -23,6 +26,7 @@ INCLUDE_DIRECTORIES(src/core)
 SET(CORE_HEADERS
     src/core/camera.h
     src/core/geometry.h
+    src/core/imageio.h
     src/core/integrator.h
     src/core/interaction.h
     src/core/interpolation.h
@@ -49,6 +53,7 @@ SET(CORE_HEADERS
 SET(CORE_SOURCE 
     src/core/camera.cpp
     src/core/geometry.cpp
+    src/core/imageio.cpp
     src/core/integrator.cpp
     src/core/interaction.cpp
     src/core/interpolation.cpp

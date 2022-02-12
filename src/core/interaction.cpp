@@ -31,12 +31,12 @@ SurfaceInteraction::SurfaceInteraction(
     shading.dndu = dndu;
     shading.dndv = dndv;
 
-    // // Adjust normal based on orientation and handedness
-    // if (shape &&
-    //     (shape->reverseOrientation ^ shape->transformSwapsHandedness)) {
-    //     n *= -1;
-    //     shading.n *= -1;
-    // }
+    // Adjust normal based on orientation and handedness
+    if (shape &&
+        (shape->reverseOrientation ^ shape->transformSwapsHandedness)) {
+        n *= -1;
+        shading.n *= -1;
+    }
 }
 
 void SurfaceInteraction::SetShadingGeometry(const Vector3f &dpdus,
@@ -73,14 +73,15 @@ void SurfaceInteraction::ComputeDifferentials(
 
         // Compute auxiliary intersection points with plane
         float d = Dot(n, Vector3f(p.x, p.y, p.z));
-        float tx =
-            -(Dot(n, Vector3f(ray.rxOrigin)) - d) / Dot(n, ray.rxDirection);
+        
+        float tx = -(Dot(n, Vector3f(ray.rxOrigin)) - d) / Dot(n, ray.rxDirection);
         if (std::isinf(tx) || std::isnan(tx)) goto fail;
         Point3f px = ray.rxOrigin + tx * ray.rxDirection;
-        float ty =
-            -(Dot(n, Vector3f(ray.ryOrigin)) - d) / Dot(n, ray.ryDirection);
+        
+        float ty = -(Dot(n, Vector3f(ray.ryOrigin)) - d) / Dot(n, ray.ryDirection);
         if (std::isinf(ty) || std::isnan(ty)) goto fail;
         Point3f py = ray.ryOrigin + ty * ray.ryDirection;
+
         dpdx = px - p;
         dpdy = py - p;
 

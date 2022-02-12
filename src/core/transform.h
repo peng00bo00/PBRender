@@ -145,7 +145,7 @@ class Transform {
     inline Normal3<T> operator()(const Normal3<T> &) const;
 
     inline Ray operator()(const Ray &r) const;
-    // inline RayDifferential operator()(const RayDifferential &r) const;
+    inline RayDifferential operator()(const RayDifferential &r) const;
 
     Bounds3f operator()(const Bounds3f &b) const;
 
@@ -212,6 +212,18 @@ inline Ray Transform::operator()(const Ray &r) const {
     Vector3f d = (*this)(r.d);
 
     return Ray(o, d, r.tMax, r.time);
+}
+
+inline RayDifferential Transform::operator()(const RayDifferential &r) const {
+    Ray tr = (*this)(Ray(r));
+    // RayDifferential ret(tr.o, tr.d, tr.tMax, tr.time, tr.medium);
+    RayDifferential ret(tr.o, tr.d, tr.tMax, tr.time);
+    ret.hasDifferentials = r.hasDifferentials;
+    ret.rxOrigin = (*this)(r.rxOrigin);
+    ret.ryOrigin = (*this)(r.ryOrigin);
+    ret.rxDirection = (*this)(r.rxDirection);
+    ret.ryDirection = (*this)(r.ryDirection);
+    return ret;
 }
 
 }

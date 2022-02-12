@@ -11,7 +11,7 @@ class Scene {
     public:
         // Scene Public Methods
         Scene(std::shared_ptr<Primitive> aggregate,
-            const std::vector<std::shared_ptr<Light>> &lights)
+              const std::vector<std::shared_ptr<Light>> &lights)
             : lights(lights), aggregate(aggregate) {
             // Scene Constructor Implementation
             worldBound = aggregate->WorldBound();

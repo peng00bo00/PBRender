@@ -17,6 +17,7 @@
 
 #include "texture.h"
 #include "textures/constant.h"
+#include "textures/imagemap.h"
 
 #include "material.h"
 #include "materials/matte.h"
@@ -39,8 +40,13 @@
 #include "integrators/directlighting.h"
 #include "integrators/path.h"
 
-#include <stb_image_write.h>
-#include <stb_image.h>
+#include "imageio.h"
+
+// #define STB_IMAGE_IMPLEMENTATION
+// #include <stb_image.h>
+
+// #define STB_IMAGE_WRITE_IMPLEMENTATION
+// #include <stb_image_write.h>
 
 #include "omp.h"
 
@@ -371,7 +377,8 @@ void test() {
 
     color2Img(col, buf);
 
-    stbi_write_png("test.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
+    // stbi_write_png("test.png", int(fullResolution.x), int(fullResolution.y), 3, buf.data(), 0);
+    WriteImage("test.png", buf.data(), fullResolution);
 }
 
 int main(int argc, char *argv[]) {
