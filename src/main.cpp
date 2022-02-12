@@ -68,6 +68,25 @@ void color2Img(std::vector<Spectrum> &col, std::vector<char> &buf) {
     }
 }
 
+std::shared_ptr<Material> getSmileFaceDiffuseMaterial() {
+    std::unique_ptr<TextureMapping2D> map = std::make_unique<UVMapping2D>(1.0f, 1.0f, 0.0f, 0.0f);
+    std::string filename = "awesomeface.png";
+
+    ImageWrap wrapMode = ImageWrap::Repeat;
+    bool trilerp = false;
+    float maxAniso = 8.f;
+    float scale = 1.f;
+    bool gamma = true;
+
+    std::shared_ptr<Texture<Spectrum>> Kt = std::make_shared<ImageTexture<RGBSpectrum , Spectrum>>(
+        std::move(map), filename, trilerp, maxAniso, wrapMode, scale, gamma);
+    
+    std::shared_ptr<Texture<float>> sigmaRed = std::make_shared<ConstantTexture<float>>(0.0f);
+    std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
+
+    return std::make_shared<MatteMaterial>(Kt, sigmaRed, bumpMap);
+}
+
 void test() {
 
     // textures
@@ -139,6 +158,8 @@ void test() {
 
     auto metalMaterial = std::make_shared<MetalMaterial>(etaM , kM,
                             roughness, uRoughness, vRoughness, bumpMap, false);
+    
+    auto smile = getSmileFaceDiffuseMaterial();
 
     // texture
     Spectrum LeftWall, RightWall, Floor, Ceiling, BackWall;
@@ -179,24 +200,30 @@ void test() {
     Transform tri_Object2World2, tri_World2Object2;
 
     // Floor
-    Point3f P_Floor[6] = {
-        Point3f(0.f, 0.f, length_Floor), Point3f(length_Floor, 0.f, length_Floor), Point3f(0.f, 0.f, 0.f),
-        Point3f(length_Floor, 0.f, length_Floor), Point3f(length_Floor, 0.f, 0.f), Point3f(0.f, 0.f, 0.f)
+    Point3f P_Floor[] = {
+        Point3f(0.f, 0.f, length_Floor), Point3f(0.f, 0.f, 0.f), Point3f(length_Floor, 0.f, length_Floor),
+        Point3f(length_Floor, 0.f, length_Floor), Point3f(0.f, 0.f, 0.f), Point3f(length_Floor, 0.f, 0.f)
+    };
+
+    Point2f UV_FLoor[] = {
+        Point2f(0.f, 1.f), Point2f(0.f, 0.f), Point2f(1.f, 1.f),
+        Point2f(1.f, 1.f), Point2f(0.f, 0.f), Point2f(1.f, 0.f),
     };
 
     std::shared_ptr<TriangleMesh> meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
-                                                                             nVerticesFloor, P_Floor, nullptr, nullptr, nullptr, nullptr);
+                                                                             nVerticesFloor, P_Floor, nullptr, nullptr, UV_FLoor, nullptr);
 
     for(int i = 0 ; i < nTrianglesFloor; ++i)
         trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
     
     for(int i = 0 ; i < nTrianglesFloor; ++i)
         prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i+offset], FloorMaterial, nullptr));
+        // prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i+offset], smile, nullptr));
     
     offset += nTrianglesFloor;
     
     // Ceiling
-    Point3f P_Ceiling[6] = {
+    Point3f P_Ceiling[] = {
         Point3f(0.f, length_Floor, length_Floor), Point3f(0.f, length_Floor, 0.f), Point3f(length_Floor, length_Floor, length_Floor),
         Point3f(length_Floor, length_Floor, length_Floor), Point3f(0.f, length_Floor, 0.f), Point3f(length_Floor, length_Floor, 0.f),
     };
@@ -213,7 +240,7 @@ void test() {
     offset += nTrianglesFloor;
     
     // BackWall
-    Point3f P_BackWall[6] = {
+    Point3f P_BackWall[] = {
         Point3f(0.f, 0.f, 0.f), Point3f(length_Floor, 0.f, 0.f), Point3f(length_Floor, length_Floor, 0.f),
         Point3f(0.f, 0.f, 0.f), Point3f(length_Floor, length_Floor, 0.f), Point3f(0.f, length_Floor, 0.f),
     };
@@ -230,7 +257,7 @@ void test() {
     offset += nTrianglesFloor;
     
     // RightWall
-    Point3f P_RightWall[6] = {
+    Point3f P_RightWall[] = {
         Point3f(0.f, 0.f, 0.f), Point3f(0.f, length_Floor, length_Floor), Point3f(0.f, 0.f, length_Floor),
         Point3f(0.f, 0.f, 0.f), Point3f(0.f, length_Floor, 0.f), Point3f(0.f, length_Floor, length_Floor),
     };
@@ -247,7 +274,7 @@ void test() {
     offset += nTrianglesFloor;
     
     // LeftWall
-    Point3f P_LeftWall[6] = {
+    Point3f P_LeftWall[] = {
         Point3f(length_Floor, 0.f, 0.f), Point3f(length_Floor, length_Floor,length_Floor), Point3f(length_Floor, 0.f, length_Floor),
         Point3f(length_Floor, 0.f, 0.f), Point3f(length_Floor, length_Floor, 0.f), Point3f(length_Floor, length_Floor, length_Floor)
     };
