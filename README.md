@@ -1,2 +1,2 @@
 # PBRender
-My own PBR renderer, still under development...
+Rebuild my PBRender with Embree API.
