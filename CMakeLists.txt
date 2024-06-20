@@ -15,6 +15,12 @@ FIND_PACKAGE(embree 4 CONFIG REQUIRED)  ## embree
 FIND_PACKAGE(TBB CONFIG REQUIRED tbb)   ## TBB
 FIND_PACKAGE(Eigen3 REQUIRED)           ## eigen
 
+## stb
+ADD_SUBDIRECTORY(src/ext/stb)
+INCLUDE_DIRECTORIES(
+    src/ext/stb
+)
+
 ## 
 INCLUDE_DIRECTORIES(src)
 INCLUDE_DIRECTORIES(src/core)
