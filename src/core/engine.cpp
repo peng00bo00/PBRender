@@ -17,7 +17,7 @@ Engine::Engine() {
     std::cout << "initialize Device finished!" << std::endl;
 
     // initialize scene
-    scene = std::make_shared<Scene>(device);    
+    scene = std::make_shared<Scene>(device);
 }
 
 Engine::~Engine() {

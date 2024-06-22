@@ -19,8 +19,8 @@ int main() {
     std::cout << "Hello Embree!" << std::endl;
 
     // create engine instance
-    auto engine = std::make_unique<PBRender::Engine>();
-    auto scene = engine->scene;
+    auto engine = PBRender::InitEngine();
+    auto scene  = engine->GetScene();
 
     // add a sphere
     Point3f center(Point3f(0.0f, 0.0f, 1.0f));

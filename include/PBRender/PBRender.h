@@ -10,6 +10,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <ext/stb/stb_image_write.h>
 
+// core
 #include <PBRender/core/common.h>
 
 #include <PBRender/core/engine.h>
