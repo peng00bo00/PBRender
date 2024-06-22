@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common.h"
-#include "math.h"
+#include <PBRender/core/common.h>
+#include <PBRender/core/math.h>
 #include <iterator>
 
 namespace PBRender {

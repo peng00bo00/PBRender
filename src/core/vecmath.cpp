@@ -1,4 +1,4 @@
-#include "vecmath.h"
+#include <PBRender/core/vecmath.h>
 
 namespace PBRender
 {

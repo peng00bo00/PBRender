@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include <PBRender/core/common.h>
 
 namespace PBRender
 {

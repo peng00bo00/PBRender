@@ -2,9 +2,9 @@
 
 #include <embree4/rtcore.h>
 
-#include "common.h"
-#include "math.h"
-#include "vecmath.h"
+#include <PBRender/core/common.h>
+#include <PBRender/core/math.h>
+#include <PBRender/core/vecmath.h>
 
 
 namespace PBRender

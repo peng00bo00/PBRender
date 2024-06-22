@@ -1,4 +1,4 @@
-#include "math.h"
+#include <PBRender/core/math.h>
 
 namespace PBRender
 {

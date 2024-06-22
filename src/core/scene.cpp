@@ -1,4 +1,4 @@
-#include "scene.h"
+#include <PBRender/core/scene.h>
 
 namespace PBRender
 {

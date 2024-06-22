@@ -1,14 +1,8 @@
-#include "PBRender.h"
+#include <PBRender/PBRender.h>
 
 #include <limits>
 #include <iostream>
 #include <ctime>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
 
 
 using Point3f = PBRender::Point3f;
@@ -43,7 +37,8 @@ int main() {
     const float ymin = -1.0f;
     const float ymax =  1.0f;
 
-    std::vector<Vector3f> film(H*W, Vector3f(0.f,0.f,0.f));
+    std::vector<Vector3f> film_normal(H*W, Vector3f(0.f,0.f,0.f));
+    std::vector<Vector3f> film_depth(H*W, Vector3f(0.f,0.f,0.f));
 
     // rasterization
     for (size_t i = 0; i < H; ++i)
@@ -74,68 +69,43 @@ int main() {
             // cast the ray to scene
             scene->RayHit(&rayhit);
             if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-                // // shading with normal
-                // float nx = rayhit.hit.Ng_x * 0.5f + 0.5f;
-                // float ny = rayhit.hit.Ng_y * 0.5f + 0.5f;
-                // float nz = rayhit.hit.Ng_z * 0.5f + 0.5f;
+                // shading with normal
+                float nx = rayhit.hit.Ng_x * 0.5f + 0.5f;
+                float ny = rayhit.hit.Ng_y * 0.5f + 0.5f;
+                float nz = rayhit.hit.Ng_z * 0.5f + 0.5f;
 
-                // film[i*H+j] = Vector3f(nx,ny,nz);
+                film_normal[i*H+j] = Vector3f(nx,ny,nz);
 
                 // shading with depth
                 float depth = rayhit.ray.tfar;
-                // std::cout << depth << std::endl;
-                film[i*H+j] = Vector3f(depth, depth, depth);
+                film_depth[i*H+j] = Vector3f(depth, depth, depth);
             }
         }
     }
 
     // write to image
-    auto buf = std::vector<char>();
-    buf.resize(3 * film.size());
+    auto buf_normal = std::vector<char>();
+    auto buf_depth = std::vector<char>();
 
-    for (size_t i = 0; i < film.size(); ++i)
+    buf_normal.resize(3 * film_normal.size());
+    buf_depth.resize(3 * film_normal.size());
+
+    for (size_t i = 0; i < film_normal.size(); ++i)
     {
-        buf[3 * i + 0] = (uint8_t) PBRender::Clamp(255.f * film[i].x + 0.5f, 0.f, 255.f);
-        buf[3 * i + 1] = (uint8_t) PBRender::Clamp(255.f * film[i].y + 0.5f, 0.f, 255.f);
-        buf[3 * i + 2] = (uint8_t) PBRender::Clamp(255.f * film[i].z + 0.5f, 0.f, 255.f);
+        buf_normal[3 * i + 0] = (uint8_t) PBRender::Clamp(255.f * film_normal[i].x + 0.5f, 0.f, 255.f);
+        buf_normal[3 * i + 1] = (uint8_t) PBRender::Clamp(255.f * film_normal[i].y + 0.5f, 0.f, 255.f);
+        buf_normal[3 * i + 2] = (uint8_t) PBRender::Clamp(255.f * film_normal[i].z + 0.5f, 0.f, 255.f);
+    
+        buf_depth[3 * i + 0] = (uint8_t) PBRender::Clamp(255.f * film_depth[i].x + 0.5f, 0.f, 255.f);
+        buf_depth[3 * i + 1] = (uint8_t) PBRender::Clamp(255.f * film_depth[i].y + 0.5f, 0.f, 255.f);
+        buf_depth[3 * i + 2] = (uint8_t) PBRender::Clamp(255.f * film_depth[i].z + 0.5f, 0.f, 255.f);
+
     }
 
-    stbi_write_png("output.png", W, H, 3, buf.data(), 0);
-
-    // for (size_t i = 0; i < H; i++)
-    // {
-    //     for (size_t j = 0; j < W; j++)
-    //     {
-    //         std::cout << film[i*H+j].x;
-    //     }
-    //     std::cout << std::endl;
-        
-    // }
+    stbi_write_png("output_normal.png", W, H, 3, buf_normal.data(), 0);
+    stbi_write_png("output_depth.png", W, H, 3, buf_depth.data(), 0);
     
     
-    // write to ppm
-    
-
-    // // std::cout << "adding random triangles to the Scene..." << std::endl;
-    // size_t N = 10000;
-    // uint geomID;
-    
-    // std::vector<Point3f> vertices;
-    // std::vector<Vector3i> indices;
-
-    // vertices.reserve(N);
-    // indices.reserve(N);
-
-    // for (size_t i=0; i<N; ++i)
-    // {
-    //     const float xx = float(drand48())-0.5;
-    //     const float yy = float(drand48())-0.5;
-    //     const float zz = float(drand48())-0.5;
-
-    //     vertices.emplace_back(xx*100.f, yy*100.f, zz*100.f);
-    //     indices.emplace_back(i*3, i * 3 + 1,i * 3 + 2);
-    // }
-
     // geomID = scene->AddTriMesh(vertices, indices);
     // std::cout << "Triangle Mesh ID: " << geomID << std::endl;
 
