@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Eigen/Eigen>
+
 #include <PBRender/core/common.h>
 #include <PBRender/core/math.h>
 #include <iterator>
@@ -114,6 +116,7 @@ struct Vector3 {
 
     Vector3() { x = y = z = 0; }
     Vector3(T x, T y, T z) : x(x), y(y), z(z) {}
+    Vector3(Eigen::Matrix<T, 3, 1> vec) : x(vec(0)), y(vec(1)), z(vec(2)) {}
 
     explicit Vector3(const Point3<T> &p);
 
@@ -217,6 +220,10 @@ struct Vector3 {
     
     float LengthSquared() const { return x * x + y * y + z * z; }
     float Length() const { return std::sqrt(LengthSquared()); }
+
+    Eigen::Matrix<T, 3, 1> ToEigen() const {
+        return {x, y, z};
+    }
 
     explicit Vector3(const Normal3<T> &n);
 };
@@ -365,6 +372,7 @@ struct Point3 {
     
     Point3() { x = y = z = 0; }
     Point3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) { assert(!HasNaNs()); }
+    Point3(Eigen::Matrix<T, 3, 1> vec) : x(vec(0)), y(vec(1)), z(vec(2)) {}
 
     template <typename U>
     explicit Point3(const Point3<U> &p)
@@ -490,6 +498,10 @@ struct Point3 {
 
     bool HasNaNs() const { return isNaN(x) || isNaN(y) || isNaN(z); }
     Point3<T> operator-() const { return Point3<T>(-x, -y, -z); }
+
+    Eigen::Matrix<T, 3, 1> ToEigen() const {
+        return {x, y, z};
+    }
 };
 
 template <typename T>
@@ -505,6 +517,7 @@ struct Normal3 {
 
     Normal3() { x = y = z = 0; }
     Normal3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) { assert(!HasNaNs()); }
+    Normal3(Eigen::Matrix<T, 3, 1> vec) : x(vec(0)), y(vec(1)), z(vec(2)) {}
 
     bool HasNaNs() const { return isNaN(x) || isNaN(y) || isNaN(z); }
 
@@ -609,6 +622,10 @@ struct Normal3 {
 
     float LengthSquared() const { return x * x + y * y + z * z; }
     float Length() const { return std::sqrt(LengthSquared()); }
+    
+    Eigen::Matrix<T, 3, 1> ToEigen() const {
+        return {x, y, z};
+    }
 };
 
 // template <typename T>

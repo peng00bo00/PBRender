@@ -7,7 +7,8 @@ namespace PBRender
 Engine::Engine() {
     std::cout << "initialize Device..." << std::endl;
 
-    device = rtcNewDevice("start_threads=1,set_affinity=1");
+    // device = rtcNewDevice("start_threads=1,set_affinity=1");
+    device = rtcNewDevice(nullptr);
 
     if (!device)
         printf("error %d: cannot create device\n", rtcGetDeviceError(NULL));

@@ -18,6 +18,32 @@ double getSeconds() {
 int main() {
     std::cout << "Hello Embree!" << std::endl;
 
+    // for (size_t i = 0; i < 20; i++)
+    // {
+    //     float x = float(drand48()) - 0.5f;
+    //     float y = float(drand48()) - 0.5f;
+    //     float z = float(drand48()) - 0.5f;
+
+    //     float theta = float(drand48()) * PBRender::Pi;
+    //     Vector3f axis(Eigen::Vector3f::Random());
+    //     axis = axis / axis.Length();
+
+    //     Vector3f X(x, y, z);
+    //     Eigen::Vector3f EX = X.ToEigen();
+
+    //     // GT from Eigen
+    //     Eigen::AngleAxisf R(theta, axis.ToEigen());
+    //     EX = R.matrix() * EX;
+
+    //     // results from my implementation
+    //     PBRender::Transform T = PBRender::AxisAngle(theta, axis);
+    //     X = T(X);
+
+    //     std::cout << "check x: " << (EX(0) - X.x) << ", ";
+    //     std::cout << "check y: " << (EX(1) - X.y) << ", ";
+    //     std::cout << "check z: " << (EX(2) - X.z) << std::endl;
+    // }
+
     // create engine instance
     auto engine = PBRender::InitEngine();
     auto scene  = engine->GetScene();
@@ -26,6 +52,8 @@ int main() {
     Point3f center(Point3f(0.0f, 0.0f, 1.0f));
     float radius = 0.5f;
     scene->AddSphere(center, radius);
+
+    // finish scene
     scene->FinishScene();
 
     // create a film

@@ -60,6 +60,18 @@ class Scene;
 // Engine
 class Engine;
 
+// Transform
+class Transform;
+
+// Camera
+class Camera;
+
+// Film
+class Film;
+
+// Ray
+class Ray;
+
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {
     uint32_t ui;
