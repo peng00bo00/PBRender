@@ -23,3 +23,6 @@
 #include <PBRender/core/transform.h>
 #include <PBRender/core/camera.h>
 #include <PBRender/core/ray.h>
+
+// cameras
+#include <PBRender/cameras/perspective.h>

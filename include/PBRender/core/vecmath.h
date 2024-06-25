@@ -628,85 +628,85 @@ struct Normal3 {
     }
 };
 
-// template <typename T>
-// struct Bounds2 {
-//     Point2<T> pMin, pMax;
+template <typename T>
+struct Bounds2 {
+    Point2<T> pMin, pMax;
 
-//     Bounds2() {
-//         T minNum = std::numeric_limits<T>::lowest();
-//         T maxNum = std::numeric_limits<T>::max();
-//         pMin = Point2<T>(maxNum, maxNum);
-//         pMax = Point2<T>(minNum, minNum);
-//     }
+    Bounds2() {
+        T minNum = std::numeric_limits<T>::lowest();
+        T maxNum = std::numeric_limits<T>::max();
+        pMin = Point2<T>(maxNum, maxNum);
+        pMax = Point2<T>(minNum, minNum);
+    }
 
-//     Bounds2(const Point2<T> &p1, const Point2<T> &p2) {
-//         pMin = Point2<T>(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
-//         pMax = Point2<T>(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
-//     }
+    Bounds2(const Point2<T> &p1, const Point2<T> &p2) {
+        pMin = Point2<T>(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
+        pMax = Point2<T>(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
+    }
 
-//     explicit Bounds2(const Point2<T> &p) : pMin(p), pMax(p) {}
+    explicit Bounds2(const Point2<T> &p) : pMin(p), pMax(p) {}
 
-//     template <typename U>
-//     explicit operator Bounds2<U>() const {
-//         return Bounds2<U>((Point2<U>)pMin, (Point2<U>)pMax);
-//     }
+    template <typename U>
+    explicit operator Bounds2<U>() const {
+        return Bounds2<U>((Point2<U>)pMin, (Point2<U>)pMax);
+    }
 
-//     Vector2<T> Diagonal() const { return pMax - pMin; }
+    Vector2<T> Diagonal() const { return pMax - pMin; }
 
-//     T Area() const {
-//         Vector2<T> d = pMax - pMin;
-//         return (d.x * d.y);
-//     }
+    T Area() const {
+        Vector2<T> d = pMax - pMin;
+        return (d.x * d.y);
+    }
 
-//     int MaximumExtent() const {
-//         Vector2<T> diag = Diagonal();
-//         if (diag.x > diag.y)
-//             return 0;
-//         else
-//             return 1;
-//     }
+    int MaximumExtent() const {
+        Vector2<T> diag = Diagonal();
+        if (diag.x > diag.y)
+            return 0;
+        else
+            return 1;
+    }
 
-//     inline const Point2<T> &operator[](int i) const {
-//         assert(i == 0 || i == 1);
-//         return (i == 0) ? pMin : pMax;
-//     }
+    inline const Point2<T> &operator[](int i) const {
+        assert(i == 0 || i == 1);
+        return (i == 0) ? pMin : pMax;
+    }
 
-//     inline Point2<T> &operator[](int i) {
-//         assert(i == 0 || i == 1);
-//         return (i == 0) ? pMin : pMax;
-//     }
+    inline Point2<T> &operator[](int i) {
+        assert(i == 0 || i == 1);
+        return (i == 0) ? pMin : pMax;
+    }
 
-//     bool operator==(const Bounds2<T> &b) const {
-//         return b.pMin == pMin && b.pMax == pMax;
-//     }
+    bool operator==(const Bounds2<T> &b) const {
+        return b.pMin == pMin && b.pMax == pMax;
+    }
 
-//     bool operator!=(const Bounds2<T> &b) const {
-//         return b.pMin != pMin || b.pMax != pMax;
-//     }
+    bool operator!=(const Bounds2<T> &b) const {
+        return b.pMin != pMin || b.pMax != pMax;
+    }
 
-//     Point2<T> Lerp(const Point2f &t) const {
-//         return Point2<T>(PBRender::Lerp(t.x, pMin.x, pMax.x),
-//                             PBRender::Lerp(t.y, pMin.y, pMax.y));
-//     }
+    Point2<T> Lerp(const Point2f &t) const {
+        return Point2<T>(PBRender::Lerp(t.x, pMin.x, pMax.x),
+                            PBRender::Lerp(t.y, pMin.y, pMax.y));
+    }
 
-//     Vector2<T> Offset(const Point2<T> &p) const {
-//         Vector2<T> o = p - pMin;
-//         if (pMax.x > pMin.x) o.x /= pMax.x - pMin.x;
-//         if (pMax.y > pMin.y) o.y /= pMax.y - pMin.y;
-//         return o;
-//     }
+    Vector2<T> Offset(const Point2<T> &p) const {
+        Vector2<T> o = p - pMin;
+        if (pMax.x > pMin.x) o.x /= pMax.x - pMin.x;
+        if (pMax.y > pMin.y) o.y /= pMax.y - pMin.y;
+        return o;
+    }
 
-//     void BoundingSphere(Point2<T> *c, float *rad) const {
-//         *c = (pMin + pMax) / 2;
-//         *rad = Inside(*c, *this) ? Distance(*c, pMax) : 0;
-//     }
+    void BoundingSphere(Point2<T> *c, float *rad) const {
+        *c = (pMin + pMax) / 2;
+        *rad = Inside(*c, *this) ? Distance(*c, pMax) : 0;
+    }
     
-//     // TODO: check if friend is necessary
-//     friend std::ostream &operator<<(std::ostream &os, const Bounds2<T> &b) {
-//         os << "Bound2 [ " << b.pMin << " - " << b.pMax << " ]";
-//         return os;
-//     }
-// };
+    // TODO: check if friend is necessary
+    friend std::ostream &operator<<(std::ostream &os, const Bounds2<T> &b) {
+        os << "Bound2 [ " << b.pMin << " - " << b.pMax << " ]";
+        return os;
+    }
+};
 
 // template <typename T>
 // struct Bounds3 {

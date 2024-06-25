@@ -42,14 +42,14 @@ struct Normal3;
 
 using Normal3f = Normal3<float>;
 
-// // Bounds
-// template <typename T>
-// class Bounds2;
+// Bounds
+template <typename T>
+class Bounds2;
 // template <typename T>
 // class Bounds3;
 
-// using Bounds2f = Bounds2<float>;
-// using Bounds2i = Bounds2<int>;
+using Bounds2f = Bounds2<float>;
+using Bounds2i = Bounds2<int>;
 
 // using Bounds3f = Bounds3<float>;
 // using Bounds3i = Bounds3<int>;
@@ -65,6 +65,8 @@ class Transform;
 
 // Camera
 class Camera;
+struct CameraSample;
+class ProjectiveCamera;
 
 // Film
 class Film;

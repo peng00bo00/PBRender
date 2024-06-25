@@ -33,7 +33,7 @@ uint Scene::AddTriMesh(const std::vector<Point3f> &vertices,
     size_t n_indices  = indices.size();
 
     std::cout << "n_vertices=" << n_vertices;
-    std::cout << ", n_indices=" << n_indices << std::endl << std::endl;
+    std::cout << ", n_triangles=" << n_indices << std::endl;
 
     // vertex buffer
     float* _vertices = (float*) rtcSetNewGeometryBuffer(geom,
@@ -73,6 +73,8 @@ uint Scene::AddTriMesh(const std::vector<Point3f> &vertices,
     // attach and release geometry 
     uint geomID = rtcAttachGeometry(scene, geom);
     rtcReleaseGeometry(geom);
+
+    std::cout << "Geometry ID = " << geomID << std::endl << std::endl;
 
     return geomID;
 }
