@@ -4,7 +4,7 @@
 #include <iostream>
 #include <ctime>
 
-
+using Point2f = PBRender::Point2f;
 using Point3f = PBRender::Point3f;
 using Vector3i= PBRender::Vector3i;
 using Vector3f= PBRender::Vector3f;
@@ -207,65 +207,45 @@ int main() {
     // finish scene
     scene->FinishScene();
 
-    // set up camera
-    Point3f pos(0.f, 1.f, 6.8f);
-    Point3f look(0.f, 1.f, 0.f);
-    Vector3f up(0.f, 1.f, 0.f);
-
-    // Eigen::Matrix4f T;
-    // T <<-1, 0, 0, 0,
-    //      0, 1, 0, 0,
-    //      0, 0,-1, 0,
-    //      0, -1,-6.8, 1;
-
-    PBRender::Transform world2camera = PBRender::LookAt(pos, look, up);
-    PBRender::Transform camera2world = world2camera.Inverse();
-    // PBRender::Transform camera2world(T);
-    std::cout << camera2world << std::endl;
-
-    float fov = 19.5f;
-    float invTanAng = 1 / std::tan(PBRender::Radians(fov) / 2);
-
-    PBRender::Vector2f fullresolution(1024, 1024);
-    auto camera = PBRender::CreatePerspectiveCamera(camera2world, fullresolution);
-
     // create a film
-    const size_t H = 1024;
     const size_t W = 1024;
+    const size_t H = 1024;
     
-    const float xmax = std::tan(PBRender::Radians(fov) / 2);
-    const float xmin =-xmax;
-    const float ymax = xmax;
-    const float ymin = xmin;
+    PBRender::Vector2f fullResolution(static_cast<float>(W), static_cast<float>(H));
 
     std::vector<Vector3f> film_normal(H*W, Vector3f(0.f,0.f,0.f));
     std::vector<Vector3f> film_albedo(H*W, Vector3f(0.f,0.f,0.f));
     std::vector<Vector3f> film_depth(H*W, Vector3f(0.f,0.f,0.f));
 
+    // set up camera
+    Point3f pos(0.f, 1.f, 6.8f);
+    Point3f look(0.f, 1.f, 0.f);
+    Vector3f up(0.f, 1.f, 0.f);
+
+    PBRender::Transform world2camera = PBRender::LookAt(pos, look, up);
+    PBRender::Transform camera2world = world2camera.Inverse();
+
+    float fov = 19.5f;
+    auto camera = PBRender::CreatePerspectiveCamera(camera2world, fullResolution, fov);
+    // auto camera = PBRender::CreateOrthographicCamera(camera2world, fullResolution);
+
     float dmin = PBRender::Infinity;
     float dmax = 0.f;
 
     // rasterization
-    for (size_t i = 0; i < W; ++i)
+    for (size_t i = 0; i < static_cast<size_t>(fullResolution.x); ++i)
     {   
-        float tx = (i+0.5f) / W;
-        float xx = PBRender::Lerp(tx, xmin, xmax);
-
-        for (size_t j = 0; j < H; ++j)
+        for (size_t j = 0; j < static_cast<size_t>(fullResolution.y); ++j)
         {
-            int offset = i + W * j;
+            size_t offset = i + static_cast<size_t>(fullResolution.x) * j;
 
-            float ty = (j+0.5f) / H;
-            float yy = PBRender::Lerp(ty, ymin, ymax);
-
+            // generate a ray from camera
+            PBRender::CameraSample sample;
+            sample.pFilm = Point2f(i, j);
             PBRender::Ray ray;
-            ray.org = Point3f(0.f, 0.f, 0.f);
-            ray.dir = Vector3f(xx, yy, 1.f);
-            ray.dir /= ray.dir.Length();
+            camera->GenerateRay(sample, ray);
 
-            ray = camera2world(ray);
-
-            // initialize a ray
+            // initialize a rayhit
             RTCRayHit rayhit;
             rayhit.ray.org_x = ray.org.x;
             rayhit.ray.org_y = ray.org.y;
@@ -307,11 +287,11 @@ int main() {
     std::cout << "Maximum Depth: " << dmax << std::endl;
 
     // write to image
-    auto buf_normal = std::vector<char>(3 * H*W);
-    auto buf_depth  = std::vector<char>(3 * H*W);
-    auto buf_albedo = std::vector<char>(3 * H*W);
+    auto buf_normal = std::vector<char>(3 * film_normal.size());
+    auto buf_depth  = std::vector<char>(3 * film_depth.size());
+    auto buf_albedo = std::vector<char>(3 * film_albedo.size());
 
-    for (size_t i = 0; i < H*W; ++i)
+    for (size_t i = 0; i < film_normal.size(); ++i)
     {
         buf_normal[3 * i + 0] = (uint8_t) PBRender::Clamp(255.f * film_normal[i].x, 0.f, 255.f);
         buf_normal[3 * i + 1] = (uint8_t) PBRender::Clamp(255.f * film_normal[i].y, 0.f, 255.f);

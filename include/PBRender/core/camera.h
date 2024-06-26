@@ -20,9 +20,9 @@ public:
     Camera(const Transform &CameraToWorld);
     virtual ~Camera();
 
-    // virtual float GenerateRay(const CameraSample &sample, Ray *ray) const = 0;
+    virtual float GenerateRay(const CameraSample &sample, Ray &ray) const = 0;
     // virtual float GenerateRayDifferential(const CameraSample &sample, RayDifferential *rd) const;
-    float GenerateRay(const CameraSample &sample, Ray *ray);
+    // float GenerateRay(const CameraSample &sample, Ray *ray);
 
     // Film GetFilm() const { return film; }
 
@@ -33,7 +33,7 @@ protected:
 };
 
 
-class ProjectiveCamera : Camera {
+class ProjectiveCamera : public Camera {
 public:
     ProjectiveCamera (const Transform &CameraToWorld,
                     const Transform &CameraToScreen,

@@ -18,9 +18,11 @@ public:
     void RenderTile();
 
     std::shared_ptr<Scene> GetScene() { return scene; };
+    std::shared_ptr<Camera> GetCamera() { return camera; };
 
 public:
     std::shared_ptr<Scene> scene;
+    std::shared_ptr<Camera> camera;
 
 private:
     RTCDevice device;
@@ -33,6 +35,10 @@ private:
 inline std::unique_ptr<Engine> InitEngine() {
     return std::make_unique<PBRender::Engine>();
 }
+
+class GeometryViewer : public Engine {
+
+};
 
 
 } // namespace PBRender

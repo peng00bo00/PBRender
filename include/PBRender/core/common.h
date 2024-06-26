@@ -59,6 +59,7 @@ class Scene;
 
 // Engine
 class Engine;
+class GeometryViewer;
 
 // Transform
 class Transform;

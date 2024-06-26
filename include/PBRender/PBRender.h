@@ -26,3 +26,4 @@
 
 // cameras
 #include <PBRender/cameras/perspective.h>
+#include <PBRender/cameras/orthographic.h>

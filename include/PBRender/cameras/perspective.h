@@ -14,7 +14,7 @@ class PerspectiveCamera : public ProjectiveCamera {
                           float focalDistance,
                           float fov);
 
-        float GenerateRay(const CameraSample &sample, Ray *) const;
+        float GenerateRay(const CameraSample &sample, Ray &) const;
         // float GenerateRayDifferential(const CameraSample &sample, 
         //                               RayDifferential *ray) const;
 
