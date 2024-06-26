@@ -23,4 +23,9 @@ public:
     float tfar;
 };
 
+inline std::ostream &operator<<(std::ostream &os, const Ray &ray) {
+    os << "Ray Origin: " << ray.org << ", " << "Ray Dir: " << ray.dir;
+    return os;
+}
+
 } // namespace PBRender

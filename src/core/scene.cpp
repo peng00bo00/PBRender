@@ -9,14 +9,11 @@ Scene::Scene(const RTCDevice _device): device(_device) {
     rtcSetSceneFlags(scene, RTC_SCENE_FLAG_ROBUST);
     rtcSetSceneBuildQuality(scene, RTC_BUILD_QUALITY_HIGH);
 
-    std::cout << "initialize Scene finished!" << std::endl;
+    std::cout << "Initialize Scene finished!" << std::endl;
 }
 
 Scene::~Scene() {
-    std::cout << "release Scene..." << std::endl;
-
     rtcReleaseScene(scene);
-
     std::cout << "Scene released!" << std::endl;
 }
 

@@ -28,8 +28,13 @@ public:
 
 protected:
     Transform CameraToWorld;
+
+    // TODO: shutterOpen, shutterClose used in motion blur, skipped for now
     // float shutterOpen, shutterClose;
     // Film film;
+
+    // TODO: medium used in volume rendering, skipped for now
+    // const Medium *medium;
 };
 
 

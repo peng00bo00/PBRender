@@ -59,8 +59,9 @@ Transform RotateZ(float theta) {
 }
 
 Transform AxisAngle(float theta, const Vector3f &axis) {
-    Eigen::Vector3f axis_normalized(axis.x, axis.y, axis.z);
-    Eigen::AngleAxisf R(theta, axis_normalized.normalized());
+    // Eigen::Vector3f axis_normalized(axis.x, axis.y, axis.z);
+    Eigen::Vector3f axis_normalized = PBRender::Normalize(axis).ToEigen();
+    Eigen::AngleAxisf R(theta, axis_normalized);
 
     Eigen::Matrix4f m = Eigen::Matrix4f::Identity();
     m.topLeftCorner<3, 3>() = R.toRotationMatrix();

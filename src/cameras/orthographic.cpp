@@ -35,14 +35,14 @@ std::shared_ptr<OrthographicCamera> CreateOrthographicCamera(const Transform &ca
     Bounds2f screen;
 
     if (frame > 1.f) {
-        screen.pMin.x = -frame;
+        screen.pMin.x =-frame;
         screen.pMax.x = frame;
-        screen.pMin.y = -1.f;
+        screen.pMin.y =-1.f;
         screen.pMax.y = 1.f;
     } else {
-        screen.pMin.x = -1.f;
+        screen.pMin.x =-1.f;
         screen.pMax.x = 1.f;
-        screen.pMin.y = -1.f / frame;
+        screen.pMin.y =-1.f / frame;
         screen.pMax.y = 1.f / frame;
     }
 
