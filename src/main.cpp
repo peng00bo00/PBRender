@@ -193,6 +193,22 @@ void InitCornellBox(PBRender::Scene *scene, std::vector<Vector3f> &albedos) {
     albedos[geomID] = Vector3f(0.725f, 0.71f, 0.68f);
 }
 
+void InitRTCRayHit(PBRender::Ray &ray, RTCRayHit &rayhit) {
+    rayhit.ray.org_x = ray.org.x;
+    rayhit.ray.org_y = ray.org.y;
+    rayhit.ray.org_z = ray.org.z;
+    rayhit.ray.dir_x = ray.dir.x;
+    rayhit.ray.dir_y = ray.dir.y;
+    rayhit.ray.dir_z = ray.dir.z;
+
+    rayhit.ray.tnear = 0;
+    rayhit.ray.tfar  = PBRender::Infinity;
+
+    rayhit.ray.mask  =-1;
+    rayhit.ray.flags = 0;
+    rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
+    rayhit.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
+}
 
 int main() {
     std::cout << "Hello Embree!" << std::endl;
@@ -247,18 +263,7 @@ int main() {
 
             // initialize a rayhit
             RTCRayHit rayhit;
-            rayhit.ray.org_x = ray.org.x;
-            rayhit.ray.org_y = ray.org.y;
-            rayhit.ray.org_z = ray.org.z;
-            rayhit.ray.dir_x = ray.dir.x;
-            rayhit.ray.dir_y = ray.dir.y;
-            rayhit.ray.dir_z = ray.dir.z;
-            rayhit.ray.tnear = 0;
-            rayhit.ray.tfar = PBRender::Infinity;
-            rayhit.ray.mask = -1;
-            rayhit.ray.flags = 0;
-            rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
-            rayhit.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
+            InitRTCRayHit(ray, rayhit);
 
             // cast the ray to scene
             scene->RayHit(&rayhit);
