@@ -579,7 +579,7 @@ struct Normal3 {
         return *this;
     }
 
-    Normal3<T>(const Normal3<T> &n) {
+    Normal3(const Normal3<T> &n) {
         assert(!n.HasNaNs());
         x = n.x;
         y = n.y;
@@ -1254,38 +1254,38 @@ Normal3<T> Abs(const Normal3<T> &v) {
 //     return Bounds2iIterator(b, pEnd);
 // }
 
-// template <typename T>
-// Bounds2<T> Intersect(const Bounds2<T> &b1, const Bounds2<T> &b2) {
-//     Bounds2<T> ret;
-//     ret.pMin = Max(b1.pMin, b2.pMin);
-//     ret.pMax = Min(b1.pMax, b2.pMax);
-//     return ret;
-// }
+template <typename T>
+Bounds2<T> Intersect(const Bounds2<T> &b1, const Bounds2<T> &b2) {
+    Bounds2<T> ret;
+    ret.pMin = Max(b1.pMin, b2.pMin);
+    ret.pMax = Min(b1.pMax, b2.pMax);
+    return ret;
+}
 
-// template <typename T>
-// bool Overlaps(const Bounds2<T> &ba, const Bounds2<T> &bb) {
-//     bool x = (ba.pMax.x >= bb.pMin.x) && (ba.pMin.x <= bb.pMax.x);
-//     bool y = (ba.pMax.y >= bb.pMin.y) && (ba.pMin.y <= bb.pMax.y);
-//     return (x && y);
-// }
+template <typename T>
+bool Overlaps(const Bounds2<T> &ba, const Bounds2<T> &bb) {
+    bool x = (ba.pMax.x >= bb.pMin.x) && (ba.pMin.x <= bb.pMax.x);
+    bool y = (ba.pMax.y >= bb.pMin.y) && (ba.pMin.y <= bb.pMax.y);
+    return (x && y);
+}
 
-// template <typename T>
-// bool Inside(const Point2<T> &pt, const Bounds2<T> &b) {
-//     return (pt.x >= b.pMin.x && pt.x <= b.pMax.x && pt.y >= b.pMin.y &&
-//             pt.y <= b.pMax.y);
-// }
+template <typename T>
+bool Inside(const Point2<T> &pt, const Bounds2<T> &b) {
+    return (pt.x >= b.pMin.x && pt.x <= b.pMax.x && pt.y >= b.pMin.y &&
+            pt.y <= b.pMax.y);
+}
 
-// template <typename T>
-// bool InsideExclusive(const Point2<T> &pt, const Bounds2<T> &b) {
-//     return (pt.x >= b.pMin.x && pt.x < b.pMax.x && pt.y >= b.pMin.y &&
-//             pt.y < b.pMax.y);
-// }
+template <typename T>
+bool InsideExclusive(const Point2<T> &pt, const Bounds2<T> &b) {
+    return (pt.x >= b.pMin.x && pt.x < b.pMax.x && pt.y >= b.pMin.y &&
+            pt.y < b.pMax.y);
+}
 
-// template <typename T, typename U>
-// Bounds2<T> Expand(const Bounds2<T> &b, U delta) {
-//     return Bounds2<T>(b.pMin - Vector2<T>(delta, delta),
-//                       b.pMax + Vector2<T>(delta, delta));
-// }
+template <typename T, typename U>
+Bounds2<T> Expand(const Bounds2<T> &b, U delta) {
+    return Bounds2<T>(b.pMin - Vector2<T>(delta, delta),
+                      b.pMax + Vector2<T>(delta, delta));
+}
 
 // template <typename T>
 // inline bool Bounds3<T>::IntersectP(const Ray &ray, float *hitt0,

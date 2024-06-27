@@ -9,7 +9,7 @@ class PerspectiveCamera : public ProjectiveCamera {
     public:
         PerspectiveCamera(const Transform &CameraToWorld,
                           const Bounds2f &screenWindow,
-                          const Vector2f &fullResolution,
+                          Film &film,
                           float lensRadius,
                           float focalDistance,
                           float fov);
@@ -23,7 +23,7 @@ class PerspectiveCamera : public ProjectiveCamera {
         float A;
 };
 
-std::shared_ptr<PerspectiveCamera> CreatePerspectiveCamera(const Transform &cam2world, const Vector2f &fullResolution,
+std::shared_ptr<PerspectiveCamera> CreatePerspectiveCamera(const Transform &cam2world, Film &film,
                                            const float fov=90.0f, const float lensradius=0.0f, const float focaldistance=0.0f); 
 
 } // namespace PBRender

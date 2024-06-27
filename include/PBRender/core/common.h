@@ -68,12 +68,19 @@ class Transform;
 class Camera;
 struct CameraSample;
 class ProjectiveCamera;
+class OrthographicCamera;
 
 // Film
 class Film;
+class RGBFilm;
+class GeometryFilm;
 
 // Ray
 class Ray;
+
+// Containers
+template <typename T, typename Alloc>
+class Array2D;
 
 // Global Inline Functions
 inline uint32_t FloatToBits(float f) {

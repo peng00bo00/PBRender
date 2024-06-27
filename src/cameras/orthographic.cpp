@@ -30,8 +30,11 @@ float OrthographicCamera::GenerateRay(const CameraSample &sample,
     return 1;
 }
 
-std::shared_ptr<OrthographicCamera> CreateOrthographicCamera(const Transform &cam2world, const Vector2f &fullResolution, const float lensradius, const float focaldistance) {
-    float frame = fullResolution.x / fullResolution.y;
+std::shared_ptr<OrthographicCamera> CreateOrthographicCamera(const Transform &cam2world, Film &film, 
+const float lensradius, const float focaldistance) {
+
+    Point2i fullResolution = film.FullResolution();
+    float frame = static_cast<float>(fullResolution.x) / static_cast<float>(fullResolution.y);
     Bounds2f screen;
 
     if (frame > 1.f) {
@@ -55,7 +58,7 @@ std::shared_ptr<OrthographicCamera> CreateOrthographicCamera(const Transform &ca
         screen.pMax.y *= ScreenScale;
     }
 
-    return std::make_shared<OrthographicCamera>(cam2world, screen, fullResolution, lensradius, focaldistance);
+    return std::make_shared<OrthographicCamera>(cam2world, screen, film, lensradius, focaldistance);
 }
 
 } // namespace PBRender

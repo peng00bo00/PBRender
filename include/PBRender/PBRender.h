@@ -16,7 +16,9 @@
 // core
 #include <PBRender/core/common.h>
 
+#include <PBRender/core/container.h>
 #include <PBRender/core/engine.h>
+#include <PBRender/core/film.h>
 #include <PBRender/core/math.h>
 #include <PBRender/core/scene.h>
 #include <PBRender/core/vecmath.h>
