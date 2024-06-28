@@ -9,7 +9,7 @@ class OrthographicCamera : public ProjectiveCamera {
     public:
         OrthographicCamera(const Transform &CameraToWorld,
                            const Bounds2f &screenWindow,
-                           Film &film,
+                           Film *film,
                            float lensRadius,
                            float focalDistance)
             : ProjectiveCamera(CameraToWorld, Orthographic(0, 1), screenWindow,
@@ -29,7 +29,7 @@ class OrthographicCamera : public ProjectiveCamera {
 };
 
 std::shared_ptr<OrthographicCamera> CreateOrthographicCamera(
-    const Transform &cam2world, Film &film, 
+    const Transform &cam2world, Film *film, 
     const float lensradius=0.0f, const float focaldistance=0.0f);
 
 } // namespace PBRender

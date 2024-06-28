@@ -5,7 +5,7 @@ namespace PBRender
 
 PerspectiveCamera::PerspectiveCamera(const Transform &CameraToWorld,
                                     const Bounds2f &screenWindow,
-                                    Film &film,
+                                    Film *film,
                                     float lensRadius,
                                     float focalDistance,
                                     float fov)
@@ -18,7 +18,7 @@ PerspectiveCamera::PerspectiveCamera(const Transform &CameraToWorld,
         (RasterToCamera(Point3f(0, 1, 0)) - RasterToCamera(Point3f(0, 0, 0)));
 
     // Compute image plane bounds at $z=1$ for _PerspectiveCamera_
-    Point2i res = film.FullResolution();
+    Point2i res = film->FullResolution();
     Point3f pMin = RasterToCamera(Point3f(0, 0, 0));
     Point3f pMax = RasterToCamera(Point3f(res.x, res.y, 0));
     pMin /= pMin.z;
@@ -53,10 +53,10 @@ float PerspectiveCamera::GenerateRay(const CameraSample &sample,
     return 1;
 }
 
-std::shared_ptr<PerspectiveCamera> CreatePerspectiveCamera(const Transform &cam2world, Film &film,
+std::shared_ptr<PerspectiveCamera> CreatePerspectiveCamera(const Transform &cam2world, Film *film,
                                            const float fov, const float lensradius, const float focaldistance) {
     
-    Point2i fullResolution = film.FullResolution();
+    Point2i fullResolution = film->FullResolution();
     float frame = static_cast<float>(fullResolution.x) / static_cast<float>(fullResolution.y);
     Bounds2f screen;
 

@@ -222,19 +222,13 @@ int main() {
     auto engine = PBRender::InitEngine();
     std::vector<Vector3f> albedos(10, Vector3f());
 
-    auto scene  = engine->GetScene();
-    InitCornellBox(scene.get(), albedos);
-
-    // finish scene
-    scene->FinishScene();
-
     // create a film
     const int W = 1024;
     const int H = 1024;
 
     Point2i fullResolution(W, H);
     std::string file_name = "Geometry";
-    PBRender::GeometryFilm gFilm(fullResolution, "Geometry");
+    PBRender::GeometryFilm gFilm(fullResolution, file_name);
 
     PBRender::Array2D<Vector3f> film_normal(W, H);
     PBRender::Array2D<Vector3f> film_albedo(W, H);
@@ -249,47 +243,64 @@ int main() {
     PBRender::Transform camera2world = world2camera.Inverse();
 
     float fov = 19.5f;
-    auto camera = PBRender::CreatePerspectiveCamera(camera2world, gFilm, fov);
-    // auto camera = PBRender::CreateOrthographicCamera(camera2world, gFilm);
+    // auto camera = PBRender::CreatePerspectiveCamera(camera2world, &gFilm, fov);
+    // auto camera = PBRender::CreateOrthographicCamera(camera2world, &gFilm);
+
+    engine->SetCamera(PBRender::CreatePerspectiveCamera(camera2world, &gFilm, fov));
+    auto camera = engine->GetCamera();
+
+    // set up scene
+    auto scene  = engine->GetScene();
+    InitCornellBox(scene.get(), albedos);
+
+    // finish scene and build BVH
+    scene->FinishScene();
 
     // rasterization
     std::cout << "Rendering with TBB multithread!" << std::endl;
-    tbb::blocked_range2d<int> range(0, fullResolution.x, 
-                                    0, fullResolution.y);
-    tbb::parallel_for(range, 
-        [&](const tbb::blocked_range2d<int> &r) {
-        for (int i=r.rows().begin(); i<r.rows().end(); i++) {
-            for (int j=r.cols().begin(); j<r.cols().end(); j++) {
-                Point2f pFilm(i, j);
-                PBRender::CameraSample sample;
-                sample.pFilm = pFilm;
-                PBRender::Ray ray;
 
-                camera->GenerateRay(sample, ray);
+    tbb::task_arena ta;
+    ta.execute([&] {
+        tbb::affinity_partitioner affinity;
+        tbb::blocked_range2d<int> range(0, fullResolution.x, 
+                                        0, fullResolution.y);
+        tbb::parallel_for(range, 
+            [&](const tbb::blocked_range2d<int> &r) {
+            // render the full frame
+            for (int i=r.rows().begin(); i<r.rows().end(); i++) {
+                for (int j=r.cols().begin(); j<r.cols().end(); j++) {
+                    Point2f pFilm(i, j);
+                    PBRender::CameraSample sample;
+                    sample.pFilm = pFilm;
+                    PBRender::Ray ray;
 
-                // initialize a rayhit
-                RTCRayHit rayhit;
-                InitRTCRayHit(ray, rayhit);
+                    camera->GenerateRay(sample, ray);
 
-                // cast the ray to scene
-                scene->RayHit(&rayhit);
-                if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-                    // shading with normal
-                    float nx = rayhit.hit.Ng_x * 0.5f + 0.5f;
-                    float ny = rayhit.hit.Ng_y * 0.5f + 0.5f;
-                    float nz = rayhit.hit.Ng_z * 0.5f + 0.5f;
+                    // initialize a rayhit
+                    RTCRayHit rayhit;
+                    InitRTCRayHit(ray, rayhit);
 
-                    film_normal(i, j) = Vector3f(nx,ny,nz);
+                    // cast the ray to scene
+                    scene->RayHit(&rayhit);
+                    if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
+                        // shading with normal
+                        float nx = rayhit.hit.Ng_x * 0.5f + 0.5f;
+                        float ny = rayhit.hit.Ng_y * 0.5f + 0.5f;
+                        float nz = rayhit.hit.Ng_z * 0.5f + 0.5f;
 
-                    // shading with depth
-                    film_depth(i, j) = rayhit.ray.tfar;
+                        film_normal(i, j) = Vector3f(nx,ny,nz);
 
-                    // shading with albedo
-                    film_albedo(i, j) = albedos[rayhit.hit.geomID];
+                        // shading with depth
+                        film_depth(i, j) = rayhit.ray.tfar;
+
+                        // shading with albedo
+                        film_albedo(i, j) = albedos[rayhit.hit.geomID];
+                    }
                 }
             }
-     }});
-
+            }, affinity);
+        });
+    
     std::cout << "Finish rendering!" << std::endl;
     
     float dmin = PBRender::Infinity;

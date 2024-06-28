@@ -17,7 +17,9 @@ public:
     uint AddTriMesh(const std::vector<Point3f> &vertices, const std::vector<Vector3i> &indices);
     uint AddSphere(const Point3f center, const float radius);
 
-    void FinishScene() { rtcCommitScene(scene); };
+    void FinishScene() { 
+        rtcCommitScene(scene);
+    };
 
     void RayHit(RTCRayHit *rayhit);
 

@@ -38,7 +38,6 @@ class RGBFilm : public Film {
 class GeometryFilm : public Film {
 public:
     GeometryFilm(Point2i fullResolution, 
-                //  float diagonal, 
                  std::string filename);
     ~GeometryFilm();
 
@@ -62,7 +61,7 @@ private:
         float rgbAlbedoSum[3] = {0., 0., 0.};
     };
 
-    Array2D<Pixel> data;
+    std::unique_ptr<Array2D<Pixel>> data;
 };
 
 } // namespace PBRender

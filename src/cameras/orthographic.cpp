@@ -30,10 +30,10 @@ float OrthographicCamera::GenerateRay(const CameraSample &sample,
     return 1;
 }
 
-std::shared_ptr<OrthographicCamera> CreateOrthographicCamera(const Transform &cam2world, Film &film, 
+std::shared_ptr<OrthographicCamera> CreateOrthographicCamera(const Transform &cam2world, Film *film, 
 const float lensradius, const float focaldistance) {
 
-    Point2i fullResolution = film.FullResolution();
+    Point2i fullResolution = film->FullResolution();
     float frame = static_cast<float>(fullResolution.x) / static_cast<float>(fullResolution.y);
     Bounds2f screen;
 

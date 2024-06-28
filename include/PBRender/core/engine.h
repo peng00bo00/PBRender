@@ -12,12 +12,16 @@ namespace PBRender
 class Engine {
 public:
     Engine();
-    ~Engine();
+    virtual ~Engine();
 
     void RenderPixel();
     void RenderTile();
+    void RenderFrame();
 
+    void InitScene();
     std::shared_ptr<Scene> GetScene() { return scene; };
+
+    void SetCamera(std::shared_ptr<Camera> cam) { camera = cam; };
     std::shared_ptr<Camera> GetCamera() { return camera; };
 
 public:

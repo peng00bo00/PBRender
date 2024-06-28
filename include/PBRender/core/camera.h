@@ -17,21 +17,21 @@ struct CameraSample {
 
 class Camera {
 public:
-    Camera(const Transform &CameraToWorld, Film &film);
+    Camera(const Transform &CameraToWorld, Film *film);
     virtual ~Camera();
 
     virtual float GenerateRay(const CameraSample &sample, Ray &ray) const = 0;
     // virtual float GenerateRayDifferential(const CameraSample &sample, RayDifferential *rd) const;
     // float GenerateRay(const CameraSample &sample, Ray *ray);
 
-    Film GetFilm() const { return film; }
+    Film* GetFilm() const { return film; }
 
 protected:
     Transform CameraToWorld;
 
     // TODO: shutterOpen, shutterClose used in motion blur, skipped for now
     // float shutterOpen, shutterClose;
-    Film film;
+    Film *film;
 
     // TODO: medium used in volume rendering, skipped for now
     // const Medium *medium;
@@ -43,14 +43,14 @@ public:
     ProjectiveCamera (const Transform &CameraToWorld,
                     const Transform &CameraToScreen,
                     const Bounds2f &screenWindow,
-                    Film &film,
+                    Film *film,
                     float lensr, float focald
                     )
     : Camera(CameraToWorld, film), CameraToScreen(CameraToScreen) {
     // Initialize depth of field parameters
     lensRadius = lensr;
     focalDistance = focald;
-    Point2i fullResolution = film.FullResolution();
+    Point2i fullResolution = film->FullResolution();
 
     ScreenToRaster = Scale(fullResolution.x, fullResolution.y, 1) *
                      Scale(1 / (screenWindow.pMax.x - screenWindow.pMin.x),

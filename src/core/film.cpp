@@ -5,7 +5,8 @@ namespace PBRender
 
 GeometryFilm::GeometryFilm(Point2i fullResolution, std::string filename)
     : Film(fullResolution, filename),
-      data(fullResolution.x, fullResolution.y) { }
+      data(std::make_unique<Array2D<Pixel>>
+    (fullResolution.x, fullResolution.y)) { }
 
 GeometryFilm::~GeometryFilm() { }
 
