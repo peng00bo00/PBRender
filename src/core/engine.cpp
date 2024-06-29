@@ -46,6 +46,7 @@ void GeometryViewer::RenderPixel(int x, int y, Array2D<Vector3f> &frame) {
     sample.pFilm = Point2f{x + 0.5f, y + 0.5f};
     Ray ray;
 
+    camera = GetCamera();
     camera->GenerateRay(sample, ray);
 
     // initialize a rayhit
@@ -69,26 +70,7 @@ void GeometryViewer::RenderPixel(int x, int y, Array2D<Vector3f> &frame) {
 
     scene->RayHit(&rayhit);
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-        float albedo[3] = {0.f, 0.f ,0.f};
-        const uint albedo_slot = 0;
-
-        uint geomID = rayhit.hit.geomID;
-        RTCGeometry geom = rtcGetGeometry(scene->GetScene(), geomID);
-
-        uint primID = rayhit.hit.primID;
-
-        float u = rayhit.hit.u;
-        float v = rayhit.hit.v;
-
-        rtcInterpolate0(geom, 
-                        primID, 
-                        u, v, 
-                        RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE,
-                        albedo_slot,
-                        albedo,
-                        3);
-
-        frame(x, y) = Vector3f(albedo[0], albedo[1], albedo[2]);
+        frame(x, y) = RayHitAlbedo(rayhit);
     }
 }
 
@@ -137,6 +119,32 @@ void GeometryViewer::RenderFrame(Point2i TileSize, Array2D<Vector3f> &frame) {
     // });
 
     std::cout << "Finish rendering!" << std::endl;
+}
+
+Vector3f GeometryViewer::RayHitAlbedo(RTCRayHit &rayhit) {
+    // retrieve geometry
+    uint geomID = rayhit.hit.geomID;
+    uint primID = rayhit.hit.primID;
+    RTCScene rtcscene = scene->GetRTCScene();
+    RTCGeometry geom = rtcGetGeometry(rtcscene, geomID);
+
+    // (u, v) coordinate
+    float u = rayhit.hit.u;
+    float v = rayhit.hit.v;
+
+    float albedo[3] = {0.f, 0.f ,0.f};
+    const uint albedo_slot = 0;
+
+    // iterpolate
+    rtcInterpolate0(geom, 
+                    primID, 
+                    u, v, 
+                    RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE,
+                    albedo_slot,
+                    albedo,
+                    3);
+    
+    return {albedo[0], albedo[1], albedo[2]};
 }
 
 } // namespace PBRender
