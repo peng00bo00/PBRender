@@ -225,8 +225,8 @@ int main() {
     auto engine = std::make_unique<PBRender::GeometryViewer>();
 
     // create a film
-    const int W = 1024;
-    const int H = 1024;
+    const int W = 1024*8;
+    const int H = 1024*8;
 
     Point2i fullResolution(W, H);
     std::string file_name = "Geometry";

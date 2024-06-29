@@ -40,8 +40,7 @@ void Engine::InitScene() {
 
 
 void GeometryViewer::RenderPixel(int x, int y, Array2D<Vector3f> &frame) {
-    std::cout << "Rendering Pixel: " << Point2i(x, y) << "..." << std::endl;
-
+    // initialize a ray at film (x, y)
     CameraSample sample;
     sample.pFilm = Point2f{x + 0.5f, y + 0.5f};
     Ray ray;
@@ -80,16 +79,14 @@ void GeometryViewer::RenderTile(const Bounds2i TileBound, Array2D<Vector3f> &fra
             RenderPixel(x, y, frame);
         }
     }
-
-    std::cout << "Rendering Tile: " << TileBound << " finished!" << std::endl;
 }
 
-void GeometryViewer::RenderFrame(Point2i TileSize, Array2D<Vector3f> &frame) {
+void GeometryViewer::RenderFrame(const Point2i TileSize, Array2D<Vector3f> &frame) {
     Film *film = camera->GetFilm();
     Point2i fullResolution = film->FullResolution();
     Bounds2i fullFrame     = film->FullFrame();
 
-    // prepare tiles
+    // split the full frame to tiles
     int numTileX = std::ceil(fullResolution.x / TileSize.x);
     int numTileY = std::ceil(fullResolution.y / TileSize.y);
 
@@ -122,6 +119,7 @@ void GeometryViewer::RenderFrame(Point2i TileSize, Array2D<Vector3f> &frame) {
 }
 
 Vector3f GeometryViewer::RayHitAlbedo(RTCRayHit &rayhit) {
+    // TODO: wrap this to a Scene::GetGeometry(geomID) method
     // retrieve geometry
     uint geomID = rayhit.hit.geomID;
     uint primID = rayhit.hit.primID;

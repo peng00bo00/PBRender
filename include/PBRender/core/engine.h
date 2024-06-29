@@ -49,8 +49,8 @@ public:
     GeometryViewer() : Engine() {};
 
     void RenderPixel(int x, int y, Array2D<Vector3f> &frame);
-    void RenderTile(Bounds2i TileBound, Array2D<Vector3f> &frame);
-    void RenderFrame(Point2i TileSize, Array2D<Vector3f> &frame);
+    void RenderTile(const Bounds2i TileBound, Array2D<Vector3f> &frame);
+    void RenderFrame(const Point2i TileSize, Array2D<Vector3f> &frame);
 
 private:
     Vector3f RayHitAlbedo(RTCRayHit &rayhit);
