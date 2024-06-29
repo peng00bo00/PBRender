@@ -48,9 +48,9 @@ class GeometryViewer : public Engine {
 public:
     GeometryViewer() : Engine() {};
 
-    void RenderPixel(int x, int y, std::vector<float> &frame);
-    void RenderTile(Bounds2i TileBound, std::vector<float> &frame);
-    void RenderFrame(Point2i TileSize, std::vector<float> &frame);
+    void RenderPixel(int x, int y, Array2D<Vector3f> &frame);
+    void RenderTile(Bounds2i TileBound, Array2D<Vector3f> &frame);
+    void RenderFrame(Point2i TileSize, Array2D<Vector3f> &frame);
 };
 
 

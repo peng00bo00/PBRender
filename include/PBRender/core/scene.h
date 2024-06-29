@@ -25,6 +25,8 @@ public:
 
     void RayHit(RTCRayHit *rayhit);
 
+    RTCScene GetScene() { return scene; };
+
 private:
     const RTCDevice device;
     RTCScene scene;

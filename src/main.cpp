@@ -225,8 +225,8 @@ int main() {
     auto engine = std::make_unique<PBRender::GeometryViewer>();
 
     // create a film
-    const int W = 512;
-    const int H = 512;
+    const int W = 1024;
+    const int H = 1024;
 
     Point2i fullResolution(W, H);
     std::string file_name = "Geometry";
@@ -249,21 +249,19 @@ int main() {
     // auto camera = PBRender::CreateOrthographicCamera(camera2world, &gFilm);
 
     engine->SetCamera(PBRender::CreatePerspectiveCamera(camera2world, &gFilm, fov));
-    auto camera = engine->GetCamera();
 
-    // tiles
-    Point2i TileSize(64, 64);
-    std::vector<float> frame;
-    frame.resize(H*W);
+    // set up scene
+    auto scene  = engine->GetScene();
+    InitCornellBox(scene.get());
 
-    engine->RenderFrame(TileSize, frame);
+    // finish scene and build BVH
+    scene->FinishScene();
 
-    // // set up scene
-    // auto scene  = engine->GetScene();
-    // InitCornellBox(scene.get());
+    // set up rendering tiles
+    Point2i TileSize(128, 128);
 
-    // // finish scene and build BVH
-    // scene->FinishScene();
+    // start rendering
+    engine->RenderFrame(TileSize, film_albedo);
 
     // // rasterization
     // std::cout << "Rendering with TBB multithread!" << std::endl;
@@ -343,36 +341,36 @@ int main() {
     //     dmin = std::min(dmin, depth);
     // }
 
-    // // write to image
-    // auto buf_normal = std::vector<char>(3 * film_normal.size());
-    // auto buf_depth  = std::vector<char>(3 * film_depth.size());
-    // auto buf_albedo = std::vector<char>(3 * film_albedo.size());
+    // write to image
+    auto buf_normal = std::vector<char>(3 * film_normal.size());
+    auto buf_depth  = std::vector<char>(3 * film_depth.size());
+    auto buf_albedo = std::vector<char>(3 * film_albedo.size());
 
-    // for (size_t i = 0; i < static_cast<size_t>(fullResolution.x); ++i)
-    // {   
-    //     for (size_t j = 0; j < static_cast<size_t>(fullResolution.y); ++j)
-    //     {
-    //         int offset = i + static_cast<size_t>(fullResolution.x) * j;
+    for (size_t i = 0; i < static_cast<size_t>(fullResolution.x); ++i)
+    {   
+        for (size_t j = 0; j < static_cast<size_t>(fullResolution.y); ++j)
+        {
+            int offset = i + static_cast<size_t>(fullResolution.x) * j;
 
-    //         // normal map
-    //         buf_normal[3 * offset + 0] = (uint8_t) PBRender::Clamp(255.f * film_normal(i, j).x, 0.f, 255.f);
-    //         buf_normal[3 * offset + 1] = (uint8_t) PBRender::Clamp(255.f * film_normal(i, j).y, 0.f, 255.f);
-    //         buf_normal[3 * offset + 2] = (uint8_t) PBRender::Clamp(255.f * film_normal(i, j).z, 0.f, 255.f);
+            // // normal map
+            // buf_normal[3 * offset + 0] = (uint8_t) PBRender::Clamp(255.f * film_normal(i, j).x, 0.f, 255.f);
+            // buf_normal[3 * offset + 1] = (uint8_t) PBRender::Clamp(255.f * film_normal(i, j).y, 0.f, 255.f);
+            // buf_normal[3 * offset + 2] = (uint8_t) PBRender::Clamp(255.f * film_normal(i, j).z, 0.f, 255.f);
 
-    //         // depth map
-    //         float depth = film_depth(i, j);
-    //         float t = (depth - dmin) / dmax;
-    //         buf_depth[3 * offset + 0] = buf_depth[3 * offset + 1] = buf_depth[3 * offset + 2] = (uint8_t) (t * 255.f);
+            // // depth map
+            // float depth = film_depth(i, j);
+            // float t = (depth - dmin) / dmax;
+            // buf_depth[3 * offset + 0] = buf_depth[3 * offset + 1] = buf_depth[3 * offset + 2] = (uint8_t) (t * 255.f);
 
-    //         // albedo map
-    //         buf_albedo[3 * offset + 0] = (uint8_t) PBRender::Clamp(255.f * film_albedo(i, j).x, 0.f, 255.f);
-    //         buf_albedo[3 * offset + 1] = (uint8_t) PBRender::Clamp(255.f * film_albedo(i, j).y, 0.f, 255.f);
-    //         buf_albedo[3 * offset + 2] = (uint8_t) PBRender::Clamp(255.f * film_albedo(i, j).z, 0.f, 255.f);
-    //     }
-    // }
+            // albedo map
+            buf_albedo[3 * offset + 0] = (uint8_t) PBRender::Clamp(255.f * film_albedo(i, j).x, 0.f, 255.f);
+            buf_albedo[3 * offset + 1] = (uint8_t) PBRender::Clamp(255.f * film_albedo(i, j).y, 0.f, 255.f);
+            buf_albedo[3 * offset + 2] = (uint8_t) PBRender::Clamp(255.f * film_albedo(i, j).z, 0.f, 255.f);
+        }
+    }
 
-    // // save to disk
+    // save to disk
     // stbi_write_png("output_normal.png", W, H, 3, buf_normal.data(), 0);
     // stbi_write_png("output_depth.png", W, H, 3, buf_depth.data(), 0);
-    // stbi_write_png("output_albedo.png", W, H, 3, buf_albedo.data(), 0);
+    stbi_write_png("output_albedo.png", W, H, 3, buf_albedo.data(), 0);
 }
