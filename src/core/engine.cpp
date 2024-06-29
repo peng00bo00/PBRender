@@ -38,4 +38,60 @@ void Engine::InitScene() {
     scene = std::make_shared<Scene>(device);
 }
 
+void RenderPixel(int x, int y, std::vector<float> &frame) {
+    std::cout << "Rendering Pixel: " << Point2i(x, y) << "..." << std::endl;
+}
+
+void RenderTile(Bounds2i TileBound, std::vector<float> &frame) {
+    std::cout << "Rendering Tile: " << TileBound << "..." << std::endl;
+
+    for (int x = TileBound.pMin.x; x < TileBound.pMax.x; ++x) {
+        for (int y = TileBound.pMin.y; y < TileBound.pMax.y; ++y) {
+            RenderPixel(x, y, frame);
+        }
+    }
+
+    std::cout << "Rendering Tile: " << TileBound << " finished!" << std::endl;
+}
+
+void GeometryViewer::RenderFrame(Point2i TileSize, std::vector<float> &frame) {
+    Film *film = camera->GetFilm();
+    Point2i fullResolution = film->FullResolution();
+    Bounds2i fullFrame     = film->FullFrame();
+
+    // prepare tiles
+    int numTileX = std::ceil(fullResolution.x / TileSize.x);
+    int numTileY = std::ceil(fullResolution.y / TileSize.y);
+
+    std::vector<Bounds2i> tiles;
+    tiles.reserve(numTileX * numTileY);
+    
+    for (size_t i = 0; i < fullResolution.x; i += TileSize.x) {
+        for (size_t j = 0; j < fullResolution.y; j += TileSize.y) {
+            // tile bound
+            Point2i pMin(i, j);
+            Point2i pMax(i+TileSize.x, j+TileSize.y);
+            Bounds2i bound(pMin, pMax);
+
+            bound = Intersect(bound, fullFrame);
+            tiles.emplace_back(bound);
+
+            std::cout << Point2i(i, j) << ": " << bound << std::endl;
+        }
+    }
+
+    // render each tile
+    for (const Bounds2i tile : tiles) {
+        RenderTile(tile, frame);
+    }
+
+
+    // tbb::task_arena ta;
+    // ta.execute([&] {
+    //     tbb::affinity_partitioner affinity;
+    // });
+
+    std::cout << "Finish rendering!" << std::endl;
+}
+
 } // namespace PBRender

@@ -16,6 +16,7 @@ public:
         filename(filename) { }
 
     Point2i FullResolution() const { return fullResolution; }
+    Bounds2i FullFrame() const { return {Point2i(0, 0), fullResolution}; };
     // Bounds2i PixelBounds() const { return pixelBounds; }
     // float Diagonal() const { return diagonal; }
     // Filter GetFilter() const { return filter; }
@@ -37,8 +38,7 @@ class RGBFilm : public Film {
 
 class GeometryFilm : public Film {
 public:
-    GeometryFilm(Point2i fullResolution, 
-                 std::string filename);
+    GeometryFilm(Point2i fullResolution, std::string filename);
     ~GeometryFilm();
 
     void AddSample();

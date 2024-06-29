@@ -15,6 +15,8 @@ public:
     ~Scene();
 
     uint AddTriMesh(const std::vector<Point3f> &vertices, const std::vector<Vector3i> &indices);
+    uint AddTriMesh(const std::vector<Point3f> &vertices, const std::vector<Vector3i> &indices, const Vector3f albedo);
+
     uint AddSphere(const Point3f center, const float radius);
 
     void FinishScene() { 

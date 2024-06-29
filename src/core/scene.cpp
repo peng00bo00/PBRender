@@ -20,7 +20,7 @@ Scene::~Scene() {
 uint Scene::AddTriMesh(const std::vector<Point3f> &vertices, 
                         const std::vector<Vector3i> &indices) {
 
-    std::cout << "Adding a triangle mesh to the Scene..." << std::endl;
+    // std::cout << "Adding a triangle mesh to the Scene..." << std::endl;
     
     // create a triangle mesh geometry and initialize a singe triangle
     RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
@@ -29,8 +29,8 @@ uint Scene::AddTriMesh(const std::vector<Point3f> &vertices,
     size_t n_vertices = vertices.size();
     size_t n_indices  = indices.size();
 
-    std::cout << "n_vertices=" << n_vertices;
-    std::cout << ", n_triangles=" << n_indices << std::endl;
+    // std::cout << "n_vertices=" << n_vertices;
+    // std::cout << ", n_triangles=" << n_indices << std::endl;
 
     // vertex buffer
     float* _vertices = (float*) rtcSetNewGeometryBuffer(geom,
@@ -71,14 +71,56 @@ uint Scene::AddTriMesh(const std::vector<Point3f> &vertices,
     uint geomID = rtcAttachGeometry(scene, geom);
     rtcReleaseGeometry(geom);
 
-    std::cout << "Geometry ID = " << geomID << std::endl << std::endl;
+    // std::cout << "Geometry ID = " << geomID << std::endl << std::endl;
 
     return geomID;
 }
 
+uint Scene::AddTriMesh(const std::vector<Point3f> &vertices, 
+                        const std::vector<Vector3i> &indices, 
+                        Vector3f albedo) {
+    // add vertices and indices
+    uint geomID = AddTriMesh(vertices, indices);
+
+    // retain the geometry
+    RTCGeometry geom = rtcGetGeometry(scene, geomID);
+    rtcRetainGeometry(geom);
+
+    // set number of vertex attributes, only use albedo for now
+    rtcSetGeometryVertexAttributeCount(geom, 1);
+
+    // albedo
+    size_t n_vertices = vertices.size();
+
+    const uint albedo_slot = 0;
+    float* _albedo = (float*) rtcSetNewGeometryBuffer(geom, 
+                                                      RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 
+                                                      albedo_slot, 
+                                                      RTC_FORMAT_FLOAT3, 
+                                                      3*sizeof(float), 
+                                                      n_vertices);
+    for (size_t i=0; i< n_vertices; ++i)
+    {
+        _albedo[i * 3]     = albedo.x;
+        _albedo[i * 3 + 1] = albedo.y;
+        _albedo[i * 3 + 2] = albedo.z;
+    }
+
+    // commit geometry
+    rtcCommitGeometry(geom);
+
+    // release geometry 
+    rtcReleaseGeometry(geom);
+
+    // std::cout << "Geometry ID = " << geomID << std::endl << std::endl;
+
+    return geomID;
+
+}
+
 uint Scene::AddSphere(const Point3f center, const float radius) {
     
-    std::cout << "Adding a sphere to the Scene..." << std::endl;
+    // std::cout << "Adding a sphere to the Scene..." << std::endl;
     
     // create a triangle mesh geometry and initialize a singe triangle
     RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_SPHERE_POINT);

@@ -701,7 +701,6 @@ struct Bounds2 {
         *rad = Inside(*c, *this) ? Distance(*c, pMax) : 0;
     }
     
-    // TODO: check if friend is necessary
     friend std::ostream &operator<<(std::ostream &os, const Bounds2<T> &b) {
         os << "Bound2 [ " << b.pMin << " - " << b.pMax << " ]";
         return os;
