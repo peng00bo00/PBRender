@@ -9,11 +9,11 @@ namespace PBRender
 class Film {
 public:
     Film(Point2i fullResolution, 
-        //  float diagonal, 
+         //  float diagonal, 
          std::string filename) :
-        fullResolution(fullResolution), 
-        // diagonal(diagonal * 0.001f), 
-        filename(filename) { }
+         fullResolution(fullResolution), 
+         // diagonal(diagonal * 0.001f), 
+         filename(filename) { }
 
     Point2i FullResolution() const { return fullResolution; }
     Bounds2i FullFrameBound() const { return {Point2i(0, 0), fullResolution}; };
@@ -26,6 +26,7 @@ public:
     // TODO: update L to color spectrum
     virtual void AddSample(Point2i pFilm, const Vector3f &L) = 0;
     virtual Vector3f GetPixel(const Point2i pFilm) const = 0;
+    virtual void WriteImage() const = 0;
 
 protected:
     Point2i fullResolution;             // resolution of the film

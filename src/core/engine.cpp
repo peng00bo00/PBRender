@@ -38,7 +38,57 @@ void Engine::InitScene() {
     scene = std::make_shared<Scene>(device);
 }
 
-// TODO: update writing part with film
+void Engine::RenderFrame(const Point2i TileSize) {
+    Film *film = camera->GetFilm();
+    Point2i fullResolution = film->FullResolution();
+    Bounds2i fullFrame     = film->FullFrameBound();
+
+    // split the full frame to tiles
+    int numTileX = std::ceil(fullResolution.x / TileSize.x);
+    int numTileY = std::ceil(fullResolution.y / TileSize.y);
+
+    std::vector<Bounds2i> tiles;
+    tiles.reserve(numTileX * numTileY);
+    
+    for (size_t i = 0; i < fullResolution.x; i += TileSize.x) {
+        for (size_t j = 0; j < fullResolution.y; j += TileSize.y) {
+            // tile bound
+            Point2i pMin(i, j);
+            Point2i pMax(i+TileSize.x, j+TileSize.y);
+            Bounds2i bound(pMin, pMax);
+
+            bound = Intersect(bound, fullFrame);
+            tiles.emplace_back(bound);
+        }
+    }
+
+    // render each tile in parallel
+    std::cout << "Rendering with TBB multithread!" << std::endl;
+    tbb::task_arena ta;
+    ta.execute([&] {
+        tbb::affinity_partitioner affinity;
+        tbb::blocked_range<int> range(0, numTileX * numTileY);
+        tbb::parallel_for(
+            range,
+            [&](const tbb::blocked_range<int> r){
+                for (int i=r.begin(); i<r.end(); ++i) {
+                    RenderTile(tiles[i]);
+                }
+            },
+            affinity
+            );
+    });
+    std::cout << "Finish rendering!" << std::endl;
+}
+
+void Engine::RenderTile(const Bounds2i TileBound) {
+    for (int x = TileBound.pMin.x; x < TileBound.pMax.x; ++x) {
+        for (int y = TileBound.pMin.y; y < TileBound.pMax.y; ++y) {
+            RenderPixel(x, y);
+        }
+    }
+}
+
 void GeometryViewer::RenderPixel(int x, int y) {
     // initialize a ray at film (x, y)
     CameraSample sample;
@@ -96,56 +146,6 @@ void GeometryViewer::RenderPixel(int x, int y) {
     }
 }
 
-void GeometryViewer::RenderTile(const Bounds2i TileBound) {
-    for (int x = TileBound.pMin.x; x < TileBound.pMax.x; ++x) {
-        for (int y = TileBound.pMin.y; y < TileBound.pMax.y; ++y) {
-            RenderPixel(x, y);
-        }
-    }
-}
-
-void GeometryViewer::RenderFrame(const Point2i TileSize) {
-    Film *film = camera->GetFilm();
-    Point2i fullResolution = film->FullResolution();
-    Bounds2i fullFrame     = film->FullFrameBound();
-
-    // split the full frame to tiles
-    int numTileX = std::ceil(fullResolution.x / TileSize.x);
-    int numTileY = std::ceil(fullResolution.y / TileSize.y);
-
-    std::vector<Bounds2i> tiles;
-    tiles.reserve(numTileX * numTileY);
-    
-    for (size_t i = 0; i < fullResolution.x; i += TileSize.x) {
-        for (size_t j = 0; j < fullResolution.y; j += TileSize.y) {
-            // tile bound
-            Point2i pMin(i, j);
-            Point2i pMax(i+TileSize.x, j+TileSize.y);
-            Bounds2i bound(pMin, pMax);
-
-            bound = Intersect(bound, fullFrame);
-            tiles.emplace_back(bound);
-        }
-    }
-
-    // render each tile in parallel
-    std::cout << "Rendering with TBB multithread!" << std::endl;
-    tbb::task_arena ta;
-    ta.execute([&] {
-        tbb::affinity_partitioner affinity;
-        tbb::blocked_range<int> range(0, numTileX * numTileY);
-        tbb::parallel_for(
-            range,
-            [&](const tbb::blocked_range<int> r){
-                for (int i=r.begin(); i<r.end(); ++i) {
-                    RenderTile(tiles[i]);
-                }
-            },
-            affinity
-            );
-    });
-    std::cout << "Finish rendering!" << std::endl;
-}
 
 GeometryViewer::PixelGeometry GeometryViewer::RayHitQuery(RTCRayHit &rayhit) {
     // retrieve geometry

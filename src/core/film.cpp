@@ -56,8 +56,7 @@ void GeometryFilm::WriteImage() const {
 	}
 
 	// save to .png file
-	std::string filename_png(filename);
-	filename_png.append(".png");
+	std::string filename_png = filename + ".png";
 
 	stbi_write_png(filename_png.data(), 
 					W, 

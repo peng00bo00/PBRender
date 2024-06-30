@@ -18,15 +18,18 @@ public:
     Engine();
     virtual ~Engine();
 
-    void RenderPixel();
-    void RenderTile();
-    void RenderFrame();
-
     void InitScene();
     std::shared_ptr<Scene> GetScene() { return scene; };
 
     void SetCamera(std::shared_ptr<Camera> cam) { camera = cam; };
     std::shared_ptr<Camera> GetCamera() { return camera; };
+
+    // rendering interface
+    void RenderFrame(const Point2i TileSize);
+
+protected:
+    void RenderTile(const Bounds2i TileBound);
+    virtual void RenderPixel(int x, int y) { }
 
 protected:
     std::shared_ptr<Scene> scene;
@@ -38,12 +41,12 @@ private:
     static void errorFunction(void* userPtr, enum RTCError error, const char* str) {
         printf("error %d: %s\n", error, str);
     }
+
 };
 
 inline std::unique_ptr<Engine> InitEngine() {
     return std::make_unique<PBRender::Engine>();
 }
-
 
 
 class GeometryViewer : public Engine {
@@ -57,9 +60,8 @@ public:
     GeometryViewer() : Engine(), gImg(ALBEDO) {};
     GeometryViewer(GeometryImage geom) : Engine(), gImg(geom) {};
 
+protected:
     void RenderPixel(int x, int y);
-    void RenderTile(const Bounds2i TileBound);
-    void RenderFrame(const Point2i TileSize);
 
 private:
     struct PixelGeometry {
@@ -73,6 +75,12 @@ private:
     PixelGeometry RayHitQuery(RTCRayHit &rayhit);
     GeometryImage gImg;
 };
+
+inline std::unique_ptr<GeometryViewer> InitGeometryViewer(
+    GeometryViewer::GeometryImage gImg = GeometryViewer::GeometryImage::ALBEDO) {
+    return std::make_unique<PBRender::GeometryViewer>(gImg);
+}
+
 
 
 } // namespace PBRender

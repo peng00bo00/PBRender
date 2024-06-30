@@ -218,16 +218,15 @@ int main() {
 
     // create engine instance
     // auto engine = PBRender::InitEngine();
-    PBRender::GeometryViewer::GeometryImage gImg 
-        = PBRender::GeometryViewer::ALBEDO;
-    auto engine = std::make_unique<PBRender::GeometryViewer>(gImg);
+    PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::ALBEDO};
+    auto engine = PBRender::InitGeometryViewer(gImg);
 
     // create a film
     const int W = 1024*2;
     const int H = 1024;
 
     Point2i fullResolution(W, H);
-    std::string file_name = "Geometry";
+    std::string file_name = "Cornel Box Geometry";
     PBRender::GeometryFilm gFilm(fullResolution, file_name);
 
     // set up camera

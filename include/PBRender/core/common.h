@@ -78,6 +78,10 @@ class GeometryFilm;
 // Ray
 class Ray;
 
+// color spectrum
+
+// integrator
+
 // Containers
 template <typename T, typename Alloc>
 class Array2D;
