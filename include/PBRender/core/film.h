@@ -16,7 +16,7 @@ public:
         filename(filename) { }
 
     Point2i FullResolution() const { return fullResolution; }
-    Bounds2i FullFrame() const { return {Point2i(0, 0), fullResolution}; };
+    Bounds2i FullFrameBound() const { return {Point2i(0, 0), fullResolution}; };
     // Bounds2i PixelBounds() const { return pixelBounds; }
     // float Diagonal() const { return diagonal; }
     // Filter GetFilter() const { return filter; }
@@ -42,6 +42,7 @@ public:
     ~GeometryFilm();
 
     void AddSample();
+    void GetPixel(Point2i pFilm);
     void AddSplat();
 
     static void *Create();

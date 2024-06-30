@@ -9,6 +9,16 @@
 
 namespace PBRender
 {
+
+// vertex attributes
+enum VERTEX_ATTRIB_SLOT {
+    VERTEX_ALBEDO = 0,
+
+    // number of vertex attributes
+    NUM_VERTX_ATTRIB = 1
+};
+
+
 class Scene {
 public:
     Scene(const RTCDevice _device);
@@ -19,13 +29,11 @@ public:
 
     uint AddSphere(const Point3f center, const float radius);
 
-    void FinishScene() { 
-        rtcCommitScene(scene);
-    };
+    RTCGeometry GetGeometry(uint geomID);
+
+    void FinishScene() { rtcCommitScene(scene); };
 
     void RayHit(RTCRayHit *rayhit);
-
-    RTCScene GetRTCScene() { return scene; };
 
 private:
     const RTCDevice device;

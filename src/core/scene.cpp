@@ -87,15 +87,14 @@ uint Scene::AddTriMesh(const std::vector<Point3f> &vertices,
     rtcRetainGeometry(geom);
 
     // set number of vertex attributes, only use albedo for now
-    rtcSetGeometryVertexAttributeCount(geom, 1);
+    rtcSetGeometryVertexAttributeCount(geom, NUM_VERTX_ATTRIB);
 
     // albedo
     size_t n_vertices = vertices.size();
 
-    const uint albedo_slot = 0;
     float* _albedo = (float*) rtcSetNewGeometryBuffer(geom, 
                                                       RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 
-                                                      albedo_slot, 
+                                                      VERTEX_ALBEDO,
                                                       RTC_FORMAT_FLOAT3, 
                                                       3*sizeof(float), 
                                                       n_vertices);
@@ -111,8 +110,6 @@ uint Scene::AddTriMesh(const std::vector<Point3f> &vertices,
 
     // release geometry 
     rtcReleaseGeometry(geom);
-
-    // std::cout << "Geometry ID = " << geomID << std::endl << std::endl;
 
     return geomID;
 
@@ -147,6 +144,10 @@ uint Scene::AddSphere(const Point3f center, const float radius) {
     rtcReleaseGeometry(geom);
 
     return geomID;
+}
+
+RTCGeometry Scene::GetGeometry(uint geomID) {
+    return rtcGetGeometry(scene, geomID);    
 }
 
 void Scene::RayHit(RTCRayHit *rayhit) {

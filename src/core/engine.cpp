@@ -38,7 +38,7 @@ void Engine::InitScene() {
     scene = std::make_shared<Scene>(device);
 }
 
-
+// TODO: update writing part with film
 void GeometryViewer::RenderPixel(int x, int y, Array2D<Vector3f> &frame) {
     // initialize a ray at film (x, y)
     CameraSample sample;
@@ -49,6 +49,7 @@ void GeometryViewer::RenderPixel(int x, int y, Array2D<Vector3f> &frame) {
     camera->GenerateRay(sample, ray);
 
     // initialize a rayhit
+    // TODO: wrap RTCRayHit initialization
     RTCRayHit rayhit;
     {
         rayhit.ray.org_x = ray.org.x;
@@ -69,7 +70,13 @@ void GeometryViewer::RenderPixel(int x, int y, Array2D<Vector3f> &frame) {
 
     scene->RayHit(&rayhit);
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-        frame(x, y) = RayHitAlbedo(rayhit);
+        PixelGeometry pixel = RayHitQuery(rayhit);
+
+        // write to film
+        frame(x, y) = pixel.albedo;
+        // frame(x, y) = pixel.normal;
+
+        // auto film = camera->GetFilm();
     }
 }
 
@@ -84,7 +91,7 @@ void GeometryViewer::RenderTile(const Bounds2i TileBound, Array2D<Vector3f> &fra
 void GeometryViewer::RenderFrame(const Point2i TileSize, Array2D<Vector3f> &frame) {
     Film *film = camera->GetFilm();
     Point2i fullResolution = film->FullResolution();
-    Bounds2i fullFrame     = film->FullFrame();
+    Bounds2i fullFrame     = film->FullFrameBound();
 
     // split the full frame to tiles
     int numTileX = std::ceil(fullResolution.x / TileSize.x);
@@ -105,44 +112,52 @@ void GeometryViewer::RenderFrame(const Point2i TileSize, Array2D<Vector3f> &fram
         }
     }
 
-    // render each tile
-    for (const Bounds2i tile : tiles) {
-        RenderTile(tile, frame);
-    }
-
-    // tbb::task_arena ta;
-    // ta.execute([&] {
-    //     tbb::affinity_partitioner affinity;
-    // });
-
+    // render each tile in parallel
+    std::cout << "Rendering with TBB multithread!" << std::endl;
+    tbb::task_arena ta;
+    ta.execute([&] {
+        tbb::affinity_partitioner affinity;
+        tbb::blocked_range<int> range(0, numTileX * numTileY);
+        tbb::parallel_for(
+            range,
+            [&](const tbb::blocked_range<int> r){
+                for (int i=r.begin(); i<r.end(); ++i) {
+                    RenderTile(tiles[i], frame);
+                }
+            },
+            affinity
+            );
+    });
     std::cout << "Finish rendering!" << std::endl;
 }
 
-Vector3f GeometryViewer::RayHitAlbedo(RTCRayHit &rayhit) {
-    // TODO: wrap this to a Scene::GetGeometry(geomID) method
+GeometryViewer::PixelGeometry GeometryViewer::RayHitQuery(RTCRayHit &rayhit) {
     // retrieve geometry
     uint geomID = rayhit.hit.geomID;
-    uint primID = rayhit.hit.primID;
-    RTCScene rtcscene = scene->GetRTCScene();
-    RTCGeometry geom = rtcGetGeometry(rtcscene, geomID);
+    RTCGeometry geom = scene->GetGeometry(geomID);
 
-    // (u, v) coordinate
+    // primID and (u, v) coordinate
+    uint primID = rayhit.hit.primID;
     float u = rayhit.hit.u;
     float v = rayhit.hit.v;
 
     float albedo[3] = {0.f, 0.f ,0.f};
-    const uint albedo_slot = 0;
 
     // iterpolate
     rtcInterpolate0(geom, 
                     primID, 
                     u, v, 
                     RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE,
-                    albedo_slot,
+                    VERTEX_ALBEDO,
                     albedo,
                     3);
     
-    return {albedo[0], albedo[1], albedo[2]};
+    GeometryViewer::PixelGeometry pixel;
+    pixel.albedo = Vector3f(albedo[0], albedo[1], albedo[2]);
+    pixel.normal = Vector3f(rayhit.hit.Ng_x, rayhit.hit.Ng_y, rayhit.hit.Ng_z);
+    pixel.depth  = rayhit.ray.tfar;
+    
+    return pixel;
 }
 
 } // namespace PBRender

@@ -53,7 +53,15 @@ public:
     void RenderFrame(const Point2i TileSize, Array2D<Vector3f> &frame);
 
 private:
-    Vector3f RayHitAlbedo(RTCRayHit &rayhit);
+    struct PixelGeometry {
+        PixelGeometry() = default;
+
+        Vector3f albedo;
+        Vector3f normal;
+        float depth;
+    };
+
+    PixelGeometry RayHitQuery(RTCRayHit &rayhit);
 };
 
 
