@@ -1,3 +1,10 @@
+// STB (note only to include in .cpp file)
+#define STB_IMAGE_IMPLEMENTATION
+#include <ext/stb/stb_image.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <ext/stb/stb_image_write.h>
+
 #include <PBRender/core/film.h>
 
 namespace PBRender
@@ -35,7 +42,7 @@ void GeometryFilm::WriteImage() const {
 	const size_t W = fullResolution.x;
 	const size_t H = fullResolution.y;
 
-	auto buf = std::vector<char>(3 * H * W);
+	auto buf = std::vector<char>(3 * W * H);
 
 	for (size_t i = 0; i < W; ++i) {
 		for (size_t j = 0; j < H; ++j) {
@@ -48,7 +55,11 @@ void GeometryFilm::WriteImage() const {
 		}
 	}
 
-	stbi_write_png("output.png", 
+	// save to .png file
+	std::string filename_png(filename);
+	filename_png.append(".png");
+
+	stbi_write_png(filename_png.data(), 
 					W, 
 					H, 
 					3, 

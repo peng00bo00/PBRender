@@ -258,27 +258,5 @@ int main() {
     engine->RenderFrame(TileSize);
 
     // write to image
-    // auto buf = std::vector<char>(3 * H * W);
-
-    // for (size_t i = 0; i < static_cast<size_t>(fullResolution.x); ++i) {   
-    //     for (size_t j = 0; j < static_cast<size_t>(fullResolution.y); ++j) {
-    //         int offset = i + static_cast<size_t>(fullResolution.x) * j;
-            
-    //         Point2i pFilm(i, j);
-    //         Vector3f col = gFilm.GetPixel(pFilm);
-
-    //         // std::cout << pFilm << ": " << col << std::endl;
-
-    //         buf[3 * offset + 0] = (uint8_t) PBRender::Clamp(255.f * col.x, 0.f, 255.f);
-    //         buf[3 * offset + 1] = (uint8_t) PBRender::Clamp(255.f * col.y, 0.f, 255.f);
-    //         buf[3 * offset + 2] = (uint8_t) PBRender::Clamp(255.f * col.z, 0.f, 255.f);
-    //     }
-    // }
-
-    // // save to disk
-    // // stbi_write_png("output_normal.png", W, H, 3, buf_normal.data(), 0);
-    // // stbi_write_png("output_depth.png", W, H, 3, buf_depth.data(), 0);
-    // stbi_write_png("output.png", W, H, 3, buf.data(), 0);
-
     gFilm.WriteImage();
 }
