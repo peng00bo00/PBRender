@@ -39,7 +39,7 @@ void Engine::InitScene() {
 }
 
 // TODO: update writing part with film
-void GeometryViewer::RenderPixel(int x, int y, Array2D<Vector3f> &frame) {
+void GeometryViewer::RenderPixel(int x, int y) {
     // initialize a ray at film (x, y)
     CameraSample sample;
     sample.pFilm = Point2f{x + 0.5f, y + 0.5f};
@@ -71,24 +71,40 @@ void GeometryViewer::RenderPixel(int x, int y, Array2D<Vector3f> &frame) {
     scene->RayHit(&rayhit);
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
         PixelGeometry pixel = RayHitQuery(rayhit);
+        Vector3f L;
+
+        switch (gImg) {
+            case NORMAL:
+                L = pixel.normal;
+
+                // normalize normal vector to (0, 1)
+                for (size_t i = 0; i < 3; ++i)
+                    L[i] = L[i] * 0.5f + 0.5f;
+                
+                break;
+            case DEPTH:
+                L = pixel.depth;
+                break;
+            default:
+                L = pixel.albedo; 
+        }
 
         // write to film
-        frame(x, y) = pixel.albedo;
-        // frame(x, y) = pixel.normal;
-
-        // auto film = camera->GetFilm();
+        auto film = camera->GetFilm();
+        Point2i pFilm(x, y);
+        film->AddSample(pFilm, L);
     }
 }
 
-void GeometryViewer::RenderTile(const Bounds2i TileBound, Array2D<Vector3f> &frame) {
+void GeometryViewer::RenderTile(const Bounds2i TileBound) {
     for (int x = TileBound.pMin.x; x < TileBound.pMax.x; ++x) {
         for (int y = TileBound.pMin.y; y < TileBound.pMax.y; ++y) {
-            RenderPixel(x, y, frame);
+            RenderPixel(x, y);
         }
     }
 }
 
-void GeometryViewer::RenderFrame(const Point2i TileSize, Array2D<Vector3f> &frame) {
+void GeometryViewer::RenderFrame(const Point2i TileSize) {
     Film *film = camera->GetFilm();
     Point2i fullResolution = film->FullResolution();
     Bounds2i fullFrame     = film->FullFrameBound();
@@ -122,7 +138,7 @@ void GeometryViewer::RenderFrame(const Point2i TileSize, Array2D<Vector3f> &fram
             range,
             [&](const tbb::blocked_range<int> r){
                 for (int i=r.begin(); i<r.end(); ++i) {
-                    RenderTile(tiles[i], frame);
+                    RenderTile(tiles[i]);
                 }
             },
             affinity
@@ -153,9 +169,21 @@ GeometryViewer::PixelGeometry GeometryViewer::RayHitQuery(RTCRayHit &rayhit) {
                     3);
     
     GeometryViewer::PixelGeometry pixel;
-    pixel.albedo = Vector3f(albedo[0], albedo[1], albedo[2]);
-    pixel.normal = Vector3f(rayhit.hit.Ng_x, rayhit.hit.Ng_y, rayhit.hit.Ng_z);
-    pixel.depth  = rayhit.ray.tfar;
+
+    // albedo
+    pixel.albedo = Vector3f(albedo[0], 
+                            albedo[1], 
+                            albedo[2]);
+
+    // normal
+    pixel.normal = Vector3f(rayhit.hit.Ng_x, 
+                            rayhit.hit.Ng_y,
+                            rayhit.hit.Ng_z);
+
+    // depth
+    pixel.depth  = Vector3f(rayhit.ray.tfar,
+                            rayhit.ray.tfar,
+                            rayhit.ray.tfar);
     
     return pixel;
 }

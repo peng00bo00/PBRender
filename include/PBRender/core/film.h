@@ -23,6 +23,10 @@ public:
     // const PixelSensor *GetPixelSensor() const { return sensor; }
     std::string GetFilename() const { return filename; }
 
+    // TODO: update L to color spectrum
+    virtual void AddSample(Point2i pFilm, const Vector3f &L) = 0;
+    virtual Vector3f GetPixel(const Point2i pFilm) const = 0;
+
 protected:
     Point2i fullResolution;             // resolution of the film
     // Bounds2i pixelBounds;            // pixel bounds
@@ -32,34 +36,34 @@ protected:
     std::string filename;               // file name
 };
 
-class RGBFilm : public Film {
+// class RGBFilm : public Film {
 
-};
+// };
 
 class GeometryFilm : public Film {
 public:
     GeometryFilm(Point2i fullResolution, std::string filename);
     ~GeometryFilm();
 
-    void AddSample();
-    void GetPixel(Point2i pFilm);
-    void AddSplat();
+    void AddSample(const Point2i pFilm, const Vector3f &L);
+    Vector3f GetPixel(const Point2i pFilm) const;
+    // void AddSplat();
 
     static void *Create();
 
-    void WriteImage();
+    void WriteImage() const;
 
 private:
     struct Pixel {
         Pixel() = default;
 
         float rgbSum[3] = {0., 0., 0.};
-        float weightSum = 0., gBufferWeightSum = 0.;
+        float weightSum = 0.f;
+        // float gBufferWeightSum = 0.;
 
-        float dzdxSum = 0, dzdySum = 0;
-        Normal3f nSum, nsSum;
-        Point2f uvSum;
-        float rgbAlbedoSum[3] = {0., 0., 0.};
+        // float dzdxSum = 0, dzdySum = 0;
+        // Normal3f nSum, nsSum;
+        // Point2f uvSum;
     };
 
     std::unique_ptr<Array2D<Pixel>> data;

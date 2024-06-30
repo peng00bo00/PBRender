@@ -4,10 +4,6 @@
 #include <iostream>
 #include <ctime>
 
-#include <tbb/parallel_for.h>
-#include <tbb/blocked_range2d.h>
-#include <tbb/task_arena.h>
-
 using Point2i = PBRender::Point2i;
 using Point2f = PBRender::Point2f;
 using Point3f = PBRender::Point3f;
@@ -222,19 +218,17 @@ int main() {
 
     // create engine instance
     // auto engine = PBRender::InitEngine();
-    auto engine = std::make_unique<PBRender::GeometryViewer>();
+    PBRender::GeometryViewer::GeometryImage gImg 
+        = PBRender::GeometryViewer::ALBEDO;
+    auto engine = std::make_unique<PBRender::GeometryViewer>(gImg);
 
     // create a film
-    const int W = 1024*8;
-    const int H = 1024*8;
+    const int W = 1024*2;
+    const int H = 1024;
 
     Point2i fullResolution(W, H);
     std::string file_name = "Geometry";
     PBRender::GeometryFilm gFilm(fullResolution, file_name);
-
-    PBRender::Array2D<Vector3f> film_normal(W, H);
-    PBRender::Array2D<Vector3f> film_albedo(W, H);
-    PBRender::Array2D<float>    film_depth(W, H);
 
     // set up camera
     Point3f pos(0.f, 1.f, 6.8f);
@@ -261,116 +255,30 @@ int main() {
     Point2i TileSize(128, 128);
 
     // start rendering
-    engine->RenderFrame(TileSize, film_albedo);
-
-    // // rasterization
-    // std::cout << "Rendering with TBB multithread!" << std::endl;
-
-    // tbb::task_arena ta;
-    // ta.execute([&] {
-    //     tbb::affinity_partitioner affinity;
-    //     tbb::blocked_range2d<int> range(0, fullResolution.x, 
-    //                                     0, fullResolution.y);
-    //     tbb::parallel_for(range, 
-    //         [&](const tbb::blocked_range2d<int> &r) {
-    //         // render the full frame
-    //         for (int i=r.rows().begin(); i<r.rows().end(); i++) {
-    //             for (int j=r.cols().begin(); j<r.cols().end(); j++) {
-    //                 Point2f pFilm(i, j);
-    //                 PBRender::CameraSample sample;
-    //                 sample.pFilm = pFilm;
-    //                 PBRender::Ray ray;
-
-    //                 camera->GenerateRay(sample, ray);
-
-    //                 // initialize a rayhit
-    //                 RTCRayHit rayhit;
-    //                 InitRTCRayHit(ray, rayhit);
-
-    //                 // cast the ray to scene
-    //                 scene->RayHit(&rayhit);
-    //                 if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-    //                     // shading with normal
-    //                     {
-    //                         float nx = rayhit.hit.Ng_x * 0.5f + 0.5f;
-    //                         float ny = rayhit.hit.Ng_y * 0.5f + 0.5f;
-    //                         float nz = rayhit.hit.Ng_z * 0.5f + 0.5f;
-
-    //                         film_normal(i, j) = Vector3f(nx,ny,nz);
-    //                     }
-
-    //                     // shading with depth
-    //                     film_depth(i, j) = rayhit.ray.tfar;
-
-    //                     // shading with albedo
-    //                     {
-    //                         float albedo[3] = {0.f, 0.f ,0.f};
-    //                         const uint albedo_slot = 0;
-
-    //                         uint geomID = rayhit.hit.geomID;
-    //                         RTCGeometry geom = rtcGetGeometry(scene->GetScene(), geomID);
-
-    //                         uint primID = rayhit.hit.primID;
-
-    //                         float u = rayhit.hit.u;
-    //                         float v = rayhit.hit.v;
-
-    //                         rtcInterpolate0(geom, 
-    //                                         primID, 
-    //                                         u, v, 
-    //                                         RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE,
-    //                                         albedo_slot,
-    //                                         albedo,
-    //                                         3);
-                            
-    //                         film_albedo(i, j) = Vector3f(albedo[0], albedo[1], albedo[2]);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         }, affinity);
-    //     });
-    
-    // std::cout << "Finish rendering!" << std::endl;
-    
-    // float dmin = PBRender::Infinity;
-    // float dmax = 0.f;
-
-    // for (auto const &depth : film_depth) {
-    //     dmax = std::max(dmax, depth);
-    //     dmin = std::min(dmin, depth);
-    // }
+    engine->RenderFrame(TileSize);
 
     // write to image
-    auto buf_normal = std::vector<char>(3 * film_normal.size());
-    auto buf_depth  = std::vector<char>(3 * film_depth.size());
-    auto buf_albedo = std::vector<char>(3 * film_albedo.size());
+    // auto buf = std::vector<char>(3 * H * W);
 
-    for (size_t i = 0; i < static_cast<size_t>(fullResolution.x); ++i)
-    {   
-        for (size_t j = 0; j < static_cast<size_t>(fullResolution.y); ++j)
-        {
-            int offset = i + static_cast<size_t>(fullResolution.x) * j;
+    // for (size_t i = 0; i < static_cast<size_t>(fullResolution.x); ++i) {   
+    //     for (size_t j = 0; j < static_cast<size_t>(fullResolution.y); ++j) {
+    //         int offset = i + static_cast<size_t>(fullResolution.x) * j;
+            
+    //         Point2i pFilm(i, j);
+    //         Vector3f col = gFilm.GetPixel(pFilm);
 
-            // // normal map
-            // buf_normal[3 * offset + 0] = (uint8_t) PBRender::Clamp(255.f * film_normal(i, j).x, 0.f, 255.f);
-            // buf_normal[3 * offset + 1] = (uint8_t) PBRender::Clamp(255.f * film_normal(i, j).y, 0.f, 255.f);
-            // buf_normal[3 * offset + 2] = (uint8_t) PBRender::Clamp(255.f * film_normal(i, j).z, 0.f, 255.f);
+    //         // std::cout << pFilm << ": " << col << std::endl;
 
-            // // depth map
-            // float depth = film_depth(i, j);
-            // float t = (depth - dmin) / dmax;
-            // buf_depth[3 * offset + 0] = buf_depth[3 * offset + 1] = buf_depth[3 * offset + 2] = (uint8_t) (t * 255.f);
+    //         buf[3 * offset + 0] = (uint8_t) PBRender::Clamp(255.f * col.x, 0.f, 255.f);
+    //         buf[3 * offset + 1] = (uint8_t) PBRender::Clamp(255.f * col.y, 0.f, 255.f);
+    //         buf[3 * offset + 2] = (uint8_t) PBRender::Clamp(255.f * col.z, 0.f, 255.f);
+    //     }
+    // }
 
-            // albedo map
-            buf_albedo[3 * offset + 0] = (uint8_t) PBRender::Clamp(255.f * film_albedo(i, j).x, 0.f, 255.f);
-            buf_albedo[3 * offset + 1] = (uint8_t) PBRender::Clamp(255.f * film_albedo(i, j).y, 0.f, 255.f);
-            buf_albedo[3 * offset + 2] = (uint8_t) PBRender::Clamp(255.f * film_albedo(i, j).z, 0.f, 255.f);
-        }
-    }
+    // // save to disk
+    // // stbi_write_png("output_normal.png", W, H, 3, buf_normal.data(), 0);
+    // // stbi_write_png("output_depth.png", W, H, 3, buf_depth.data(), 0);
+    // stbi_write_png("output.png", W, H, 3, buf.data(), 0);
 
-    // save to disk
-    // stbi_write_png("output_normal.png", W, H, 3, buf_normal.data(), 0);
-    // stbi_write_png("output_depth.png", W, H, 3, buf_depth.data(), 0);
-    stbi_write_png("output_albedo.png", W, H, 3, buf_albedo.data(), 0);
+    gFilm.WriteImage();
 }

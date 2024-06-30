@@ -44,13 +44,22 @@ inline std::unique_ptr<Engine> InitEngine() {
     return std::make_unique<PBRender::Engine>();
 }
 
+
+
 class GeometryViewer : public Engine {
 public:
-    GeometryViewer() : Engine() {};
+    enum GeometryImage {
+        ALBEDO = 0,
+        NORMAL = 1,
+        DEPTH  = 2
+    };
 
-    void RenderPixel(int x, int y, Array2D<Vector3f> &frame);
-    void RenderTile(const Bounds2i TileBound, Array2D<Vector3f> &frame);
-    void RenderFrame(const Point2i TileSize, Array2D<Vector3f> &frame);
+    GeometryViewer() : Engine(), gImg(ALBEDO) {};
+    GeometryViewer(GeometryImage geom) : Engine(), gImg(geom) {};
+
+    void RenderPixel(int x, int y);
+    void RenderTile(const Bounds2i TileBound);
+    void RenderFrame(const Point2i TileSize);
 
 private:
     struct PixelGeometry {
@@ -58,10 +67,11 @@ private:
 
         Vector3f albedo;
         Vector3f normal;
-        float depth;
+        Vector3f depth;
     };
 
     PixelGeometry RayHitQuery(RTCRayHit &rayhit);
+    GeometryImage gImg;
 };
 
 
