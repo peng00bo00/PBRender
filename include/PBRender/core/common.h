@@ -64,6 +64,14 @@ class GeometryViewer;
 // Transform
 class Transform;
 
+// Color Spectrum
+template <int nSpectrumSamples>
+class CoefficientSpectrum;
+
+class RGBSpectrum;
+
+using Spectrum = RGBSpectrum;
+
 // Camera
 class Camera;
 struct CameraSample;
@@ -78,9 +86,16 @@ class GeometryFilm;
 // Ray
 class Ray;
 
-// color spectrum
+// Sampler
 
-// integrator
+// Integrator
+class Integrator;
+
+// BxDF
+class BxDF;
+class BRDF;
+class BTDF;
+class BSDF;
 
 // Containers
 template <typename T, typename Alloc>

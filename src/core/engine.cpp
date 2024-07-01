@@ -89,6 +89,25 @@ void Engine::RenderTile(const Bounds2i TileBound) {
     }
 }
 
+void RayTracer::RenderPixel(int x, int y) {
+    // initialize a ray at film (x, y)
+    CameraSample sample;
+    sample.pFilm = Point2f{x + 0.5f, y + 0.5f};
+    Ray ray;
+
+    camera = GetCamera();
+    camera->GenerateRay(sample, ray);
+
+    // initialize a rayhit
+    RTCRayHit rayhit;
+    InitRTCRayHit(ray, rayhit);
+
+    scene->RayHit(&rayhit);
+    if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
+        // blah, blah, blah...
+    }
+}
+
 void GeometryViewer::RenderPixel(int x, int y) {
     // initialize a ray at film (x, y)
     CameraSample sample;
@@ -99,44 +118,26 @@ void GeometryViewer::RenderPixel(int x, int y) {
     camera->GenerateRay(sample, ray);
 
     // initialize a rayhit
-    // TODO: wrap RTCRayHit initialization
     RTCRayHit rayhit;
-    {
-        rayhit.ray.org_x = ray.org.x;
-        rayhit.ray.org_y = ray.org.y;
-        rayhit.ray.org_z = ray.org.z;
-        rayhit.ray.dir_x = ray.dir.x;
-        rayhit.ray.dir_y = ray.dir.y;
-        rayhit.ray.dir_z = ray.dir.z;
-
-        rayhit.ray.tnear = 0;
-        rayhit.ray.tfar  = PBRender::Infinity;
-
-        rayhit.ray.mask  =-1;
-        rayhit.ray.flags = 0;
-        rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
-        rayhit.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
-    }
+    InitRTCRayHit(ray, rayhit);
 
     scene->RayHit(&rayhit);
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
         PixelGeometry pixel = RayHitQuery(rayhit);
-        Vector3f L;
+        Spectrum L;
 
         switch (gImg) {
             case NORMAL:
-                L = pixel.normal;
-
                 // normalize normal vector to (0, 1)
                 for (size_t i = 0; i < 3; ++i)
-                    L[i] = L[i] * 0.5f + 0.5f;
+                    L[i] = pixel.normal[i] * 0.5f + 0.5f;
                 
                 break;
             case DEPTH:
                 L = pixel.depth;
                 break;
             default:
-                L = pixel.albedo; 
+                L = pixel.albedo;
         }
 
         // write to film

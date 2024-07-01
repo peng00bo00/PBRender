@@ -1,6 +1,7 @@
 #pragma once
 
 #include <PBRender/core/common.h>
+#include <PBRender/core/spectrum.h>
 #include <PBRender/core/container.h>
 
 namespace PBRender
@@ -24,8 +25,8 @@ public:
     std::string GetFilename() const { return filename; }
 
     // TODO: update L to color spectrum
-    virtual void AddSample(Point2i pFilm, const Vector3f &L) = 0;
-    virtual Vector3f GetPixel(const Point2i pFilm) const = 0;
+    virtual void AddSample(Point2i pFilm, const Spectrum &L) = 0;
+    virtual Spectrum GetPixel(const Point2i pFilm) const = 0;
     virtual void WriteImage() const = 0;
 
 protected:
@@ -37,17 +38,43 @@ protected:
     std::string filename;               // file name
 };
 
-// class RGBFilm : public Film {
+// TODO: update RGBFilm as needed
+class RGBFilm : public Film {
+public:
+    RGBFilm(Point2i fullResolution, std::string filename);
+    ~RGBFilm();
 
-// };
+    void AddSample(const Point2i pFilm, const Spectrum &L);
+    Spectrum GetPixel(const Point2i pFilm) const;
+    // void AddSplat();
+
+    static void *Create();
+
+    void WriteImage() const;
+
+private:
+    struct Pixel {
+        Pixel() = default;
+
+        float rgbSum[3] = {0., 0., 0.};
+        float weightSum = 0.f;
+        // float gBufferWeightSum = 0.;
+
+        // float dzdxSum = 0, dzdySum = 0;
+        // Normal3f nSum, nsSum;
+        // Point2f uvSum;
+    };
+
+    std::unique_ptr<Array2D<Pixel>> data;
+};
 
 class GeometryFilm : public Film {
 public:
     GeometryFilm(Point2i fullResolution, std::string filename);
     ~GeometryFilm();
 
-    void AddSample(const Point2i pFilm, const Vector3f &L);
-    Vector3f GetPixel(const Point2i pFilm) const;
+    void AddSample(const Point2i pFilm, const Spectrum &L);
+    Spectrum GetPixel(const Point2i pFilm) const;
     // void AddSplat();
 
     static void *Create();

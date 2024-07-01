@@ -9,6 +9,7 @@
 #include <PBRender/core/common.h>
 #include <PBRender/core/scene.h>
 #include <PBRender/core/camera.h>
+#include <PBRender/core/spectrum.h>
 
 namespace PBRender
 {
@@ -47,6 +48,15 @@ private:
 inline std::unique_ptr<Engine> InitEngine() {
     return std::make_unique<PBRender::Engine>();
 }
+
+
+class RayTracer : public Engine {
+public:
+    RayTracer() : Engine() {};
+
+protected:
+    void RenderPixel(int x, int y);
+};
 
 
 class GeometryViewer : public Engine {

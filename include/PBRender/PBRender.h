@@ -11,6 +11,7 @@
 
 #include <PBRender/core/container.h>
 #include <PBRender/core/engine.h>
+#include <PBRender/core/spectrum.h>
 #include <PBRender/core/film.h>
 #include <PBRender/core/math.h>
 #include <PBRender/core/scene.h>

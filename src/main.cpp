@@ -1,19 +1,10 @@
 #include <PBRender/PBRender.h>
 
-#include <limits>
-#include <iostream>
-#include <ctime>
-
 using Point2i = PBRender::Point2i;
 using Point2f = PBRender::Point2f;
 using Point3f = PBRender::Point3f;
 using Vector3i= PBRender::Vector3i;
 using Vector3f= PBRender::Vector3f;
-
-double getSeconds() {
-    std::time_t t = std::time(nullptr);
-    return static_cast<double>(t);
-}
 
 // initialize cornel box scene
 void InitCornellBox(PBRender::Scene *scene) {
@@ -196,33 +187,16 @@ void InitCornellBox(PBRender::Scene *scene) {
     geomID = scene->AddTriMesh(vertices, indices, albedo);
 }
 
-void InitRTCRayHit(PBRender::Ray &ray, RTCRayHit &rayhit) {
-    rayhit.ray.org_x = ray.org.x;
-    rayhit.ray.org_y = ray.org.y;
-    rayhit.ray.org_z = ray.org.z;
-    rayhit.ray.dir_x = ray.dir.x;
-    rayhit.ray.dir_y = ray.dir.y;
-    rayhit.ray.dir_z = ray.dir.z;
-
-    rayhit.ray.tnear = 0;
-    rayhit.ray.tfar  = PBRender::Infinity;
-
-    rayhit.ray.mask  =-1;
-    rayhit.ray.flags = 0;
-    rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
-    rayhit.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
-}
-
 int main() {
     std::cout << "Hello Embree!" << std::endl;
 
     // create engine instance
     // auto engine = PBRender::InitEngine();
-    PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::ALBEDO};
+    PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::NORMAL};
     auto engine = PBRender::InitGeometryViewer(gImg);
 
     // create a film
-    const int W = 1024*2;
+    const int W = 1024;
     const int H = 1024;
 
     Point2i fullResolution(W, H);
