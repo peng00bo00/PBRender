@@ -19,7 +19,11 @@
 #include <PBRender/core/transform.h>
 #include <PBRender/core/camera.h>
 #include <PBRender/core/ray.h>
+#include <PBRender/core/rng.h>
+#include <PBRender/core/sampler.h>
 
 // cameras
 #include <PBRender/cameras/perspective.h>
 #include <PBRender/cameras/orthographic.h>
+
+// samplers
