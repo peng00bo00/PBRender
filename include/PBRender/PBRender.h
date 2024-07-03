@@ -27,3 +27,4 @@
 #include <PBRender/cameras/orthographic.h>
 
 // samplers
+#include <PBRender/samplers/independent.h>

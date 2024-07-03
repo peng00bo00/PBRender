@@ -1,7 +1,7 @@
 #pragma once
 
 #include <PBRender/core/common.h>
-#include <PBRender/core/math.h>
+#include <PBRender/core/hash.h>
 
 namespace PBRender
 {

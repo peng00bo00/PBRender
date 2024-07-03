@@ -90,6 +90,12 @@ class Ray;
 class RNG;
 class Sampler;
 
+// TODO: implement other samplers when needed
+class IndependentSampler;
+class HaltonSampler;
+class SobolSampler;
+class StratifiedSampler;
+
 // Integrator
 class Integrator;
 
@@ -174,15 +180,6 @@ inline double NextFloatDown(double v, int delta = 1) {
     else
         ui += delta;
     return BitsToFloat(ui);
-}
-
-inline uint64_t MixBits(uint64_t v) {
-    v ^= (v >> 31);
-    v *= 0x7fb5d329728ea185;
-    v ^= (v >> 27);
-    v *= 0x81dadef4bc2dd44d;
-    v ^= (v >> 33);
-    return v;
 }
 
 } // namespace PBRender
