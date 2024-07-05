@@ -6,7 +6,6 @@ namespace PBRender
 HaltonSampler::HaltonSampler(int samplesPerPixel, Point2i fullRes,
                              RandomizeStrategy randomize, int seed)
     : samplesPerPixel(samplesPerPixel), randomize(randomize) {
-    std::cout << "Halton Sampler!" << std::endl;
     if (randomize == RandomizeStrategy::PermuteDigits)
         digitPermutations = ComputeRadicalInversePermutations(seed);
     
