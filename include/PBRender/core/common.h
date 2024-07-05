@@ -81,7 +81,7 @@ class OrthographicCamera;
 // Film
 class Film;
 class RGBFilm;
-class GeometryFilm;
+class GBuffferFilm;
 
 // Ray
 class Ray;

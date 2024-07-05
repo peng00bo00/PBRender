@@ -1,5 +1,8 @@
 #include <PBRender/core/engine.h>
 
+#include <tbb/parallel_for.h>
+#include <tbb/task_arena.h>
+#include <tbb/blocked_range.h>
 
 namespace PBRender
 {
@@ -39,9 +42,13 @@ void Engine::InitScene() {
 }
 
 void Engine::RenderFrame(const Point2i TileSize) {
+    std::cout << "Start rendering the frame." << std::endl;
     Film *film = camera->GetFilm();
+    std::cout << "Film retrieved." << std::endl;
     Point2i fullResolution = film->FullResolution();
+    std::cout << "Full resolution: " << fullResolution << std::endl;
     Bounds2i fullFrame     = film->FullFrameBound();
+    std::cout << "Full frame bound: " << fullFrame << std::endl;
 
     // split the full frame to tiles
     int numTileX = std::ceil(fullResolution.x / TileSize.x);
@@ -49,6 +56,7 @@ void Engine::RenderFrame(const Point2i TileSize) {
 
     std::vector<Bounds2i> tiles;
     tiles.reserve(numTileX * numTileY);
+    std::cout << "Using " << numTileX * numTileY << " tiles for rendering." << std::endl;
     
     for (size_t i = 0; i < fullResolution.x; i += TileSize.x) {
         for (size_t j = 0; j < fullResolution.y; j += TileSize.y) {
@@ -91,12 +99,12 @@ void Engine::RenderTile(const Bounds2i TileBound) {
 
 void RayTracer::RenderPixel(int x, int y) {
     // initialize a ray at film (x, y)
-    CameraSample sample;
-    sample.pFilm = Point2f{x + 0.5f, y + 0.5f};
+    CameraSample cs;
+    cs.pFilm = Point2f{x + 0.5f, y + 0.5f};
     Ray ray;
 
     camera = GetCamera();
-    camera->GenerateRay(sample, ray);
+    camera->GenerateRay(cs, ray);
 
     // initialize a rayhit
     RTCRayHit rayhit;
@@ -104,18 +112,60 @@ void RayTracer::RenderPixel(int x, int y) {
 
     scene->RayHit(&rayhit);
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-        // blah, blah, blah...
+        // retrieve geometry
+        uint geomID = rayhit.hit.geomID;
+        RTCGeometry geom = scene->GetGeometry(geomID);
+
+        // primID and (u, v) coordinate
+        uint primID = rayhit.hit.primID;
+        float u = rayhit.hit.u;
+        float v = rayhit.hit.v;
+
+        // albedo
+        float albedo[3] = {0.f, 0.f ,0.f};
+
+        rtcInterpolate0(geom, 
+                    primID, 
+                    u, v, 
+                    RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE,
+                    VERTEX_ATTRIB_SLOT::VERTEX_ALBEDO,
+                    albedo,
+                    3);
+
+        // Blinn-Phong shader
+        Spectrum L;
+
+        // diffuse
+        for (size_t i=0; i<3; ++i)
+            L[i] += 0.5f * albedo[i];
+
+        // specular
+        Vector3f lightDir(0.f, 1.f, 0.f); lightDir = Normalize(lightDir);
+        Vector3f viewDir = -ray.dir; viewDir = Normalize(viewDir);
+        Vector3f halfwayDir = Normalize(lightDir + viewDir);
+
+        Vector3f normal(rayhit.hit.Ng_x, rayhit.hit.Ng_y, rayhit.hit.Ng_z);
+        normal = Normalize(normal);
+
+        float spec = std::max(Dot(normal, halfwayDir), 0.f);
+        for (size_t i=0; i<3; ++i)
+            L[i] += spec * albedo[i];
+
+        // write to film
+        auto film = camera->GetFilm();
+        Point2i pFilm(x, y);
+        film->AddSample(pFilm, L, 1.f);
     }
 }
 
 void GeometryViewer::RenderPixel(int x, int y) {
     // initialize a ray at film (x, y)
-    CameraSample sample;
-    sample.pFilm = Point2f{x + 0.5f, y + 0.5f};
+    CameraSample cs;
+    cs.pFilm = Point2f{x + 0.5f, y + 0.5f};
     Ray ray;
 
     camera = GetCamera();
-    camera->GenerateRay(sample, ray);
+    camera->GenerateRay(cs, ray);
 
     // initialize a rayhit
     RTCRayHit rayhit;
@@ -127,13 +177,13 @@ void GeometryViewer::RenderPixel(int x, int y) {
         Spectrum L;
 
         switch (gImg) {
-            case NORMAL:
+            case GeometryImage::NORMAL:
                 // normalize normal vector to (0, 1)
                 for (size_t i = 0; i < 3; ++i)
                     L[i] = pixel.normal[i] * 0.5f + 0.5f;
                 
                 break;
-            case DEPTH:
+            case GeometryImage::DEPTH:
                 L = pixel.depth;
                 break;
             default:
@@ -143,7 +193,7 @@ void GeometryViewer::RenderPixel(int x, int y) {
         // write to film
         auto film = camera->GetFilm();
         Point2i pFilm(x, y);
-        film->AddSample(pFilm, L);
+        film->AddSample(pFilm, L, 1.f);
     }
 }
 
@@ -165,7 +215,7 @@ GeometryViewer::PixelGeometry GeometryViewer::RayHitQuery(RTCRayHit &rayhit) {
                     primID, 
                     u, v, 
                     RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE,
-                    VERTEX_ALBEDO,
+                    VERTEX_ATTRIB_SLOT::VERTEX_ALBEDO,
                     albedo,
                     3);
     

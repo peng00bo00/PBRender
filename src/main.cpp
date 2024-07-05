@@ -188,68 +188,71 @@ void InitCornellBox(PBRender::Scene *scene) {
 }
 
 int main() {
-    // std::cout << "Hello Embree!" << std::endl;
+    std::cout << "Hello Embree!" << std::endl;
 
-    // // create engine instance
-    // // auto engine = PBRender::InitEngine();
-    // PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::NORMAL};
+    // create engine instance    
+    // PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::GeometryImage::ALBEDO};
     // auto engine = PBRender::InitGeometryViewer(gImg);
 
-    // // create a film
-    // const int W = 1024;
-    // const int H = 1024;
+    uint spp = 8;
+    auto engine = PBRender::InitRayTracer(spp);
 
-    // Point2i fullResolution(W, H);
-    // std::string file_name = "Cornel Box Geometry";
-    // PBRender::GeometryFilm gFilm(fullResolution, file_name);
+    // create a film
+    const int W = 1024;
+    const int H = 1024;
 
-    // // set up camera
-    // Point3f pos(0.f, 1.f, 6.8f);
-    // Point3f look(0.f, 1.f, 0.f);
-    // Vector3f up(0.f, 1.f, 0.f);
+    Point2i fullResolution(W, H);
+    std::string file_name = "Cornel Box Geometry";
+    // PBRender::GBuffferFilm film(fullResolution, file_name);
+    PBRender::RGBFilm film(fullResolution, file_name);
 
-    // PBRender::Transform world2camera = PBRender::LookAt(pos, look, up);
-    // PBRender::Transform camera2world = world2camera.Inverse();
+    // set up camera
+    Point3f pos(0.f, 1.f, 6.8f);
+    Point3f look(0.f, 1.f, 0.f);
+    Vector3f up(0.f, 1.f, 0.f);
 
-    // float fov = 19.5f;
-    // // auto camera = PBRender::CreatePerspectiveCamera(camera2world, &gFilm, fov);
-    // // auto camera = PBRender::CreateOrthographicCamera(camera2world, &gFilm);
+    PBRender::Transform world2camera = PBRender::LookAt(pos, look, up);
+    PBRender::Transform camera2world = world2camera.Inverse();
 
-    // engine->SetCamera(PBRender::CreatePerspectiveCamera(camera2world, &gFilm, fov));
+    float fov = 19.5f;
+    // auto camera = PBRender::CreatePerspectiveCamera(camera2world, &gFilm, fov);
+    // auto camera = PBRender::CreateOrthographicCamera(camera2world, &gFilm);
 
-    // // set up scene
-    // auto scene  = engine->GetScene();
-    // InitCornellBox(scene.get());
+    engine->SetCamera(PBRender::CreatePerspectiveCamera(camera2world, &film, fov));
 
-    // // finish scene and build BVH
-    // scene->FinishScene();
+    // set up scene
+    auto scene  = engine->GetScene();
+    InitCornellBox(scene.get());
 
-    // // set up rendering tiles
-    // Point2i TileSize(128, 128);
+    // finish scene and build BVH
+    scene->FinishScene();
 
-    // // start rendering
-    // engine->RenderFrame(TileSize);
+    // set up rendering tiles
+    Point2i TileSize(128, 128);
 
-    // // write to image
-    // gFilm.WriteImage();
+    // start rendering
+    engine->RenderFrame(TileSize);
 
-    auto sampler = std::make_unique<PBRender::IndependentSampler>(8);
+    // write to image
+    film.WriteImage();
 
-    tbb::task_arena ta;
-    ta.execute([&] {
-        tbb::blocked_range<int> range(0, 8);
-        tbb::parallel_for(
-            range,
-            [&](const tbb::blocked_range<int> r) {
-                for (int i=r.begin(); i<r.end(); ++i) {
-                    auto clone = sampler->Clone();
-                    std::cout << clone->ToString() << std::endl;
+    // auto sampler = std::make_unique<PBRender::IndependentSampler>(8);
 
-                    float x = clone->Get1D();
-                    std::cout << "Sample from clone: " << x << std::endl;
-                }
-            }
-        );
-    });
+    // tbb::task_arena ta;
+    // ta.execute([&] {
+    //     tbb::blocked_range<int> range(0, 8);
+    //     tbb::parallel_for(
+    //         range,
+    //         [&](const tbb::blocked_range<int> r) {
+    //             for (int i=r.begin(); i<r.end(); ++i) {
+    //                 auto clone = sampler->Clone();
+    //                 std::cout << clone->ToString() << std::endl;
+
+    //                 float x = clone->Get1D();
+    //                 std::cout << "Sample from clone: " << x << std::endl;
+    //             }
+    //         }
+    //     );
+    // });
 
 }

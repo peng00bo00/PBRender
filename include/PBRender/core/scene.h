@@ -11,11 +11,11 @@ namespace PBRender
 {
 
 // vertex attributes
-enum VERTEX_ATTRIB_SLOT {
-    VERTEX_ALBEDO = 0,
+enum VERTEX_ATTRIB_SLOT : unsigned int {
+    VERTEX_ALBEDO = 0U,
 
     // number of vertex attributes
-    NUM_VERTX_ATTRIB = 1
+    NUM_VERTX_ATTRIB = 1U
 };
 
 
@@ -24,8 +24,8 @@ public:
     Scene(const RTCDevice _device);
     ~Scene();
 
-    uint AddTriMesh(const std::vector<Point3f> &vertices, const std::vector<Vector3i> &indices);
     uint AddTriMesh(const std::vector<Point3f> &vertices, const std::vector<Vector3i> &indices, const Vector3f albedo);
+    uint AddTriMesh(const std::vector<Point3f> &vertices, const std::vector<Vector3i> &indices);
 
     uint AddSphere(const Point3f center, const float radius);
 

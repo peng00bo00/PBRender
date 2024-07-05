@@ -2,14 +2,11 @@
 
 #include <embree4/rtcore.h>
 
-#include <tbb/parallel_for.h>
-#include <tbb/task_arena.h>
-#include <tbb/blocked_range.h>
-
 #include <PBRender/core/common.h>
 #include <PBRender/core/scene.h>
 #include <PBRender/core/camera.h>
 #include <PBRender/core/spectrum.h>
+#include <PBRender/core/sampler.h>
 
 namespace PBRender
 {
@@ -52,22 +49,32 @@ inline std::unique_ptr<Engine> InitEngine() {
 
 class RayTracer : public Engine {
 public:
-    RayTracer() : Engine() {};
+    RayTracer(int spp) : Engine(), spp(spp) {};
+    void SetSampler(std::shared_ptr<Sampler> Sampler) { sampler = sampler; };
 
 protected:
     void RenderPixel(int x, int y);
+
+protected:
+    std::shared_ptr<Sampler> sampler;
+
+private:
+    uint spp;
 };
 
+inline std::unique_ptr<RayTracer> InitRayTracer(uint spp) {
+    return std::make_unique<PBRender::RayTracer>(spp);
+}
 
 class GeometryViewer : public Engine {
 public:
-    enum GeometryImage {
-        ALBEDO = 0,
-        NORMAL = 1,
-        DEPTH  = 2
+    enum class GeometryImage {
+        ALBEDO,
+        NORMAL,
+        DEPTH
     };
 
-    GeometryViewer() : Engine(), gImg(ALBEDO) {};
+    GeometryViewer() : Engine(), gImg(GeometryImage::ALBEDO) {};
     GeometryViewer(GeometryImage geom) : Engine(), gImg(geom) {};
 
 protected:

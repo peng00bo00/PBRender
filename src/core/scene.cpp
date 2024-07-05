@@ -18,19 +18,14 @@ Scene::~Scene() {
 }
 
 uint Scene::AddTriMesh(const std::vector<Point3f> &vertices, 
-                        const std::vector<Vector3i> &indices) {
-
-    // std::cout << "Adding a triangle mesh to the Scene..." << std::endl;
-    
-    // create a triangle mesh geometry and initialize a singe triangle
+                        const std::vector<Vector3i> &indices, 
+                        Vector3f albedo) {
+    // create a triangle mesh geometry
     RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
     rtcSetGeometryBuildQuality(geom, RTC_BUILD_QUALITY_HIGH);
 
     size_t n_vertices = vertices.size();
     size_t n_indices  = indices.size();
-
-    // std::cout << "n_vertices=" << n_vertices;
-    // std::cout << ", n_triangles=" << n_indices << std::endl;
 
     // vertex buffer
     float* _vertices = (float*) rtcSetNewGeometryBuffer(geom,
@@ -64,37 +59,13 @@ uint Scene::AddTriMesh(const std::vector<Point3f> &vertices,
         }
     }
 
-    // commit geometry
-    rtcCommitGeometry(geom);
-
-    // attach and release geometry 
-    uint geomID = rtcAttachGeometry(scene, geom);
-    rtcReleaseGeometry(geom);
-
-    // std::cout << "Geometry ID = " << geomID << std::endl << std::endl;
-
-    return geomID;
-}
-
-uint Scene::AddTriMesh(const std::vector<Point3f> &vertices, 
-                        const std::vector<Vector3i> &indices, 
-                        Vector3f albedo) {
-    // add vertices and indices
-    uint geomID = AddTriMesh(vertices, indices);
-
-    // retain the geometry
-    RTCGeometry geom = rtcGetGeometry(scene, geomID);
-    rtcRetainGeometry(geom);
-
     // set number of vertex attributes, only use albedo for now
-    rtcSetGeometryVertexAttributeCount(geom, NUM_VERTX_ATTRIB);
+    rtcSetGeometryVertexAttributeCount(geom, VERTEX_ATTRIB_SLOT::NUM_VERTX_ATTRIB);
 
     // albedo
-    size_t n_vertices = vertices.size();
-
     float* _albedo = (float*) rtcSetNewGeometryBuffer(geom, 
                                                       RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 
-                                                      VERTEX_ALBEDO,
+                                                      VERTEX_ATTRIB_SLOT::VERTEX_ALBEDO,
                                                       RTC_FORMAT_FLOAT3, 
                                                       3*sizeof(float), 
                                                       n_vertices);
@@ -108,11 +79,16 @@ uint Scene::AddTriMesh(const std::vector<Point3f> &vertices,
     // commit geometry
     rtcCommitGeometry(geom);
 
-    // release geometry 
+    // attach and release geometry 
+    uint geomID = rtcAttachGeometry(scene, geom);
     rtcReleaseGeometry(geom);
 
     return geomID;
+}
 
+uint Scene::AddTriMesh(const std::vector<Point3f> &vertices, 
+                        const std::vector<Vector3i> &indices) {
+    return AddTriMesh(vertices, indices, Vector3f(0.f, 0.f ,0.f));
 }
 
 uint Scene::AddSphere(const Point3f center, const float radius) {
