@@ -1,5 +1,6 @@
 #include <PBRender/core/engine.h>
 
+#include <tbb/tick_count.h>
 #include <tbb/parallel_for.h>
 #include <tbb/task_arena.h>
 #include <tbb/blocked_range.h>
@@ -42,13 +43,9 @@ void Engine::InitScene() {
 }
 
 void Engine::RenderFrame(const Point2i TileSize) {
-    std::cout << "Start rendering the frame." << std::endl;
     Film *film = camera->GetFilm();
-    std::cout << "Film retrieved." << std::endl;
     Point2i fullResolution = film->FullResolution();
-    std::cout << "Full resolution: " << fullResolution << std::endl;
     Bounds2i fullFrame     = film->FullFrameBound();
-    std::cout << "Full frame bound: " << fullFrame << std::endl;
 
     // split the full frame to tiles
     int numTileX = std::ceil(fullResolution.x / TileSize.x);
@@ -97,20 +94,93 @@ void Engine::RenderTile(const Bounds2i TileBound) {
     }
 }
 
-void RayTracer::RenderPixel(int x, int y) {
-    // initialize a ray at film (x, y)
-    CameraSample cs;
-    cs.pFilm = Point2f{x + 0.5f, y + 0.5f};
-    Ray ray;
+void RayTracer::RenderFrame(const Point2i TileSize, Sampler *sampler) {
+    std::cout << "Start rendering with ray tracer!" << std::endl;
+    Film *film = camera->GetFilm();
+    Point2i fullResolution = film->FullResolution();
+    Bounds2i fullFrame     = film->FullFrameBound();
 
-    camera = GetCamera();
-    camera->GenerateRay(cs, ray);
+    // split the full frame to tiles
+    int numTileX = std::ceil(fullResolution.x / TileSize.x);
+    int numTileY = std::ceil(fullResolution.y / TileSize.y);
 
+    std::vector<Bounds2i> tiles;
+    tiles.reserve(numTileX * numTileY);
+    std::cout << "Using " << numTileX * numTileY << " tiles for rendering." << std::endl;
+    
+    for (size_t i = 0; i < fullResolution.x; i += TileSize.x) {
+        for (size_t j = 0; j < fullResolution.y; j += TileSize.y) {
+            // tile bound
+            Point2i pMin(i, j);
+            Point2i pMax(i+TileSize.x, j+TileSize.y);
+            Bounds2i bound(pMin, pMax);
+
+            bound = Intersect(bound, fullFrame);
+            tiles.emplace_back(bound);
+        }
+    }
+
+    // render each tile in parallel
+    std::cout << "Rendering with TBB multithread..." << std::endl;
+    tbb::tick_count t0 = tbb::tick_count::now();
+    
+    tbb::task_arena ta;
+    ta.execute([&] {
+        tbb::affinity_partitioner affinity;
+        tbb::blocked_range<int> range(0, numTileX * numTileY);
+        tbb::parallel_for(
+            range,
+            [&](const tbb::blocked_range<int> r){
+                for (int i=r.begin(); i<r.end(); ++i) {
+                    auto clone = sampler->Clone();
+                    RenderTile(tiles[i], clone.get());
+                }
+            },
+            affinity
+            );
+    });
+
+    tbb::tick_count t1 = tbb::tick_count::now();
+    std::cout << "Rendering takes " << (t1-t0).seconds() << "s to finish." << std::endl;
+}
+
+void RayTracer::RenderTile(const Bounds2i TileBound, Sampler *sampler) {
+    for (int x = TileBound.pMin.x; x < TileBound.pMax.x; ++x) {
+        for (int y = TileBound.pMin.y; y < TileBound.pMax.y; ++y) {
+            RenderPixel(x, y, sampler);
+        }
+    }
+}
+
+void RayTracer::RenderPixel(int x, int y, Sampler *sampler) {
+    // pixel on film
+    auto film = camera->GetFilm();
+    Point2i pFilm(x, y);
+
+    // samples per pixel
+    for (size_t sampleIndex=0; sampleIndex < spp; ++sampleIndex) {
+        sampler->StartPixelSample(pFilm, sampleIndex);
+        CameraSample cs = GetCameraSample(sampler, pFilm);
+
+        // initialize a ray
+        Ray ray;
+        camera->GenerateRay(cs, ray);
+
+        Spectrum L(0.f);
+        float weight = RenderRay(ray, L);
+
+        // write to film
+        film->AddSample(pFilm, L, weight);
+    }
+}
+
+float RayTracer::RenderRay(Ray &ray, Spectrum &L) {
     // initialize a rayhit
     RTCRayHit rayhit;
     InitRTCRayHit(ray, rayhit);
 
     scene->RayHit(&rayhit);
+
     if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
         // retrieve geometry
         uint geomID = rayhit.hit.geomID;
@@ -133,8 +203,6 @@ void RayTracer::RenderPixel(int x, int y) {
                     3);
 
         // Blinn-Phong shader
-        Spectrum L;
-
         // diffuse
         for (size_t i=0; i<3; ++i)
             L[i] += 0.5f * albedo[i];
@@ -150,12 +218,10 @@ void RayTracer::RenderPixel(int x, int y) {
         float spec = std::max(Dot(normal, halfwayDir), 0.f);
         for (size_t i=0; i<3; ++i)
             L[i] += spec * albedo[i];
-
-        // write to film
-        auto film = camera->GetFilm();
-        Point2i pFilm(x, y);
-        film->AddSample(pFilm, L, 1.f);
     }
+
+    float weight = 1.f;
+    return weight;
 }
 
 void GeometryViewer::RenderPixel(int x, int y) {
@@ -164,7 +230,6 @@ void GeometryViewer::RenderPixel(int x, int y) {
     cs.pFilm = Point2f{x + 0.5f, y + 0.5f};
     Ray ray;
 
-    camera = GetCamera();
     camera->GenerateRay(cs, ray);
 
     // initialize a rayhit

@@ -194,7 +194,7 @@ int main() {
     // PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::GeometryImage::ALBEDO};
     // auto engine = PBRender::InitGeometryViewer(gImg);
 
-    uint spp = 8;
+    uint spp = 64;
     auto engine = PBRender::InitRayTracer(spp);
 
     // create a film
@@ -219,6 +219,9 @@ int main() {
     // auto camera = PBRender::CreateOrthographicCamera(camera2world, &gFilm);
 
     engine->SetCamera(PBRender::CreatePerspectiveCamera(camera2world, &film, fov));
+    
+    // set sampler
+    auto sampler = std::make_shared<PBRender::IndependentSampler>(spp);
 
     // set up scene
     auto scene  = engine->GetScene();
@@ -231,28 +234,9 @@ int main() {
     Point2i TileSize(128, 128);
 
     // start rendering
-    engine->RenderFrame(TileSize);
+    engine->RenderFrame(TileSize, sampler.get());
 
     // write to image
     film.WriteImage();
-
-    // auto sampler = std::make_unique<PBRender::IndependentSampler>(8);
-
-    // tbb::task_arena ta;
-    // ta.execute([&] {
-    //     tbb::blocked_range<int> range(0, 8);
-    //     tbb::parallel_for(
-    //         range,
-    //         [&](const tbb::blocked_range<int> r) {
-    //             for (int i=r.begin(); i<r.end(); ++i) {
-    //                 auto clone = sampler->Clone();
-    //                 std::cout << clone->ToString() << std::endl;
-
-    //                 float x = clone->Get1D();
-    //                 std::cout << "Sample from clone: " << x << std::endl;
-    //             }
-    //         }
-    //     );
-    // });
 
 }

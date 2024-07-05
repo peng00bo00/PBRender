@@ -1,6 +1,7 @@
 #pragma once
 
 #include <PBRender/core/common.h>
+#include <PBRender/core/camera.h>
 #include <PBRender/core/vecmath.h>
 #include <PBRender/core/rng.h>
 
@@ -21,5 +22,14 @@ public:
 	virtual std::string ToString() const = 0;
 };
 
+template <typename S>
+inline CameraSample GetCameraSample(S sampler, Point2i pPixel) {
+	CameraSample cs;
+
+	Point2f dxy = sampler->GetPixel2D();
+	cs.pFilm = Point2f(pPixel.x + dxy.x, pPixel.y + dxy.y);
+
+	return cs;
+}
 
 } // namespace PBRender

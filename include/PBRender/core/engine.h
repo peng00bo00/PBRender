@@ -46,17 +46,18 @@ inline std::unique_ptr<Engine> InitEngine() {
     return std::make_unique<PBRender::Engine>();
 }
 
-
+// TODO: use integrator instead of sampler
 class RayTracer : public Engine {
 public:
     RayTracer(int spp) : Engine(), spp(spp) {};
-    void SetSampler(std::shared_ptr<Sampler> Sampler) { sampler = sampler; };
+
+    // rendering interface
+    void RenderFrame(const Point2i TileSize, Sampler *sampler);
 
 protected:
-    void RenderPixel(int x, int y);
-
-protected:
-    std::shared_ptr<Sampler> sampler;
+    void RenderTile(const Bounds2i TileBound, Sampler *sampler);
+    void RenderPixel(int x, int y, Sampler *sampler);
+    float RenderRay(Ray &ray, Spectrum &L);
 
 private:
     uint spp;
