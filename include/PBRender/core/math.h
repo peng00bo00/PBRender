@@ -2,6 +2,14 @@
 
 #include <PBRender/core/common.h>
 
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <string>
+#include <type_traits>
+
 namespace PBRender
 {
 
@@ -28,6 +36,93 @@ static constexpr float Inv4Pi        = 0.07957747154594766788;
 static constexpr float PiOver2       = 1.57079632679489661923;
 static constexpr float PiOver4       = 0.78539816339744830961;
 static constexpr float Sqrt2         = 1.41421356237309504880;
+
+// Bit Operation Inline Functions
+inline uint32_t ReverseBits32(uint32_t n) {
+    n = (n << 16) | (n >> 16);
+    n = ((n & 0x00ff00ff) << 8) | ((n & 0xff00ff00) >> 8);
+    n = ((n & 0x0f0f0f0f) << 4) | ((n & 0xf0f0f0f0) >> 4);
+    n = ((n & 0x33333333) << 2) | ((n & 0xcccccccc) >> 2);
+    n = ((n & 0x55555555) << 1) | ((n & 0xaaaaaaaa) >> 1);
+    return n;
+}
+
+inline uint64_t ReverseBits64(uint64_t n) {
+    uint64_t n0 = ReverseBits32((uint32_t)n);
+    uint64_t n1 = ReverseBits32((uint32_t)(n >> 32));
+    return (n0 << 32) | n1;
+}
+
+// https://fgiesen.wordpress.com/2009/12/13/decoding-morton-codes/
+// updated to 64 bits.
+inline uint64_t LeftShift2(uint64_t x) {
+    x &= 0xffffffff;
+    x = (x ^ (x << 16)) & 0x0000ffff0000ffff;
+    x = (x ^ (x << 8)) & 0x00ff00ff00ff00ff;
+    x = (x ^ (x << 4)) & 0x0f0f0f0f0f0f0f0f;
+    x = (x ^ (x << 2)) & 0x3333333333333333;
+    x = (x ^ (x << 1)) & 0x5555555555555555;
+    return x;
+}
+
+inline uint64_t EncodeMorton2(uint32_t x, uint32_t y) {
+    return (LeftShift2(y) << 1) | LeftShift2(x);
+}
+
+inline uint32_t LeftShift3(uint32_t x) {
+    // DCHECK_LE(x, (1u << 10));
+    if (x == (1 << 10))
+        --x;
+    x = (x | (x << 16)) & 0b00000011000000000000000011111111;
+    // x = ---- --98 ---- ---- ---- ---- 7654 3210
+    x = (x | (x << 8)) & 0b00000011000000001111000000001111;
+    // x = ---- --98 ---- ---- 7654 ---- ---- 3210
+    x = (x | (x << 4)) & 0b00000011000011000011000011000011;
+    // x = ---- --98 ---- 76-- --54 ---- 32-- --10
+    x = (x | (x << 2)) & 0b00001001001001001001001001001001;
+    // x = ---- 9--8 --7- -6-- 5--4 --3- -2-- 1--0
+    return x;
+}
+
+inline uint32_t EncodeMorton3(float x, float y, float z) {
+    // DCHECK_GE(x, 0);
+    // DCHECK_GE(y, 0);
+    // DCHECK_GE(z, 0);
+    return (LeftShift3(z) << 2) | (LeftShift3(y) << 1) | LeftShift3(x);
+}
+
+
+inline uint32_t Compact1By1(uint64_t x) {
+    // TODO: as of Haswell, the PEXT instruction could do all this in a
+    // single instruction.
+    // x = -f-e -d-c -b-a -9-8 -7-6 -5-4 -3-2 -1-0
+    x &= 0x5555555555555555;
+    // x = --fe --dc --ba --98 --76 --54 --32 --10
+    x = (x ^ (x >> 1)) & 0x3333333333333333;
+    // x = ---- fedc ---- ba98 ---- 7654 ---- 3210
+    x = (x ^ (x >> 2)) & 0x0f0f0f0f0f0f0f0f;
+    // x = ---- ---- fedc ba98 ---- ---- 7654 3210
+    x = (x ^ (x >> 4)) & 0x00ff00ff00ff00ff;
+    // x = ---- ---- ---- ---- fedc ba98 7654 3210
+    x = (x ^ (x >> 8)) & 0x0000ffff0000ffff;
+    // ...
+    x = (x ^ (x >> 16)) & 0xffffffff;
+    return x;
+}
+
+inline void DecodeMorton2(uint64_t v, uint32_t *x, uint32_t *y) {
+    *x = Compact1By1(v);
+    *y = Compact1By1(v >> 1);
+}
+
+inline uint32_t Compact1By2(uint32_t x) {
+    x &= 0x09249249;                   // x = ---- 9--8 --7- -6-- 5--4 --3- -2-- 1--0
+    x = (x ^ (x >> 2)) & 0x030c30c3;   // x = ---- --98 ---- 76-- --54 ---- 32-- --10
+    x = (x ^ (x >> 4)) & 0x0300f00f;   // x = ---- --98 ---- ---- 7654 ---- ---- 3210
+    x = (x ^ (x >> 8)) & 0xff0000ff;   // x = ---- --98 ---- ---- ---- ---- 7654 3210
+    x = (x ^ (x >> 16)) & 0x000003ff;  // x = ---- ---- ---- ---- ---- --98 7654 3210
+    return x;
+}
 
 // useful functions
 inline float gamma(int n) {
@@ -131,6 +226,39 @@ inline bool Quadratic(float a, float b, float c, float *t0, float *t1) {
     *t1 = c / q;
     if (*t0 > *t1) std::swap(*t0, *t1);
     return true;
+}
+
+// Permutation Inline Function Declarations
+inline int PermutationElement(uint32_t i, uint32_t n, uint32_t seed);
+
+inline int PermutationElement(uint32_t i, uint32_t l, uint32_t p) {
+    uint32_t w = l - 1;
+    w |= w >> 1;
+    w |= w >> 2;
+    w |= w >> 4;
+    w |= w >> 8;
+    w |= w >> 16;
+    do {
+        i ^= p;
+        i *= 0xe170893d;
+        i ^= p >> 16;
+        i ^= (i & w) >> 4;
+        i ^= p >> 8;
+        i *= 0x0929eb3f;
+        i ^= p >> 23;
+        i ^= (i & w) >> 1;
+        i *= 1 | p >> 27;
+        i *= 0x6935fa69;
+        i ^= (i & w) >> 11;
+        i *= 0x74dcb303;
+        i ^= (i & w) >> 2;
+        i *= 0x9e501cc3;
+        i ^= (i & w) >> 2;
+        i *= 0xc860a3df;
+        i &= w;
+        i ^= i >> 5;
+    } while (i >= l);
+    return (i + p) % l;
 }
 
 } // namespace PBRender

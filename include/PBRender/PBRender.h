@@ -28,3 +28,4 @@
 
 // samplers
 #include <PBRender/samplers/independent.h>
+#include <PBRender/samplers/halton.h>

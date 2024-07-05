@@ -194,7 +194,7 @@ int main() {
     // PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::GeometryImage::ALBEDO};
     // auto engine = PBRender::InitGeometryViewer(gImg);
 
-    uint spp = 64;
+    uint spp = 8;
     auto engine = PBRender::InitRayTracer(spp);
 
     // create a film
@@ -221,10 +221,11 @@ int main() {
     engine->SetCamera(PBRender::CreatePerspectiveCamera(camera2world, &film, fov));
     
     // set sampler
-    auto sampler = std::make_shared<PBRender::IndependentSampler>(spp);
+    // auto sampler = std::make_shared<PBRender::IndependentSampler>(spp);
+    auto sampler = std::make_shared<PBRender::HaltonSampler>(spp, fullResolution);
 
     // set up scene
-    auto scene  = engine->GetScene();
+    auto scene = engine->GetScene();
     InitCornellBox(scene.get());
 
     // finish scene and build BVH
@@ -238,5 +239,4 @@ int main() {
 
     // write to image
     film.WriteImage();
-
 }
