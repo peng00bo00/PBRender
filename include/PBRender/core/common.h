@@ -90,11 +90,10 @@ class Ray;
 class RNG;
 class Sampler;
 
-// TODO: implement other samplers when needed
+// TODO: implement other samplers if needed
 class IndependentSampler;
 class HaltonSampler;
 class SobolSampler;
-class StratifiedSampler;
 
 // Integrator
 class Integrator;

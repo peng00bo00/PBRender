@@ -256,7 +256,10 @@ struct OwenScrambler {
 enum class RandomizeStrategy { None, PermuteDigits, FastOwen, Owen };
 
 std::string ToString(RandomizeStrategy r);
-
+inline std::ostream &operator<<(std::ostream &os, const RandomizeStrategy &r) {
+    os << "RandomizeStrategy [ " << ToString(r) << " ]";
+    return os;
+}
 
 inline uint64_t SobolIntervalToIndex(uint32_t m, uint64_t frame, Point2i p) {
     if (m == 0)

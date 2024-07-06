@@ -158,7 +158,7 @@ void RayTracer::RenderPixel(int x, int y, Sampler *sampler) {
     Point2i pFilm(x, y);
 
     // samples per pixel
-    for (size_t sampleIndex=0; sampleIndex < spp; ++sampleIndex) {
+    for (size_t sampleIndex=0; sampleIndex < sampler->SamplesPerPixel(); ++sampleIndex) {
         sampler->StartPixelSample(pFilm, sampleIndex);
         CameraSample cs = GetCameraSample(sampler, pFilm);
 

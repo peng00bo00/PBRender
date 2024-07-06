@@ -194,7 +194,7 @@ int main() {
     // PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::GeometryImage::ALBEDO};
     // auto engine = PBRender::InitGeometryViewer(gImg);
 
-    uint spp = 8;
+    uint spp = 16;
     auto engine = PBRender::InitRayTracer(spp);
 
     // create a film
@@ -222,7 +222,21 @@ int main() {
     
     // set sampler
     // auto sampler = std::make_shared<PBRender::IndependentSampler>(spp);
-    auto sampler = std::make_shared<PBRender::HaltonSampler>(spp, fullResolution);
+    // auto sampler = std::make_shared<PBRender::HaltonSampler>(spp, fullResolution);
+
+    PBRender::RandomizeStrategy randomizer = PBRender::RandomizeStrategy::FastOwen;
+    // auto sampler = std::make_shared<PBRender::SobolSampler>(spp, fullResolution, randomizer);
+    // auto sampler = std::make_shared<PBRender::PaddedSobolSampler>(spp, randomizer);
+    auto sampler = std::make_shared<PBRender::ZSobolSampler>(spp, fullResolution, randomizer);
+    std::cout << sampler->ToString() << std::endl;
+
+    // Point2i pixel(0, 0);
+    // auto clone = sampler->Clone();
+    // for (size_t i=0; i<spp; ++i) {
+    //     clone->StartPixelSample(pixel, i);
+    //     Point2f p = clone->GetPixel2D();
+    //     std::cout << p << std::endl;
+    // }
 
     // set up scene
     auto scene = engine->GetScene();

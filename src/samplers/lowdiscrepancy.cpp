@@ -47,8 +47,8 @@ std::string ToString(RandomizeStrategy r) {
         return "Owen";
     default:
         // LOG_FATAL("Unhandled RandomizeStrategy");
-        std::cout << "Unhandled RandomizeStrategy" << std::endl;
-        return "";
+        // return "";
+        return "Unhandled RandomizeStrategy";
     }
 }
 

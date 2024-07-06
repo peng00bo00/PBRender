@@ -37,8 +37,8 @@ std::string HaltonSampler::ToString() const {
 
 
     std::ostringstream ss;
-    // ss << "[ HaltonSampler randomize: " << randomize << " "
-    ss << "[ HaltonSampler "
+    ss << "[ HaltonSampler randomize: " << randomize << " "
+    // ss << "[ HaltonSampler "
     //    << "digitPermutations: " << digitPermutations << " "
        << "dimension: " << haltonIndex << " "
        << "samplesPerPixel: " << samplesPerPixel << " "

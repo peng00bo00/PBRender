@@ -21,6 +21,7 @@
 #include <PBRender/core/ray.h>
 #include <PBRender/core/rng.h>
 #include <PBRender/core/sampler.h>
+#include <PBRender/core/sampling.h>
 
 // cameras
 #include <PBRender/cameras/perspective.h>
@@ -29,3 +30,4 @@
 // samplers
 #include <PBRender/samplers/independent.h>
 #include <PBRender/samplers/halton.h>
+#include <PBRender/samplers/sobol.h>

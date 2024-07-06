@@ -20,6 +20,8 @@ public:
         rng.Advance(sampleIndex * 65536ull + dimension);
     }
 
+    int SamplesPerPixel() const { return samplesPerPixel; }
+
     float Get1D() { return rng.Uniform<float>(); }
     Point2f Get2D() { return {rng.Uniform<float>(), rng.Uniform<float>()}; }
     Point2f GetPixel2D() { return Get2D(); }

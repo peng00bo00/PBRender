@@ -11,7 +11,9 @@ namespace PBRender
 class Sampler {
 public:
 	virtual ~Sampler() {}
+	
 	virtual void StartPixelSample(Point2i p, int sampleIndex, int dimension = 0) = 0;
+	virtual int SamplesPerPixel() const = 0;
 
 	virtual float Get1D() = 0;
 	virtual Point2f Get2D() = 0;
