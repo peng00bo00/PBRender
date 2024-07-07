@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assert.h>
+#include <cfloat>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -100,9 +101,10 @@ class Integrator;
 
 // BxDF
 class BxDF;
-class BRDF;
-class BTDF;
-class BSDF;
+struct BSDFSample;
+// class BRDF;
+// class BTDF;
+// class BSDF;
 
 // Containers
 template <typename T, typename Alloc>

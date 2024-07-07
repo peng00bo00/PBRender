@@ -7,8 +7,6 @@
 #include <Eigen/Eigen>
 
 // core
-#include <PBRender/core/common.h>
-
 #include <PBRender/core/engine.h>
 #include <PBRender/core/film.h>
 #include <PBRender/core/transform.h>
@@ -25,3 +23,8 @@
 #include <PBRender/samplers/independent.h>
 #include <PBRender/samplers/halton.h>
 #include <PBRender/samplers/sobol.h>
+
+// BxDF
+#include <PBRender/bxdfs/conductor.h>
+#include <PBRender/bxdfs/dielectric.h>
+#include <PBRender/bxdfs/diffuse.h>

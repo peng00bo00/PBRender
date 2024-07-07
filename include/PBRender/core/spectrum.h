@@ -216,6 +216,13 @@ public:
         return c[i];
     }
 
+    explicit operator bool() const {
+        for (int i = 0; i < nSpectrumSamples; ++i)
+            if (c[i] != 0)
+                return true;
+        return false;
+    }
+
 public:
     static const int nSamples = nSpectrumSamples;
     

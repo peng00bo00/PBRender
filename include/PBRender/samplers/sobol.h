@@ -168,8 +168,7 @@ private:
     int sampleIndex, dimension;
 };
 
-
-// ZSobolSampler Definition
+// ZSobolSampler. This is the default sampler in PBRT
 class ZSobolSampler : public Sampler {
 public:
     ZSobolSampler(int samplesPerPixel, Point2i fullResolution,

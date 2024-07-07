@@ -1097,22 +1097,22 @@ inline T AbsDot(const Normal3<T> &n1, const Normal3<T> &n2) {
 }
 
 template <typename T>
-inline Normal3<T> Faceforward(const Normal3<T> &n, const Vector3<T> &v) {
+inline Normal3<T> FaceForward(const Normal3<T> &n, const Vector3<T> &v) {
     return (Dot(n, v) < 0.f) ? -n : n;
 }
 
 template <typename T>
-inline Normal3<T> Faceforward(const Normal3<T> &n, const Normal3<T> &n2) {
+inline Normal3<T> FaceForward(const Normal3<T> &n, const Normal3<T> &n2) {
     return (Dot(n, n2) < 0.f) ? -n : n;
 }
 
 template <typename T>
-inline Vector3<T> Faceforward(const Vector3<T> &v, const Vector3<T> &v2) {
+inline Vector3<T> FaceForward(const Vector3<T> &v, const Vector3<T> &v2) {
     return (Dot(v, v2) < 0.f) ? -v : v;
 }
 
 template <typename T>
-inline Vector3<T> Faceforward(const Vector3<T> &v, const Normal3<T> &n2) {
+inline Vector3<T> FaceForward(const Vector3<T> &v, const Normal3<T> &n2) {
     return (Dot(v, n2) < 0.f) ? -v : v;
 }
 
@@ -1348,32 +1348,73 @@ Bounds2<T> Expand(const Bounds2<T> &b, U delta) {
 //     // Round offset point _po_ away from _p_
 //     for (int i = 0; i < 3; ++i) {
 //         if (offset[i] > 0)
-//             po[i] = NextFloatUp(po[i]);
+//             po[i] = NextfloatUp(po[i]);
 //         else if (offset[i] < 0)
-//             po[i] = NextFloatDown(po[i]);
+//             po[i] = NextfloatDown(po[i]);
 //     }
 //     return po;
 // }
 
 inline Vector3f SphericalDirection(float sinTheta, float cosTheta, float phi) {
-    return Vector3f(sinTheta * std::cos(phi), sinTheta * std::sin(phi),
-                    cosTheta);
-}
-
-inline Vector3f SphericalDirection(float sinTheta, float cosTheta, float phi,
-                                   const Vector3f &x, const Vector3f &y,
-                                   const Vector3f &z) {
-    return sinTheta * std::cos(phi) * x + sinTheta * std::sin(phi) * y +
-           cosTheta * z;
+    return Vector3f(Clamp(sinTheta, -1, 1) * std::cos(phi),
+                    Clamp(sinTheta, -1, 1) * std::sin(phi), Clamp(cosTheta, -1, 1));
 }
 
 inline float SphericalTheta(const Vector3f &v) {
-    return std::acos(Clamp(v.z, -1, 1));
+    return SafeACos(v.z);
 }
 
 inline float SphericalPhi(const Vector3f &v) {
     float p = std::atan2(v.y, v.x);
     return (p < 0) ? (p + 2 * Pi) : p;
+}
+
+inline float CosTheta(Vector3f w) {
+    return w.z;
+}
+inline float Cos2Theta(Vector3f w) {
+    return Sqr(w.z);
+}
+inline float AbsCosTheta(Vector3f w) {
+    return std::abs(w.z);
+}
+
+inline float Sin2Theta(Vector3f w) {
+    return std::max<float>(0, 1 - Cos2Theta(w));
+}
+inline float SinTheta(Vector3f w) {
+    return std::sqrt(Sin2Theta(w));
+}
+
+inline float TanTheta(Vector3f w) {
+    return SinTheta(w) / CosTheta(w);
+}
+inline float Tan2Theta(Vector3f w) {
+    return Sin2Theta(w) / Cos2Theta(w);
+}
+
+inline float CosPhi(Vector3f w) {
+    float sinTheta = SinTheta(w);
+    return (sinTheta == 0) ? 1 : Clamp(w.x / sinTheta, -1, 1);
+}
+inline float SinPhi(Vector3f w) {
+    float sinTheta = SinTheta(w);
+    return (sinTheta == 0) ? 0 : Clamp(w.y / sinTheta, -1, 1);
+}
+
+inline float CosDPhi(Vector3f wa, Vector3f wb) {
+    float waxy = Sqr(wa.x) + Sqr(wa.y), wbxy = Sqr(wb.x) + Sqr(wb.y);
+    if (waxy == 0 || wbxy == 0)
+        return 1;
+    return Clamp((wa.x * wb.x + wa.y * wb.y) / std::sqrt(waxy * wbxy), -1, 1);
+}
+
+inline bool SameHemisphere(Vector3f w, Vector3f wp) {
+    return w.z * wp.z > 0;
+}
+
+inline bool SameHemisphere(Vector3f w, Normal3f wp) {
+    return w.z * wp.z > 0;
 }
 
 }

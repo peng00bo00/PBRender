@@ -14,6 +14,132 @@ namespace PBRender
 {
 
 template <typename T>
+struct complex {
+    complex(T re) : re(re), im(0) {}
+    complex(T re, T im) : re(re), im(im) {}
+
+    complex operator-() const { return {-re, -im}; }
+
+    complex operator+(complex z) const { return {re + z.re, im + z.im}; }
+
+    complex operator-(complex z) const { return {re - z.re, im - z.im}; }
+
+    complex operator*(complex z) const {
+        return {re * z.re - im * z.im, re * z.im + im * z.re};
+    }
+
+    complex operator/(complex z) const {
+        T scale = 1 / (z.re * z.re + z.im * z.im);
+        return {scale * (re * z.re + im * z.im), scale * (im * z.re - re * z.im)};
+    }
+
+    friend complex operator+(T value, complex z) {
+        return complex(value) + z;
+    }
+
+    friend complex operator-(T value, complex z) {
+        return complex(value) - z;
+    }
+
+    friend complex operator*(T value, complex z) {
+        return complex(value) * z;
+    }
+
+    friend complex operator/(T value, complex z) {
+        return complex(value) / z;
+    }
+
+    T re, im;
+};
+
+inline float sqrt(float f) {
+    return std::sqrt(f);
+}
+inline double sqrt(double f) {
+    return std::sqrt(f);
+}
+inline float abs(float f) {
+    return std::abs(f);
+}
+inline double abs(double f) {
+    return std::fabs(f);
+}
+
+inline float copysign(float mag, float sign) {
+    return std::copysign(mag, sign);
+}
+
+inline double copysign(double mag, double sign) {
+    return std::copysign(mag, sign);
+}
+
+inline float floor(float arg) {
+    return std::floor(arg);
+}
+
+inline double floor(double arg) {
+    return std::floor(arg);
+}
+
+inline float ceil(float arg) {
+    return std::ceil(arg);
+}
+
+inline double ceil(double arg) {
+    return std::ceil(arg);
+}
+
+inline float round(float arg) {
+    return std::round(arg);
+}
+
+inline double round(double arg) {
+    return std::round(arg);
+}
+
+inline float fmod(float x, float y) {
+    return std::fmod(x, y);
+}
+
+inline double fmod(double x, double y) {
+    return std::fmod(x, y);
+}
+
+template <typename T>
+T real(const complex<T> &z) {
+    return z.re;
+}
+
+template <typename T>
+T imag(const complex<T> &z) {
+    return z.im;
+}
+
+template <typename T>
+T norm(const complex<T> &z) {
+    return z.re * z.re + z.im * z.im;
+}
+
+template <typename T>
+T abs(const complex<T> &z) {
+    return sqrt(norm(z));
+}
+
+template <typename T>
+complex<T> sqrt(const complex<T> &z) {
+    T n = abs(z), t1 = sqrt(T(.5) * (n + abs(z.re))),
+      t2 = T(.5) * z.im / t1;
+
+    if (n == 0)
+        return 0;
+
+    if (z.re >= 0)
+        return {t1, t2};
+    else
+        return {abs(t2), copysign(t1, z.im)};
+}
+
+template <typename T>
 inline bool isNaN(const T x) {
     return std::isnan(x);
 }
@@ -91,7 +217,6 @@ inline uint32_t EncodeMorton3(float x, float y, float z) {
     return (LeftShift3(z) << 2) | (LeftShift3(y) << 1) | LeftShift3(x);
 }
 
-
 inline uint32_t Compact1By1(uint64_t x) {
     // TODO: as of Haswell, the PEXT instruction could do all this in a
     // single instruction.
@@ -164,6 +289,86 @@ inline float Mod(float a, float b) {
 inline float Radians(float deg) { return (Pi / 180) * deg; }
 
 inline float Degrees(float rad) { return (180 / Pi) * rad; }
+
+inline float SmoothStep(float x, float a, float b) {
+    if (a == b)
+        return (x < a) ? 0 : 1;
+    // DCHECK_LT(a, b);
+    float t = Clamp((x - a) / (b - a), 0, 1);
+    return t * t * (3 - 2 * t);
+}
+
+inline float SafeSqrt(float x) {
+    // DCHECK_GE(x, -1e-3f);  // not too negative
+    return std::sqrt(std::max(0.f, x));
+}
+
+
+inline double SafeSqrt(double x) {
+    // DCHECK_GE(x, -1e-3);  // not too negative
+    return std::sqrt(std::max(0., x));
+}
+
+template <typename T>
+inline constexpr T Sqr(T v) {
+    return v * v;
+}
+
+// Would be nice to allow Float to be a template type here, but it is tricky:
+// https://stackoverflow.com/questions/5101516/why-function-template-cannot-be-partially-specialized
+template <int n>
+inline constexpr float Pow(float v) {
+    if constexpr (n < 0)
+        return 1 / Pow<-n>(v);
+    float n2 = Pow<n / 2>(v);
+    return n2 * n2 * Pow<n & 1>(v);
+}
+
+template <>
+inline constexpr float Pow<1>(float v) {
+    return v;
+}
+template <>
+inline constexpr float Pow<0>(float v) {
+    return 1;
+}
+
+template <int n>
+inline constexpr double Pow(double v) {
+    if constexpr (n < 0)
+        return 1 / Pow<-n>(v);
+    double n2 = Pow<n / 2>(v);
+    return n2 * n2 * Pow<n & 1>(v);
+}
+
+template <>
+inline constexpr double Pow<1>(double v) {
+    return v;
+}
+
+template <>
+ inline constexpr double Pow<0>(double v) {
+    return 1;
+}
+
+inline float SafeASin(float x) {
+    // DCHECK(x >= -1.0001 && x <= 1.0001);
+    return std::asin(Clamp(x, -1, 1));
+}
+inline float SafeACos(float x) {
+    // DCHECK(x >= -1.0001 && x <= 1.0001);
+    return std::acos(Clamp(x, -1, 1));
+}
+
+// inline double SafeASin(double x) {
+//     // DCHECK(x >= -1.0001 && x <= 1.0001);
+//     return std::asin(Clamp(x, -1, 1));
+// }
+
+// inline double SafeACos(double x) {
+//     // DCHECK(x >= -1.0001 && x <= 1.0001);
+//     return std::acos(Clamp(x, -1, 1));
+// }
 
 inline float Log2(float x) {
     const float invLog2 = 1.442695040888963387004650940071;
