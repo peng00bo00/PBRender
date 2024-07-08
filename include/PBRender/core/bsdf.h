@@ -30,15 +30,13 @@ public:
     }
 
     template <typename BxDF>
-    Spectrum f(Vector3f woRender, Vector3f wiRender,
-                                   TransportMode mode = TransportMode::Radiance) const {
+    Spectrum f(Vector3f woRender, Vector3f wiRender, TransportMode mode = TransportMode::Radiance) const {
         Vector3f wi = RenderToLocal(wiRender), wo = RenderToLocal(woRender);
         if (wo.z == 0)
             return {};
         const BxDF *specificBxDF = bxdf->CastOrNullptr<BxDF>();
         return specificBxDF->f(wo, wi, mode);
     }
-
     
     BSDFSample Sample_f(
         Vector3f woRender, float u, Point2f u2,
@@ -61,7 +59,6 @@ public:
         bs->wi = LocalToRender(bs->wi);
         return bs;
     }
-
     
     float PDF(Vector3f woRender, Vector3f wiRender,
               TransportMode mode = TransportMode::Radiance,
