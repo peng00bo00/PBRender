@@ -15,11 +15,17 @@ public:
     Transform() 
             : m(Eigen::Matrix4f::Identity()),
               mInv(Eigen::Matrix4f::Identity()) {}
-    
     Transform(const Eigen::Matrix4f &matrix) 
             : m(matrix), mInv(matrix.inverse()) {}
     Transform(const Eigen::Matrix4f &matrix, const Eigen::Matrix4f &matrixInv)
             : m(matrix), mInv(matrixInv) {}
+    explicit Transform(const Frame &frame) {
+        m << frame.x.x, frame.x.y, frame.x.z, 0,
+             frame.y.x, frame.y.y, frame.y.z, 0,
+             frame.z.x, frame.z.y, frame.z.z, 0,
+             0, 0, 0, 1;
+        mInv = m.inverse();
+    }
 
     Transform Inverse() const {
         return Transform{mInv, m};

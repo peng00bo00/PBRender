@@ -28,3 +28,5 @@
 #include <PBRender/bxdfs/conductor.h>
 #include <PBRender/bxdfs/dielectric.h>
 #include <PBRender/bxdfs/diffuse.h>
+#include <PBRender/bxdfs/fresnel.h>
+#include <PBRender/bxdfs/layered.h>

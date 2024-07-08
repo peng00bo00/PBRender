@@ -163,7 +163,6 @@ public:
 
     std::string ToString() const;
 
-    
     static float RoughnessToAlpha(float roughness) { return std::sqrt(roughness); }
 
     void Regularize() {

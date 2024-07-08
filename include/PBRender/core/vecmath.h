@@ -865,6 +865,24 @@ inline Vector3<T> Cross(const Normal3<T> &v1, const Vector3<T> &v2) {
 }
 
 template <typename T>
+inline void CoordinateSystem(Vector3<T> v1, Vector3<T> *v2, Vector3<T> *v3) {
+    float sign = PBRender::copysign(float(1), v1.z);
+    float a = -1 / (sign + v1.z);
+    float b = v1.x * v1.y * a;
+    *v2 = Vector3<T>(1 + sign * Sqr(v1.x) * a, sign * b, -sign * v1.x);
+    *v3 = Vector3<T>(b, sign + Sqr(v1.y) * a, -v1.y);
+}
+
+template <typename T>
+inline void CoordinateSystem(Normal3<T> v1, Vector3<T> *v2, Vector3<T> *v3) {
+    float sign = PBRender::copysign(float(1), v1.z);
+    float a = -1 / (sign + v1.z);
+    float b = v1.x * v1.y * a;
+    *v2 = Vector3<T>(1 + sign * Sqr(v1.x) * a, sign * b, -sign * v1.x);
+    *v3 = Vector3<T>(b, sign + Sqr(v1.y) * a, -v1.y);
+}
+
+template <typename T>
 inline Vector3<T> Normalize(const Vector3<T> &v) {
     return v / v.Length();
 }
@@ -1416,5 +1434,73 @@ inline bool SameHemisphere(Vector3f w, Vector3f wp) {
 inline bool SameHemisphere(Vector3f w, Normal3f wp) {
     return w.z * wp.z > 0;
 }
+
+// Frame Definition
+class Frame {
+public:
+    Frame() : x(1, 0, 0), y(0, 1, 0), z(0, 0, 1) {}
+    Frame(Vector3f x, Vector3f y, Vector3f z): x(x), y(y), z(z) {}
+
+    static Frame FromXZ(Vector3f x, Vector3f z) { return Frame(x, Cross(z, x), z); }
+    static Frame FromXY(Vector3f x, Vector3f y) { return Frame(x, y, Cross(x, y)); }
+
+    static Frame FromZ(Vector3f z) {
+        Vector3f x, y;
+        CoordinateSystem(z, &x, &y);
+        return Frame(x, y, z);
+    }
+
+    static Frame FromX(Vector3f x) {
+        Vector3f y, z;
+        CoordinateSystem(x, &y, &z);
+        return Frame(x, y, z);
+    }
+
+    static Frame FromY(Vector3f y) {
+        Vector3f x, z;
+        CoordinateSystem(y, &z, &x);
+        return Frame(x, y, z);
+    }
+
+    static Frame FromX(Normal3f x) {
+        Vector3f y, z;
+        CoordinateSystem(x, &y, &z);
+        return Frame(Vector3f(x), y, z);
+    }
+
+    static Frame FromY(Normal3f y) {
+        Vector3f x, z;
+        CoordinateSystem(y, &z, &x);
+        return Frame(x, Vector3f(y), z);
+    }
+
+    static Frame FromZ(Normal3f z) { return FromZ(Vector3f(z)); }
+
+    Vector3f ToLocal(Vector3f v) const {
+        return Vector3f(Dot(v, x), Dot(v, y), Dot(v, z));
+    }
+
+    Normal3f ToLocal(Normal3f n) const {
+        return Normal3f(Dot(n, x), Dot(n, y), Dot(n, z));
+    }
+    
+    Vector3f FromLocal(Vector3f v) const { return v.x * x + v.y * y + v.z * z; }
+    
+    Normal3f FromLocal(Normal3f n) const { return Normal3f(n.x * x + n.y * y + n.z * z); }
+
+    std::string ToString() const {
+        // return StringPrintf("[ Frame x: %s y: %s z: %s ]", x, y, z);
+        std::ostringstream ss;
+        ss << "[ Frame x: " << x << " "
+           << "y: " << y << " "
+           << "z: " << z << " ]";
+
+        return ss.str();
+    }
+
+    // Frame Public Members
+    Vector3f x, y, z;
+};
+
 
 }

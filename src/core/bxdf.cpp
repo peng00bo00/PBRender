@@ -35,6 +35,19 @@ std::string ToString(TransportMode mode) {
     return mode == TransportMode::Radiance ? "Radiance" : "Importance";
 }
 
+std::string BSDFSample::ToString() const {
+    // return StringPrintf("[ BSDFSample f: %s wi: %s pdf: %s flags: %s ]", f, wi, pdf,
+    //                     flags);
+    
+    std::ostringstream ss;
+    ss << "[ BSDFSample f: " << f << " "
+       << "wi: " << wi << " "
+       << "pdf: " << pdf << " " 
+       << "flags: " << flags << " ]";
+
+    return ss.str();
+}
+
 // BxDF Method Definitions
 Spectrum BxDF::rho(Vector3f wo, std::vector<float> &uc, std::vector<Point2f> &u2) const {
     if (wo.z == 0)

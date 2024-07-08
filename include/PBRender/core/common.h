@@ -43,6 +43,9 @@ struct Normal3;
 
 using Normal3f = Normal3<float>;
 
+// Frame
+class Frame;
+
 // Bounds
 template <typename T>
 class Bounds2;

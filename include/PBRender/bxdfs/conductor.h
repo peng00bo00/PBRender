@@ -101,7 +101,7 @@ class ConductorBxDF : public BxDF {
 
     void Regularize() { mfDistrib.Regularize(); }
 
-  private:
+private:
     // ConductorBxDF Private Members
     TrowbridgeReitzDistribution mfDistrib;
     Spectrum eta, k;
