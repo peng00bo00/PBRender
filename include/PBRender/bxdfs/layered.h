@@ -27,7 +27,7 @@ public:
         return top ? top->f(wo, wi, mode) : bottom->f(wo, wi, mode);
     }
 
-    BSDFSample Sample_f(
+    Optional<BSDFSample> Sample_f(
         Vector3f wo, float uc, Point2f u, TransportMode mode,
         BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const {
         return top ? top->Sample_f(wo, uc, u, mode, sampleFlags)

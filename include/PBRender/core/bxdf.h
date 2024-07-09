@@ -151,7 +151,7 @@ public:
 
     virtual Spectrum f(Vector3f wo, Vector3f wi, TransportMode mode) const = 0;
 
-    virtual BSDFSample Sample_f(
+    virtual Optional<BSDFSample> Sample_f(
         Vector3f wo, float uc, Point2f u, TransportMode mode = TransportMode::Radiance,
         BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;
 

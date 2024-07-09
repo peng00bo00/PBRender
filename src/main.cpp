@@ -188,75 +188,67 @@ void InitCornellBox(PBRender::Scene *scene) {
 }
 
 int main() {
-    // std::cout << "Hello Embree!" << std::endl;
+    // create engine instance    
+    // PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::GeometryImage::ALBEDO};
+    // auto engine = PBRender::InitGeometryViewer(gImg);
 
-    // // create engine instance    
-    // // PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::GeometryImage::ALBEDO};
-    // // auto engine = PBRender::InitGeometryViewer(gImg);
+    uint spp = 16;
+    auto engine = PBRender::InitRayTracer(spp);
 
-    // uint spp = 16;
-    // auto engine = PBRender::InitRayTracer(spp);
+    // create a film
+    const int W = 1024;
+    const int H = 1024;
 
-    // // create a film
-    // const int W = 1024;
-    // const int H = 1024;
+    Point2i fullResolution(W, H);
+    std::string file_name = "Cornel Box Geometry";
+    // PBRender::GBuffferFilm film(fullResolution, file_name);
+    PBRender::RGBFilm film(fullResolution, file_name);
 
-    // Point2i fullResolution(W, H);
-    // std::string file_name = "Cornel Box Geometry";
-    // // PBRender::GBuffferFilm film(fullResolution, file_name);
-    // PBRender::RGBFilm film(fullResolution, file_name);
+    // set up camera
+    Point3f pos(0.f, 1.f, 6.8f);
+    Point3f look(0.f, 1.f, 0.f);
+    Vector3f up(0.f, 1.f, 0.f);
 
-    // // set up camera
-    // Point3f pos(0.f, 1.f, 6.8f);
-    // Point3f look(0.f, 1.f, 0.f);
-    // Vector3f up(0.f, 1.f, 0.f);
+    PBRender::Transform world2camera = PBRender::LookAt(pos, look, up);
+    PBRender::Transform camera2world = world2camera.Inverse();
 
-    // PBRender::Transform world2camera = PBRender::LookAt(pos, look, up);
-    // PBRender::Transform camera2world = world2camera.Inverse();
+    float fov = 19.5f;
+    // auto camera = PBRender::CreatePerspectiveCamera(camera2world, &gFilm, fov);
+    // auto camera = PBRender::CreateOrthographicCamera(camera2world, &gFilm);
 
-    // float fov = 19.5f;
-    // // auto camera = PBRender::CreatePerspectiveCamera(camera2world, &gFilm, fov);
-    // // auto camera = PBRender::CreateOrthographicCamera(camera2world, &gFilm);
-
-    // engine->SetCamera(PBRender::CreatePerspectiveCamera(camera2world, &film, fov));
+    engine->SetCamera(PBRender::CreatePerspectiveCamera(camera2world, &film, fov));
     
-    // // set sampler
-    // // auto sampler = std::make_shared<PBRender::IndependentSampler>(spp);
-    // // auto sampler = std::make_shared<PBRender::HaltonSampler>(spp, fullResolution);
+    // set sampler
+    // auto sampler = std::make_shared<PBRender::IndependentSampler>(spp);
+    // auto sampler = std::make_shared<PBRender::HaltonSampler>(spp, fullResolution);
 
-    // PBRender::RandomizeStrategy randomizer = PBRender::RandomizeStrategy::FastOwen;
-    // // auto sampler = std::make_shared<PBRender::SobolSampler>(spp, fullResolution, randomizer);
-    // // auto sampler = std::make_shared<PBRender::PaddedSobolSampler>(spp, randomizer);
-    // auto sampler = std::make_shared<PBRender::ZSobolSampler>(spp, fullResolution, randomizer);
-    // std::cout << sampler->ToString() << std::endl;
+    PBRender::RandomizeStrategy randomizer = PBRender::RandomizeStrategy::FastOwen;
+    // auto sampler = std::make_shared<PBRender::SobolSampler>(spp, fullResolution, randomizer);
+    // auto sampler = std::make_shared<PBRender::PaddedSobolSampler>(spp, randomizer);
+    auto sampler = std::make_shared<PBRender::ZSobolSampler>(spp, fullResolution, randomizer);
+    std::cout << sampler->ToString() << std::endl;
 
-    // // Point2i pixel(0, 0);
-    // // auto clone = sampler->Clone();
-    // // for (size_t i=0; i<spp; ++i) {
-    // //     clone->StartPixelSample(pixel, i);
-    // //     Point2f p = clone->GetPixel2D();
-    // //     std::cout << p << std::endl;
-    // // }
+    // Point2i pixel(0, 0);
+    // auto clone = sampler->Clone();
+    // for (size_t i=0; i<spp; ++i) {
+    //     clone->StartPixelSample(pixel, i);
+    //     Point2f p = clone->GetPixel2D();
+    //     std::cout << p << std::endl;
+    // }
 
-    // // set up scene
-    // auto scene = engine->GetScene();
-    // InitCornellBox(scene.get());
+    // set up scene
+    auto scene = engine->GetScene();
+    InitCornellBox(scene.get());
 
-    // // finish scene and build BVH
-    // scene->FinishScene();
+    // finish scene and build BVH
+    scene->FinishScene();
 
-    // // set up rendering tiles
-    // Point2i TileSize(128, 128);
+    // set up rendering tiles
+    Point2i TileSize(128, 128);
 
-    // // start rendering
-    // engine->RenderFrame(TileSize, sampler.get());
+    // start rendering
+    engine->RenderFrame(TileSize, sampler.get());
 
-    // // write to image
-    // film.WriteImage();
-
-    PBRender::Frame frame;
-    std::cout << frame.ToString() << std::endl;
-
-    PBRender::Transform T(frame);
-    std::cout << T << std::endl;
+    // write to image
+    film.WriteImage();
 }

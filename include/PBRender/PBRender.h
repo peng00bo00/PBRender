@@ -14,6 +14,7 @@
 #include <PBRender/core/ray.h>
 #include <PBRender/core/scene.h>
 #include <PBRender/core/spectrum.h>
+#include <PBRender/core/bsdf.h>
 
 // cameras
 #include <PBRender/cameras/perspective.h>

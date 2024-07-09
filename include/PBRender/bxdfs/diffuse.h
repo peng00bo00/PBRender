@@ -18,7 +18,7 @@ public:
         return R * InvPi;
     }
 
-    BSDFSample Sample_f(
+    Optional<BSDFSample> Sample_f(
         Vector3f wo, float uc, Point2f u, TransportMode mode,
         BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const {
         if (!(sampleFlags & BxDFReflTransFlags::Reflection))
@@ -64,7 +64,7 @@ public:
         return SameHemisphere(wo, wi) ? (R * InvPi) : (T * InvPi);
     }
 
-    BSDFSample Sample_f(
+    Optional<BSDFSample> Sample_f(
         Vector3f wo, float uc, Point2f u, TransportMode mode,
         BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const {
         // Compute reflection and transmission probabilities for diffuse BSDF

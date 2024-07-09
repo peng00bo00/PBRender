@@ -22,7 +22,7 @@ public:
                (mfDistrib.EffectivelySmooth() ? BxDFFlags::Specular : BxDFFlags::Glossy);
     }
 
-    BSDFSample Sample_f(
+    Optional<BSDFSample> Sample_f(
         Vector3f wo, float uc, Point2f u, TransportMode mode,
         BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const;
     
@@ -54,7 +54,7 @@ public:
         return Spectrum(0);
     }
     
-    BSDFSample Sample_f(Vector3f wo, float uc, Point2f u,
+    Optional<BSDFSample> Sample_f(Vector3f wo, float uc, Point2f u,
                                         TransportMode mode,
                                         BxDFReflTransFlags sampleFlags) const {
         float R = FrDielectric(AbsCosTheta(wo), eta), T = 1 - R;
@@ -106,7 +106,6 @@ public:
 private:
     float eta;
 };
-
 
 
 } // namespace PBRender

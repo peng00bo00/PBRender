@@ -22,7 +22,7 @@ class ConductorBxDF : public BxDF {
                                              : BxDFFlags::GlossyReflection;
     }
     
-    BSDFSample Sample_f(
+    Optional<BSDFSample> Sample_f(
         Vector3f wo, float uc, Point2f u, TransportMode mode,
         BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const {
         if (!(sampleFlags & BxDFReflTransFlags::Reflection))

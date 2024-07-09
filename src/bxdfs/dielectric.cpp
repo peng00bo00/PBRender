@@ -3,7 +3,7 @@
 namespace PBRender
 {
 
-BSDFSample DielectricBxDF::Sample_f(
+Optional<BSDFSample> DielectricBxDF::Sample_f(
     Vector3f wo, float uc, Point2f u, TransportMode mode,
     BxDFReflTransFlags sampleFlags) const {
     if (eta == 1 || mfDistrib.EffectivelySmooth()) {

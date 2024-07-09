@@ -13,7 +13,7 @@ public:
     NormalizedFresnelBxDF() = default;
     NormalizedFresnelBxDF(float eta) : eta(eta) {}
 
-    BSDFSample Sample_f(Vector3f wo, float uc, Point2f u, TransportMode mode,
+    Optional<BSDFSample> Sample_f(Vector3f wo, float uc, Point2f u, TransportMode mode,
                         BxDFReflTransFlags sampleFlags) const {
         if (!(sampleFlags & BxDFReflTransFlags::Reflection))
             return {};
