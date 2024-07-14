@@ -15,6 +15,8 @@
 #include <PBRender/core/scene.h>
 #include <PBRender/core/spectrum.h>
 #include <PBRender/core/bsdf.h>
+#include <PBRender/core/texture.h>
+#include <PBRender/core/material.h>
 
 // cameras
 #include <PBRender/cameras/perspective.h>
@@ -31,3 +33,9 @@
 #include <PBRender/bxdfs/diffuse.h>
 #include <PBRender/bxdfs/fresnel.h>
 #include <PBRender/bxdfs/layered.h>
+
+// textures
+#include <PBRender/textures/constant.h>
+
+// materials
+#include <PBRender/materials/diffuse.h>

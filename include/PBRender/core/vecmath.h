@@ -629,6 +629,12 @@ struct Normal3 {
 };
 
 template <typename T>
+inline std::ostream &operator<<(std::ostream &os, const Normal3<T> &n) {
+    os << "Normal3 [ " << n.x << ", " << n.y << ", " << n.z << " ]";
+    return os;
+}
+
+template <typename T>
 struct Bounds2 {
     Point2<T> pMin, pMax;
 
