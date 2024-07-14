@@ -192,8 +192,7 @@ int main() {
     // PBRender::GeometryViewer::GeometryImage gImg{PBRender::GeometryViewer::GeometryImage::ALBEDO};
     // auto engine = PBRender::InitGeometryViewer(gImg);
 
-    uint spp = 16;
-    auto engine = PBRender::InitRayTracer(spp);
+    auto engine = PBRender::InitRayTracer();
 
     // create a film
     const int W = 1024;
@@ -219,6 +218,7 @@ int main() {
     engine->SetCamera(PBRender::CreatePerspectiveCamera(camera2world, &film, fov));
     
     // set sampler
+    const uint spp = 16;
     // auto sampler = std::make_shared<PBRender::IndependentSampler>(spp);
     // auto sampler = std::make_shared<PBRender::HaltonSampler>(spp, fullResolution);
 
@@ -228,13 +228,7 @@ int main() {
     auto sampler = std::make_shared<PBRender::ZSobolSampler>(spp, fullResolution, randomizer);
     std::cout << sampler->ToString() << std::endl;
 
-    // Point2i pixel(0, 0);
-    // auto clone = sampler->Clone();
-    // for (size_t i=0; i<spp; ++i) {
-    //     clone->StartPixelSample(pixel, i);
-    //     Point2f p = clone->GetPixel2D();
-    //     std::cout << p << std::endl;
-    // }
+    engine->SetSampler(sampler);
 
     // set up scene
     auto scene = engine->GetScene();
@@ -247,7 +241,7 @@ int main() {
     Point2i TileSize(128, 128);
 
     // start rendering
-    engine->RenderFrame(TileSize, sampler.get());
+    engine->RenderFrame(TileSize);
 
     // write to image
     film.WriteImage();

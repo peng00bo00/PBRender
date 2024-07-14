@@ -94,7 +94,7 @@ void Engine::RenderTile(const Bounds2i TileBound) {
     }
 }
 
-void RayTracer::RenderFrame(const Point2i TileSize, Sampler *sampler) {
+void RayTracer::RenderFrame(const Point2i TileSize) {
     std::cout << "Start rendering with ray tracer!" << std::endl;
     Film *film = camera->GetFilm();
     Point2i fullResolution = film->FullResolution();
@@ -128,16 +128,14 @@ void RayTracer::RenderFrame(const Point2i TileSize, Sampler *sampler) {
     ta.execute([&] {
         tbb::affinity_partitioner affinity;
         tbb::blocked_range<int> range(0, numTileX * numTileY);
-        tbb::parallel_for(
-            range,
-            [&](const tbb::blocked_range<int> r){
-                for (int i=r.begin(); i<r.end(); ++i) {
-                    auto clone = sampler->Clone();
-                    RenderTile(tiles[i], clone.get());
-                }
-            },
-            affinity
-            );
+        auto map = [&](const tbb::blocked_range<int> r){
+                        for (int i=r.begin(); i<r.end(); ++i) {
+                            auto clone = sampler->Clone();
+                            RenderTile(tiles[i], clone.get());
+                        }
+                    };
+        
+        tbb::parallel_for(range, map, affinity);
     });
 
     tbb::tick_count t1 = tbb::tick_count::now();

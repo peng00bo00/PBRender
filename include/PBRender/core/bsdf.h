@@ -80,7 +80,7 @@ public:
     //     if (wo.z == 0)
     //         return {};
 
-    //     const BxDF *specificBxDF = bxdf->Cast<BxDF>();  // TODO: `check ->Cast`
+    //     const BxDF *specificBxDF = bxdf->Cast<BxDF>();
     //     if (!(specificBxDF->Flags() & sampleFlags))
     //         return {};
 
@@ -107,7 +107,7 @@ public:
     //     Vector3f wo = RenderToLocal(woRender), wi = RenderToLocal(wiRender);
     //     if (wo.z == 0)
     //         return 0;
-    //     const BxDF *specificBxDF = bxdf->Cast<BxDF>();   // TODO: `check ->Cast`
+    //     const BxDF *specificBxDF = bxdf->Cast<BxDF>();
     //     return specificBxDF->PDF(wo, wi, mode, sampleFlags);
     // }
 
