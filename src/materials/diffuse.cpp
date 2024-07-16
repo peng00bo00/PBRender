@@ -10,5 +10,13 @@ std::string DiffuseMaterial::ToString() const {
     return ss.str();
 }
 
+std::string DiffuseTransmissionMaterial::ToString() const {
+    std::ostringstream ss;
+    ss << "[ DiffuseTransmissionMaterial reflectance: " << reflectance->ToString() << " "
+       << "transmittance: " << transmittance->ToString() << " ]";
+
+    return ss.str();
+}
+
 
 } // namespace PBRender

@@ -6,7 +6,7 @@ namespace PBRender
 {
 
 // SpectrumConstantTexture Definition
-class ConstantTexture : Texture {
+class ConstantTexture : public SpectrumTexture {
 public:
     // SpectrumConstantTexture Public Methods
     ConstantTexture(Spectrum value) : value(value) {}

@@ -54,6 +54,13 @@ struct TextureEvalContext {
     int faceIndex = 0;
 };
 
+// TODO: maybe implement texture evaluator if needed
+class TextureEvaluator {
+public:
+    float operator()(FloatTexture tex, TextureEvalContext ctx);
+    Spectrum operator()(SpectrumTexture tex, TextureEvalContext ctx);
+};
+
 class ConstantTexture;
 // class ReflectanceConstantTexture;
 class SpectrumBilerpTexture;
@@ -69,10 +76,20 @@ class GPUSpectrumPtexTexture;
 class SpectrumScaledTexture;
 
 
-class Texture {
+class SpectrumTexture {
 public:
+    virtual ~SpectrumTexture() = default;
+
     virtual std::string ToString() const = 0;
     virtual Spectrum Evaluate(TextureEvalContext ctx) const = 0;
+};
+
+class FloatTexture {
+public:
+    virtual ~FloatTexture() = default;
+
+    virtual std::string ToString() const = 0;
+    virtual float Evaluate(TextureEvalContext ctx) const = 0;
 };
 
 } // namespace PBRender

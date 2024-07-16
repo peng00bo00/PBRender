@@ -109,6 +109,13 @@ struct BSDFSample;
 // class BTDF;
 // class BSDF;
 
+// Texture
+class SpectrumTexture;
+class FloatTexture;
+
+// Material
+class Material;
+
 // Containers
 template <typename T, typename Alloc>
 class Array2D;

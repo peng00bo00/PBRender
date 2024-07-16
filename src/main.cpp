@@ -26,6 +26,7 @@ void InitCornellBox(PBRender::Scene *scene) {
     
     albedo = Vector3f(0.725f, 0.71f, 0.68f);
     geomID = scene->AddTriMesh(vertices, indices, albedo);
+    std::cout << "Finish adding floor." << std::endl;
 
     // ceiling
     vertices.clear(); indices.clear();
@@ -40,6 +41,7 @@ void InitCornellBox(PBRender::Scene *scene) {
 
     albedo = Vector3f(0.725f, 0.71f, 0.68f);
     geomID = scene->AddTriMesh(vertices, indices, albedo);
+    std::cout << "Finish adding ceiling." << std::endl;
 
     // back wall
     vertices.clear(); indices.clear();
@@ -54,6 +56,7 @@ void InitCornellBox(PBRender::Scene *scene) {
 
     albedo = Vector3f(0.725f, 0.71f, 0.68f);
     geomID = scene->AddTriMesh(vertices, indices, albedo);
+    std::cout << "Finish adding back wall." << std::endl;
 
     // right wall
     vertices.clear(); indices.clear();
@@ -68,6 +71,7 @@ void InitCornellBox(PBRender::Scene *scene) {
 
     albedo = Vector3f(0.14f, 0.45f, 0.091f);
     geomID = scene->AddTriMesh(vertices, indices, albedo);
+    std::cout << "Finish adding right wall." << std::endl;
 
     // left wall
     vertices.clear(); indices.clear();
@@ -96,7 +100,7 @@ void InitCornellBox(PBRender::Scene *scene) {
 
     albedo = Vector3f(17.f, 12.f, 4.f) / 255.f;
     geomID = scene->AddTriMesh(vertices, indices, albedo);
-
+    std::cout << "Finish adding light." << std::endl;
 
     // short box
     vertices.clear(); indices.clear();
@@ -141,6 +145,7 @@ void InitCornellBox(PBRender::Scene *scene) {
 
     albedo = Vector3f(0.725f, 0.71f, 0.68f);
     geomID = scene->AddTriMesh(vertices, indices, albedo);
+    std::cout << "Finish adding short box." << std::endl;
 
     // tall box
     vertices.clear(); indices.clear();
@@ -185,6 +190,7 @@ void InitCornellBox(PBRender::Scene *scene) {
 
     albedo = Vector3f(0.725f, 0.71f, 0.68f);
     geomID = scene->AddTriMesh(vertices, indices, albedo);
+    std::cout << "Finish adding tall box." << std::endl;
 }
 
 int main() {
@@ -233,6 +239,7 @@ int main() {
     // set up scene
     auto scene = engine->GetScene();
     InitCornellBox(scene.get());
+    std::cout << "Using Cornell Box Scene!" << std::endl;
 
     // finish scene and build BVH
     scene->FinishScene();
@@ -245,4 +252,22 @@ int main() {
 
     // write to image
     film.WriteImage();
+    
+    // PBRender::Spectrum color(Vector3f(100.f, 200.f, 100.f));
+    // auto reflectance = std::make_shared<PBRender::ConstantTexture>(color);
+    // std::cout << reflectance->ToString() << std::endl;
+
+    // // auto r = std::make_shared<PBRender::SpectrumTexture>(reflectance.get());
+    // std::shared_ptr<PBRender::SpectrumTexture> r = reflectance;
+    // // r = std::static_pointer_cast<PBRender::SpectrumTexture>(reflectance);
+    // std::cout << r->ToString() << std::endl;
+
+    // PBRender::DiffuseMaterial material(r);
+    // std::cout << material.ToString() << std::endl;
+
+    // PBRender::MaterialEvalContext ctx;
+    // std::cout << ctx.ToString() << std::endl;
+
+    // PBRender::BSDF bsdf = material.GetBSDF(ctx);
+    // std::cout << bsdf.ToString() << std::endl;
 }

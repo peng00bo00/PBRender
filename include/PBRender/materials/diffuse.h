@@ -10,7 +10,9 @@ class DiffuseMaterial : public Material {
   public:
     // DiffuseMaterial Type Definitions
     using BxDF = DiffuseBxDF;
-    // using BSSRDF = void;
+    using BSSRDF = void;
+
+    DiffuseMaterial(std::shared_ptr<SpectrumTexture> reflectance): reflectance(reflectance) {}
 
     // // DiffuseMaterial Public Methods
     // static const char *Name() { return "DiffuseMaterial"; }
@@ -49,7 +51,7 @@ class DiffuseMaterial : public Material {
     
     // TODO: need to update GetBSDF() interface
     BSDF GetBSDF(MaterialEvalContext ctx) const {
-        Spectrum r; // = reflectance->Evaluate();
+        Spectrum r = reflectance->Evaluate(ctx);
         auto bxdf = std::make_shared<BxDF>(r);
         return BSDF(ctx.ns, ctx.dpdus, bxdf);
     }
@@ -57,9 +59,59 @@ class DiffuseMaterial : public Material {
 private:
     // Image *normalMap;
     // FloatTexture displacement;
-    std::shared_ptr<Texture> reflectance;
+    std::shared_ptr<SpectrumTexture> reflectance;
 };
 
+class DiffuseTransmissionMaterial : public Material {
+  public:
+    using BxDF = DiffuseTransmissionBxDF;
+    using BSSRDF = void;
+    // DiffuseTransmissionMaterial Public Methods
+    // DiffuseTransmissionMaterial(SpectrumTexture reflectance,
+    //                             SpectrumTexture transmittance, FloatTexture displacement,
+    //                             Image *normalMap, Float scale)
+    //     : displacement(displacement),
+    //       normalMap(normalMap),
+    //       reflectance(reflectance),
+    //       transmittance(transmittance),
+    //       scale(scale) {}
+
+    static const char *Name() { return "DiffuseTransmissionMaterial"; }
+
+    // template <typename TextureEvaluator>
+    // bool CanEvaluateTextures(TextureEvaluator texEval) const {
+    //     return texEval.CanEvaluate({}, {reflectance, transmittance});
+    // }
+
+    BSDF GetBSDF(MaterialEvalContext ctx) const {
+        Spectrum r = reflectance->Evaluate(ctx);
+        Spectrum t = transmittance->Evaluate(ctx);
+        auto bxdf = std::make_shared<BxDF>(r, t);
+        return BSDF(ctx.ns, ctx.dpdus, bxdf);
+    }
+
+    // FloatTexture GetDisplacement() const { return displacement; }
+    // const Image *GetNormalMap() const { return normalMap; }
+
+    // static DiffuseTransmissionMaterial *Create(
+    //     const TextureParameterDictionary &parameters, Image *normalMap,
+    //     const FileLoc *loc, Allocator alloc);
+
+    // template <typename TextureEvaluator>
+    // void GetBSSRDF(TextureEvaluator texEval, MaterialEvalContext ctx,
+    //                             SampledWavelengths &lambda) const {}
+
+    static constexpr bool HasSubsurfaceScattering() { return false; }
+
+    std::string ToString() const;
+
+  private:
+    // DiffuseTransmissionMaterial Private Data
+    // FloatTexture displacement;
+    // Image *normalMap;
+    std::shared_ptr<SpectrumTexture> reflectance, transmittance;
+    float scale;
+};
 
 
 } // namespace PBRender

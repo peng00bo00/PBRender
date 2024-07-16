@@ -19,6 +19,15 @@ struct MaterialEvalContext : public TextureEvalContext {
     Vector3f dpdus;
 };
 
+inline std::string MaterialEvalContext::ToString() const {
+    std::ostringstream ss;
+    ss << "[ MaterialEvalContext wo: " << wo << " "
+       << "ns: " << ns << " "
+       << "dpdus: " << dpdus << " ]";
+
+    return ss.str();
+}
+
 // Material Declarations
 class CoatedDiffuseMaterial;
 class CoatedConductorMaterial;
